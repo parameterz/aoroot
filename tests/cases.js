@@ -140,12 +140,20 @@ export function runAll() {
       appliesTo(T("eacts-50"), { sex: "male", height_cm: 165 }) && !appliesTo(T("eacts-50"), { sex: "male", height_cm: 169 }));
   }
 
-  // Indexed report line.
+  // Indexed report line (terse).
   {
-    const w = indexedReportLine("aao", 44, { sex: "female", age: 62, height_cm: 158, weight_kg: 60 }, "mm");
-    check("report: indexed line, woman 158 cm", w === "Ascending aorta 44 mm at 158 cm: AHI 2.78 cm/m, CSAH 9.6 cm2/m (area from diameter, assumed circular). Desai 2026 risk thresholds reached: AHI >= 2.5 cm/m, CSAH >= 9 cm2/m; not reached: >= 45 mm (women). 2022 ACC/AHA indexed thresholds not reached: CSAH >= 10 cm2/m (IIa), AHI >= 3.21 cm/m (IIb).", w);
-    const m = indexedReportLine("aao", 44, { sex: "male", age: 60, height_cm: 190, weight_kg: 95 }, "cm");
-    check("report: indexed line, man 190 cm, cm units", m.startsWith("Ascending aorta 4.4 cm at 190 cm: AHI 2.32 cm/m, CSAH 8.0 cm2/m") && !/thresholds reached/.test(m) && m.includes("not reached") && !m.includes("women"), m);
+    const F = { sex: "female", age: 62, height_cm: 158, weight_kg: 60 };
+    const cases = [
+      ["aao", 44, F, "mm", "Ascending aorta 44 mm: AHI 2.78 cm/m, CSAH 9.6 cm2/m; above Desai 2026 risk thresholds (AHI 2.5, CSAH 9)."],
+      ["sov", 38, F, "mm", "Sinus of Valsalva 38 mm: AHI 2.41 cm/m, CSAH 7.2 cm2/m; below Desai 2026 risk thresholds (AHI 2.5, CSAH 9)."],
+      ["aao", 41, F, "mm", "Ascending aorta 41 mm: AHI 2.59 cm/m, CSAH 8.4 cm2/m; above Desai 2026 AHI threshold (2.5), below CSAH (9)."],
+      ["aao", 46, F, "mm", "Ascending aorta 46 mm: AHI 2.91 cm/m, CSAH 10.5 cm2/m; above Desai 2026 risk thresholds (AHI 2.5, CSAH 9); meets 2022 ACC/AHA CSAH >= 10 (IIa)."],
+      ["aao", 44, { sex: "male", age: 60, height_cm: 190, weight_kg: 95 }, "cm", "Ascending aorta 4.4 cm: AHI 2.32 cm/m, CSAH 8.0 cm2/m; below Desai 2026 risk thresholds (AHI 2.5, CSAH 9)."],
+    ];
+    for (const [site, y, pt, u, want] of cases) {
+      const got = indexedReportLine(site, y, pt, u);
+      check(`report: indexed ${site} ${y} mm ${pt.height_cm} cm`, got === want, got);
+    }
   }
 
   // Input checks.
