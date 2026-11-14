@@ -7,6 +7,7 @@ import { score, notesFor } from "../lib/evaluator.js";
 import { covariates } from "../lib/covariates.js";
 import { SITES, modelsForSite, applyChoices } from "../lib/conventions.js";
 import { decodeHash, encodeHash, convFromCode, picksFor, sdVariantFor, DEFAULT_CONV } from "../lib/state.js";
+import { drawPctCard, drawLegend } from "./cards.js";
 import { SITE_NAMES, scalingOf, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine } from "../lib/describe.js";
 
 export const VERSION = "v0.1";
@@ -55,6 +56,7 @@ function render() {
     const convCode = state.conv[site];
     const conv = convFromCode(convCode);
     let rows = "";
+    const pctRows = [];
 
     for (const ref of registry) {
       if (!ref.models.some((m) => m.measurement.site === site && !m.measurement.sinus)) continue; // reference doesn't cover this site
@@ -99,6 +101,11 @@ function render() {
             notes.map((n) => `<li class="${n.severity}">${esc(n.text)}</li>`).join("") +
             `<li>${esc(ref.citation.authors.split(",")[0])} et al. ${esc(ref.citation.journal)} ${ref.citation.year}. <a href="https://doi.org/${esc(ref.citation.doi)}">doi:${esc(ref.citation.doi)}</a></li></ul></details>`
           : "";
+        pctRows.push({
+          label: `${ref.label.split(" (")[0]} · ${shortLabel(ref, model)}`.replace(/ · (SoV|SV|TAA|VAJ|annulus|ascending aorta|OMAM [^,]+),? ?/, " · ").replace(/ · $/, ""),
+          sub: scalingOf(model),
+          pct: r.pctPred, lo: r.llnPct, hi: r.ulnPct, outside: !!r.outside,
+        });
         const key = `${site}|${ref.id}|${model.id}`;
         const line = reportLine(site, y, r, ref, model, units);
         reportRows.push({ key, line });
@@ -122,7 +129,17 @@ function render() {
       <div class="tablewrap"><table>
         <thead><tr><th>Reference</th><th>Model</th><th class="num">Predicted</th><th class="num">Normal range</th>
           <th class="num">z</th><th class="num">% pred</th><th>Report</th></tr></thead>
-        <tbody>${rows}</tbody></table></div>`);
+        <tbody>${rows}</tbody></table></div>
+      <section class="card" aria-label="${SITE_NAMES[site]}: percent of predicted">
+        <div class="card-head"><h3>Percent of predicted</h3>
+          <span class="handnote">same ${fmtObserved(y, units)}, as a share of what each reference expects</span></div>
+        <svg class="pct" id="pct_${site}" role="img" aria-label="Percent of predicted for each reference; values are in the table above"></svg>
+        <div class="legend"><span><span data-lg="band"></span> normal range</span><span><span data-lg="dot"></span> this patient</span>
+          <span><span data-lg="out"></span> outside the normal range</span><span class="muted">dashed line: 100% of predicted</span></div>
+      </section>`);
+    const svg = document.getElementById(`pct_${site}`);
+    if (pctRows.length) { drawPctCard(svg, pctRows); drawLegend(svg.parentElement); }
+    else svg.closest(".card").hidden = true;
   }
 
   // Wire up controls rendered above
@@ -150,4 +167,10 @@ document.getElementById("copy").onclick = async () => {
 };
 
 window.addEventListener("hashchange", render);
+// Redraw the sketches when the width changes (text in the cards stays a fixed size).
+let lastW = window.innerWidth, resizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { if (Math.abs(window.innerWidth - lastW) > 40) { lastW = window.innerWidth; render(); } }, 150);
+});
 render();

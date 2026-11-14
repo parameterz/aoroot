@@ -136,6 +136,22 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); border-top: 1
   display: flex; flex-direction: column; gap: 6px; }
 footer strong { color: var(--ink); font-weight: 600; }
 
+/* Cards */
+.card { margin-top: 16px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 16px 18px 12px; }
+.card-head { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; }
+.card h3 { font-size: 18px; }
+.card .handnote { font-size: 18px; }
+svg.pct { display: block; width: 100%; height: auto; margin-top: 8px; overflow: visible; }
+@media (max-width: 600px) { .card { padding: 12px 10px 10px; } .card .handnote { font-size: 16px; } }
+svg text.lbl { font-family: var(--f-body); font-size: 13px; fill: var(--ink); }
+svg text.lbl.sub, svg tspan.sub { font-size: 11px; fill: var(--muted); }
+svg text.tick { font-size: 16px; }
+svg text.tick.hundred { fill: var(--accent); font-weight: 700; }
+svg text.note { font-size: 15px; fill: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12.5px; color: var(--muted); padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--rule); align-items: center; }
+.legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { width: 26px; height: 16px; overflow: visible; display: block; }
+
 /* Sketched charts (rough.js strokes use currentColor) */
 .g-rule { color: var(--muted); }
 .g-band { color: var(--band); }
