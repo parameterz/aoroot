@@ -1,6 +1,18 @@
 /* aoroot: graphite and chalk on cool drawing paper with one cobalt accent.
    Same look as parameterz/OMAM-Aortic-Root (after intro2echo.com); charts sketched with
-   rough.js, annotations in a hand face. Hand-written, no framework. */
+   rough.js, annotations in a hand face. Hand-written, no framework; fonts served from fonts/. */
+/* Self-hosted fonts (SIL Open Font License 1.1; licenses in fonts/). Latin subset, only the
+   weights the site uses. Files from the Fontsource packages (v5.3.0) of the Google Fonts releases. */
+@font-face { font-family: "Newsreader"; font-style: normal; font-weight: 500; font-display: swap; src: url("../fonts/newsreader-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Newsreader"; font-style: italic; font-weight: 500; font-display: swap; src: url("../fonts/newsreader-latin-500-italic.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight: 400; font-display: swap; src: url("../fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight: 500; font-display: swap; src: url("../fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("../fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 500; font-display: swap; src: url("../fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Caveat"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/caveat-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Caveat"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/caveat-latin-700-normal.woff2") format("woff2"); }
+
 :root {
   --bg: #e2e4e3;              /* drawing paper */
   --surface: #f1f2f0;         /* chalk panel */
