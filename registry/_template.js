@@ -138,7 +138,8 @@ export default {
       //   "lognormal10" z = (log10 y − μ) / σ    (σ = SEE on the log10 scale, e.g. Campens)
       //   "boxcox"     z = ((y/μ)^L − 1) / (L·σ) (LMS; σ is S, needs `L` below)
       //   "ratio"      z = (y/μ − c) / s          (OMAM-style corrected value; sd: null and
-      //                ratio: { mean: c, sd: s } — the paper's mean and SD of observed/predicted)
+      //                ratio: { mean: c, sd: s, interval?: [lo, hi] } — the paper's mean and SD of
+      //                observed/predicted; a published `interval` is used as the normal range)
       dist: "normal",
       // L: { type: "constant", value: 1 },
 

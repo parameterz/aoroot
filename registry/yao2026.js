@@ -8,6 +8,9 @@
 // Corrected value Yc = observed / Yp. The paper's normal range is on Yc, so:
 //   % predicted = 100 × Yc
 //   z = (Yc − mean Yc) / SD Yc             (dist: "ratio")
+//   normal range = Yp × published Yc limits (Table 5, asymmetric) for the Chinese and
+//   Italian sets, as the authors recommend; Yp × (mean ± 1.96 SD) for the combined set,
+//   which has no published limits. Same choice as parameterz/OMAM-Aortic-Root.
 //
 // Three equation sets, one per derivation population. Each site's three models share a
 // `choice.group`; the user picks the population as a view option (combined = default).
@@ -23,10 +26,11 @@ export default {
   schema: 1,
   id: "yao2026",
   label: "Yao 2026 (OMAM)",
-  entryVersion: "0.1.1",
+  entryVersion: "0.2.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Sections 2.6–2.8, Tables 4–5)" },
     { version: "0.1.1", date: "2026-11-14", by: "Claude", change: "population group/default moved to the shared `choice` field" },
+    { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Normal range from published Yc limits (Chinese, Italian); tests from parameterz/OMAM-Aortic-Root" },
   ],
 
   citation: {
@@ -261,13 +265,13 @@ export default {
       id: "combined-sd",
       appliesTo: { match: "-combined$" },
       severity: "info",
-      text: "The paper gives reference values (Table 5) only for the Chinese and Italian equations. For the combined equations, the mean and SD of Yc come from the validation group by sex (Table 4, group B, about 30% of subjects).",
+      text: "The paper gives reference values (Table 5) only for the Chinese and Italian equations. For the combined equations, the mean and SD of Yc come from the validation group by sex (Table 4, group B, about 30% of subjects), and the normal range is mean ± 1.96 SD. Treat it as provisional.",
     },
     {
       id: "interval",
       appliesTo: { match: "-(chinese|italian)$" },
       severity: "info",
-      text: "Table 5 labels its limits '95% CI', but they are a reference interval (the range containing 95% of healthy values), not a confidence interval of the mean. They are slightly asymmetric (wider above the mean), so the upper limit shown here (mean + 1.96 SD) can differ slightly from the published one.",
+      text: "The normal range uses the published limits of the corrected value (Table 5), as the authors recommend. Table 5 labels them '95% CI', but they are a reference interval (the range containing 95% of healthy values), not a confidence interval of the mean. They are asymmetric and not exactly mean ± 1.96 SD, so a z-score near ±2 can fall on either side of a limit.",
     },
     {
       id: "population-choice",
@@ -331,9 +335,23 @@ export default {
       expect: { "sov-combined": { pctPred: 114.3, z: 1.51 } },
     },
     {
-      kind: "arithmetic", source: "Hand calculation, 2026-11-14: ULN = 27.6674 × (1.003 + 1.96 × 0.105)",
+      kind: "arithmetic", source: "Hand calculation, 2026-11-14: published Yc limits 0.792–1.213 × Yp 27.6674",
       input: { sex: "female", age: 55, height_cm: 158, weight_kg: 52 },
-      expect: { "sov-chinese": { pred: 27.6674, uln: 33.444 } },
+      expect: { "sov-chinese": { pred: 27.6674, lln: 21.9126, uln: 33.5606 } },
+    },
+    {
+      kind: "independent", source: "parameterz/OMAM-Aortic-Root (v1.1) screenshot: Italian, male 45 y, 175 cm, 75 kg; annulus 24 mm: expected 20.8, z +1.72, normal 17.7–24.7",
+      input: { sex: "male", age: 45, height_cm: 175, weight_kg: 75 },
+      y: { annulus: 24 },
+      expect: { "annulus-italian": { pred: 20.8, z: 1.72, lln: 17.7, uln: 24.7 } },
+      tol: { pred: 0.05, z: 0.01, lln: 0.05, uln: 0.05 },
+    },
+    {
+      kind: "independent", source: "parameterz/OMAM-Aortic-Root (v1.1): same patient, combined (provisional): expected 21.2, z +1.33, normal 16.9–25.3",
+      input: { sex: "male", age: 45, height_cm: 175, weight_kg: 75 },
+      y: { annulus: 24 },
+      expect: { "annulus-combined": { pred: 21.2, z: 1.33, lln: 16.9, uln: 25.3 } },
+      tol: { pred: 0.05, z: 0.01, lln: 0.05, uln: 0.05 },
     },
   ],
 

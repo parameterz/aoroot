@@ -102,7 +102,7 @@ function render() {
         const key = `${site}|${ref.id}|${model.id}`;
         const line = reportLine(site, y, r, ref, model, units);
         reportRows.push({ key, line });
-        const zHi = r.z != null && Math.abs(r.z) >= 1.96 ? " hi" : "";
+        const zHi = r.outside ? " hi" : "";
         rows += `<tr class="${first.trim()}">
           <td>${refCell}</td>
           <td><div>${esc(shortLabel(ref, model))}</div>
