@@ -15,9 +15,10 @@ export default {
   schema: 1,
   id: "campens2014",
   label: "Campens 2014",
-  entryVersion: "0.1.0",
+  entryVersion: "0.1.1",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Table 2)" },
+    { version: "0.1.1", date: "2026-11-14", by: "Claude", change: "Independent tests from the legacy parameterz Campens calculator" },
   ],
 
   citation: {
@@ -161,6 +162,22 @@ export default {
   ],
 
   tests: [
+    // Original parameterz pediatric site (main-parameterz.appspot.com/refs/campens-ajc-2014),
+    // Haycock BSA, screenshot 2026-11-14: male, 61 y, 178 cm, 75 kg; SoV 40 and AA 40 mm.
+    {
+      kind: "independent", source: "Legacy parameterz Campens calculator: BSA 1.930, SoV z 1.57, range 29.17–41.40",
+      input: { sex: "male", age: 61, height_cm: 178, weight_kg: 75 },
+      y: { sov: 40 },
+      expect: { covariates: { bsa_haycock: 1.930 }, "sov-haycock": { z: 1.57, lln: 29.17, uln: 41.40 } },
+      tol: { covariates: 0.001, z: 0.01, lln: 0.01, uln: 0.01 },
+    },
+    {
+      kind: "independent", source: "Legacy parameterz Campens calculator: AA z 2.29, range 26.19–38.72",
+      input: { sex: "male", age: 61, height_cm: 178, weight_kg: 75 },
+      y: { aao: 40 },
+      expect: { "aao-haycock": { z: 2.29, lln: 26.19, uln: 38.72 } },
+      tol: { z: 0.01, lln: 0.01, uln: 0.01 },
+    },
     {
       kind: "paper", source: "Table 1, men ≥15 y: mean age 45.2, BSA(DB) 1.9, SoV 33.4 ± 3.8 mm (prediction at the group means ≈ group mean)",
       input: { sex: "male", age: 45.2, height_cm: 177.4, weight_kg: 72.99 },

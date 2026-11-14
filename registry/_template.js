@@ -176,7 +176,7 @@ export default {
   //   arithmetic   hand-calculated. Done from the PAPER's equations, these also
   //                guard against later edits to the file; done from the file's
   //                own coefficients, they check the evaluator only.
-  // Expect any of: pred, z, pctPred, uln (published units). covariates: { bsa_dubois: … }.
+  // Expect any of: pred, z, pctPred, uln, lln (published units). covariates: { bsa_dubois: … }.
   // Optional per test: sdVariant: "<variant id>", ulnZ: 2 (default 1.96), tol: { pred, z, pctPred, uln }.
   // A legacy calculator that showed predicted mean and ULN only is still a good
   // `independent` test: expect { pred, uln } with no observed y.

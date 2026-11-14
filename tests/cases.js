@@ -7,7 +7,7 @@ import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
 import { modelsForSite } from "../lib/conventions.js";
 
-const TOL = { pred: 0.001, z: 0.01, pctPred: 0.1, uln: 0.01, covariates: 0.001 };
+const TOL = { pred: 0.001, z: 0.01, pctPred: 0.1, uln: 0.01, lln: 0.01, covariates: 0.001 };
 
 /** @returns {{ name: string, pass: boolean, detail: string }[]} */
 export function runAll() {
@@ -34,7 +34,8 @@ export function runAll() {
         const y = t.y?.[site] == null ? null : convert(t.y[site], model.measurement.units, "mm");
         const r = score(ref, model, t.input, y, { sdVariant: t.sdVariant, ulnZ: t.ulnZ });
         const u = model.measurement.units;
-        const got = { pred: r.published.pred, z: r.z, pctPred: r.pctPred, uln: r.uln == null ? null : convert(r.uln, "mm", u) };
+        const got = { pred: r.published.pred, z: r.z, pctPred: r.pctPred, uln: r.uln == null ? null : convert(r.uln, "mm", u),
+          lln: r.lln == null ? null : convert(r.lln, "mm", u) };
         for (const [k, w] of Object.entries(want))
           if (got[k] == null || Math.abs(got[k] - w) > tol[k])
             fails.push(`${modelId}.${k} ${got[k]?.toFixed(4)} ≠ ${w}`);
