@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2212%22 fill=%22none%22 stroke=%22%238a2c2c%22 stroke-width=%224%22/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adult aortic root reference values · aoroot</title>
+<meta name="description" content="Compare an adult aortic root measurement against published echocardiographic reference values: z-scores, percent of predicted and normal ranges.">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+<header>
+  <h1>Adult aortic root reference values</h1>
+  <p class="sub">Compare echo measurements of the aortic root and ascending aorta against published adult references.</p>
+</header>
+
+<form id="form" novalidate>
+  <fieldset>
+    <legend>Patient</legend>
+    <div class="row">
+      <div>
+        <div class="small muted" style="margin-bottom:.25rem">Sex</div>
+        <div class="seg" role="radiogroup" aria-label="Sex">
+          <label><input type="radio" name="sex" value="male"> Male</label>
+          <label><input type="radio" name="sex" value="female"> Female</label>
+        </div>
+      </div>
+      <label>Age (years)<input type="number" name="age" min="1" max="120" step="0.1" inputmode="decimal"></label>
+      <label><span>Height (<span data-u="ht">cm</span>)</span><input type="number" name="ht" step="0.1" inputmode="decimal"></label>
+      <label><span>Weight (<span data-u="wt">kg</span>) <span class="small">optional</span></span><input type="number" name="wt" step="0.1" inputmode="decimal"></label>
+      <div>
+        <div class="small muted" style="margin-bottom:.25rem">Height / weight units</div>
+        <div class="seg">
+          <label><input type="radio" name="body" value="metric" checked> cm / kg</label>
+          <label><input type="radio" name="body" value="us"> in / lb</label>
+        </div>
+      </div>
+    </div>
+    <p class="small muted" style="margin:.75rem 0 0">Without weight, references based on BSA or weight are skipped.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Measurements</legend>
+    <div class="row" style="margin-bottom:1rem">
+      <div class="seg">
+        <label><input type="radio" name="units" value="mm" checked> mm</label>
+        <label><input type="radio" name="units" value="cm"> cm</label>
+      </div>
+      <span class="small muted">Enter any or all. Defaults follow ASE/EACVI 2015: annulus inner edge in mid-systole; the others leading edge at end-diastole.</span>
+    </div>
+    <div class="meas" id="meas"><!-- rows built by form.js --></div>
+  </fieldset>
+
+  <div class="actions">
+    <button type="submit" class="primary" id="go" disabled>Calculate</button>
+    <button type="button" class="secondary" id="reset">Clear</button>
+    <span class="small muted">No names or identifiers. Values are kept only in the page link.</span>
+  </div>
+</form>
+
+<footer>
+  aoroot.parameterz.com · by <a href="https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/">Dan Dyar, MA, ACS, RDCS, FASE</a> ·
+  <a href="tests.html">tests</a> · For education and decision support; check results against the original publications.
+</footer>
+<script type="module" src="js/form.js"></script>
+</body>
+</html>

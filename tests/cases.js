@@ -6,6 +6,7 @@ import { score } from "../lib/evaluator.js";
 import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
 import { modelsForSite, applyChoices } from "../lib/conventions.js";
+import { scalingOf, adjustsFor, reportLine, shortLabel } from "../lib/describe.js";
 import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor } from "../lib/state.js";
 
 const TOL = { pred: 0.001, z: 0.01, pctPred: 0.1, uln: 0.01, lln: 0.01, covariates: 0.001 };
@@ -96,6 +97,28 @@ export function runAll() {
     check("hash: bad values dropped and reported", bad.errors.length === 5 && bad.state.patient.height_cm === 170 && bad.state.y.sov === null, bad.errors.join("; "));
     check("hash: default conventions omitted", encodeHash(defaultState()) === "#");
     check("conv: ii-ms", JSON.stringify(convFromCode("ii-ms")) === JSON.stringify({ edge: "inner", phase: "mid-systole", view: "parasternal long axis" }));
+  }
+
+  // Descriptions and report text.
+  {
+    const get = (r, m) => { const ref = registry.find((x) => x.id === r); return [ref, ref.models.find((x) => x.id === m)]; };
+    const cases = [
+      ["saura2017", "sov-ll-ed-ht", "ratio to height", "sex and height"],
+      ["devereux2012", "sov-height", "height", "age, sex and height"],
+      ["campens2014", "sov-dubois", "BSA (log scale)", "age, sex and BSA"],
+      ["patel2022", "sov-abs-over65", "none (absolute)", "age group and sex"],
+      ["yao2026", "sov-combined", "height and weight (allometric)", "age, sex, height and weight"],
+    ];
+    for (const [r, m, sc, adj] of cases) {
+      const [, model] = get(r, m);
+      check(`describe: ${r}/${m}`, scalingOf(model) === sc && adjustsFor(model) === adj, `${scalingOf(model)} | ${adjustsFor(model)}`);
+    }
+    const [ref, model] = get("saura2017", "sov-ll-ed-ht");
+    const p = { sex: "female", age: 70, height_cm: 155, weight_kg: 55 };
+    const line = reportLine("sov", 36, score(ref, model, p, 36), ref, model, "mm");
+    check("report line", line === "Sinus of Valsalva 36 mm (z = +2.56; 128% of predicted for sex and height; NORRE (Saura 2017), SV L–L end-diastole, height-indexed).", line);
+    const [dref, dmodel] = get("devereux2012", "sov-height");
+    check("short label", shortLabel(dref, dmodel) === "height model", shortLabel(dref, dmodel));
   }
 
   // Input checks.
