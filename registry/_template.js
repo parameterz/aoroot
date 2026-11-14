@@ -67,7 +67,8 @@ export default {
         modality: "echo",          //   "echo" | "ct" | "cmr"
         edge: "leading",           //   "leading" | "inner" | "outer"
         phase: "end-diastole",     //   "end-diastole" | "mid-systole" | "systole"
-        view: "",
+        view: "",                  //   "parasternal long axis" | "parasternal short axis"
+        // sinus: "right" | "left" | "non" | "mean of three"   (short-axis measurements only)
       },
 
       // Which population this equation was derived in. When a paper publishes
@@ -92,6 +93,11 @@ export default {
       //   age, sex, height_cm, height_m, weight_kg, bmi,
       //   bsa_dubois, bsa_mosteller, bsa_haycock, bsa_gehan
       // Term transforms: "ln" | "log10" | "sqrt" | "inv" | { pow: n }
+      // Any number (intercept, coef, value, a, exp, base) may be keyed by sex:
+      //   coef: { male: 19.0, female: 18.1 }
+      // Ratio-indexed references (NORRE, WASE) are linear with no intercept:
+      //   mean: { type: "linear", terms: [{ var: "height_m", coef: { male: 19.0, female: 18.1 } }] }
+      //   sd:   { type: "linear", terms: [{ var: "height_m", coef: { male: 2.1,  female: 2.0  } }] }
       // Allometric (OMAM-style) models: `power` mean (or linear on ln terms with
       // outcome: "ln"), and dist: "lognormal" if the paper gives a log-scale SD.
       mean: {
@@ -152,7 +158,8 @@ export default {
 
   // Curator's notes. Shown wherever an affected model appears.
   notes: [
-    // { id: "note-id", appliesTo: ["sov-height"] | "all", severity: "important" | "info", text: "" },
+    // { id: "note-id", appliesTo: ["sov-height"] | "all" | { match: "-bsa$" }, severity: "important" | "info", text: "" },
+    // `match` is a regular expression tested against model IDs, for notes that cover a group.
   ],
 
   // [EVAL] Test cases. Three kinds, in order of value:
@@ -163,7 +170,10 @@ export default {
   //   arithmetic   hand-calculated. Done from the PAPER's equations, these also
   //                guard against later edits to the file; done from the file's
   //                own coefficients, they check the evaluator only.
-  // Optional per test: sdVariant: "<variant id>", tol: { pred, z, pctPred }.
+  // Expect any of: pred, z, pctPred, uln (published units). covariates: { bsa_dubois: … }.
+  // Optional per test: sdVariant: "<variant id>", tol: { pred, z, pctPred, uln }.
+  // A legacy calculator that showed predicted mean and ULN only is still a good
+  // `independent` test: expect { pred, uln } with no observed y.
   tests: [
     // {
     //   kind: "paper", source: "Table 3, row 2",
