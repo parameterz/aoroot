@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2212%22 fill=%22none%22 stroke=%22%238a2c2c%22 stroke-width=%224%22/%3E%3C/svg%3E">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adult aortic root reference values · aoroot</title>
 <meta name="description" content="Compare an adult aortic root measurement against published echocardiographic reference values: z-scores, percent of predicted and normal ranges.">
@@ -10,8 +10,9 @@
 </head>
 <body>
 <header>
-  <h1>Adult aortic root reference values</h1>
-  <p class="sub">Compare echo measurements of the aortic root and ascending aorta against published adult references.</p>
+  <div class="eyebrow">Adult echocardiography · Aortic root reference values</div>
+  <h1>One aortic root, <em>several</em> references</h1>
+  <p class="lede">Score an adult aortic root or ascending aorta against published echocardiographic references side by side: z-score, percent of predicted and normal range, with notes on how each study adjusts for body size, age and sex.</p>
 </header>
 
 <form id="form" novalidate>
@@ -54,13 +55,14 @@
   <div class="actions">
     <button type="submit" class="primary" id="go" disabled>Calculate</button>
     <button type="button" class="secondary" id="reset">Clear</button>
-    <span class="small muted">No names or identifiers. Values are kept only in the page link.</span>
+    <span class="handnote">no names or identifiers: values live only in the link</span>
   </div>
 </form>
 
 <footer>
-  aoroot.parameterz.com · by <a href="https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/">Dan Dyar, MA, ACS, RDCS, FASE</a> ·
-  <a href="tests.html">tests</a> · For education and decision support; check results against the original publications.
+  <span>All calculation runs in your browser; nothing is stored or sent. Educational tool, not a substitute for clinical judgment; check results against the original publications.</span>
+  <span>Visual style after <a href="https://intro2echo.com">The Heart by Ultrasound</a>. Sketched figures drawn with rough.js (MIT). <a href="tests.html">Tests</a>.</span>
+  <span><strong>Created by:</strong> <a href="https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/">Dan Dyar, MA, ACS, RDCS, FASE</a></span>
 </footer>
 <script type="module" src="js/form.js"></script>
 </body>

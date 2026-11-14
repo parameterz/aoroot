@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2212%22 fill=%22none%22 stroke=%22%238a2c2c%22 stroke-width=%224%22/%3E%3C/svg%3E">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Results · Adult aortic root reference values · aoroot</title>
 <link rel="stylesheet" href="css/site.css">
 </head>
 <body>
 <header>
-  <h1>Results</h1>
-  <p class="sub">Every reference scores the same measurement. Rows differ by how each study adjusts for body size, age and sex.</p>
+  <div class="eyebrow">Adult echocardiography · Aortic root reference values</div>
+  <h1>Same root, <em>different</em> references</h1>
+  <p class="lede">Every reference scores the same measurement. Rows differ by how each study adjusts for body size, age and sex.</p>
 </header>
 
 <div class="summary" id="summary"></div>
@@ -21,12 +22,14 @@
   <h2>Copy for report</h2>
   <p class="small muted">Tick the rows you want in the report column above. Plain text; the reference is named on every line.</p>
   <textarea id="reportText" readonly aria-label="Report text"></textarea>
-  <div class="actions"><button type="button" class="secondary" id="copy">Copy</button><span id="copied" class="small muted"></span></div>
+  <div class="actions"><button type="button" class="primary" id="copy">Copy</button><span id="copied" class="small muted"></span></div>
 </section>
 
 <footer>
-  aoroot.parameterz.com <span id="version"></span> · by <a href="https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/">Dan Dyar, MA, ACS, RDCS, FASE</a> ·
-  Links contain the values you entered. For education and decision support; check results against the original publications.
+  <span>Links contain the values you entered. All calculation runs in your browser; nothing is stored or sent. Educational tool, not a substitute for clinical judgment; check results against the original publications.</span>
+  <span>Visual style after <a href="https://intro2echo.com">The Heart by Ultrasound</a>. Sketched figures drawn with rough.js (MIT).</span>
+  <span><strong>Created by:</strong> <a href="https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/">Dan Dyar, MA, ACS, RDCS, FASE</a></span>
+  <span>aoroot.parameterz.com <span id="version"></span></span>
 </footer>
 <script type="module" src="js/results.js"></script>
 </body>
