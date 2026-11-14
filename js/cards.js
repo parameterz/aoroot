@@ -117,3 +117,87 @@ export function drawLegend(container) {
   container.querySelector("[data-lg=out]")?.replaceChildren(mk("g-dot out", (rc) =>
     rc.circle(13, 8, 11, { stroke: "currentColor", fill: "currentColor", fillStyle: "solid", roughness: 1.1, seed: 8 })));
 }
+
+/** Split a series into runs of consecutive points with the same `extrap` flag (null = gap). */
+function runs(pts, key) {
+  const out = [];
+  let cur = null;
+  for (const p of pts) {
+    if (!p || p[key] == null) { cur = null; continue; }
+    if (!cur || cur.extrap !== p.extrap) {
+      const prev = cur?.pts.at(-1);
+      cur = { extrap: p.extrap, pts: prev ? [prev] : [] };   // join runs without a gap
+      out.push(cur);
+    }
+    cur.pts.push(p);
+  }
+  return out;
+}
+
+/**
+ * Patient-on-the-curve card.
+ * series: [{ label, colorIndex, hidden, pts: [{ x, pred, uln, extrap } | null] }]
+ * patient: { x, y }   (y in mm)   xLabel: axis title
+ */
+export function drawCurveCard(svg, series, patient, xLabel, fmtY = (v) => `${v}`) {
+  const W = Math.max(320, Math.round(svg.getBoundingClientRect().width) || 760);
+  const narrow = W < 600;
+  const H = narrow ? 300 : 380;
+  const m = { l: narrow ? 40 : 56, r: 16, t: 14, b: 46 };
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.replaceChildren();
+  const R = rough.svg(svg);
+
+  const shown = series.filter((s) => !s.hidden);
+  const xs = series.flatMap((s) => s.pts.filter(Boolean).map((p) => p.x));
+  if (!shown.length) { svg.appendChild(el("text", { x: W / 2, y: H / 2, "text-anchor": "middle", class: "note" }, "all references hidden: tap one below")); return; }
+  const ys = shown.flatMap((s) => s.pts.filter(Boolean).flatMap((p) => [p.pred, p.uln].filter((v) => v != null)));
+  ys.push(patient.y);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const yStep = 5;
+  const y0 = Math.floor((Math.min(...ys) - 1) / yStep) * yStep, y1 = Math.ceil((Math.max(...ys) + 1) / yStep) * yStep;
+  const X = (v) => m.l + ((v - x0) / (x1 - x0)) * (W - m.l - m.r);
+  const Y = (v) => H - m.b - ((v - y0) / (y1 - y0)) * (H - m.t - m.b);
+
+  // Axes and light grid.
+  const xStep = x1 - x0 > 50 ? 10 : 5;
+  for (let v = Math.ceil(y0 / yStep) * yStep; v <= y1; v += yStep) {
+    svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), class: "grid" }));
+    svg.appendChild(el("text", { x: m.l - 8, y: Y(v) + 5, "text-anchor": "end", class: "tick" }, fmtY(v)));
+  }
+  for (let v = Math.ceil(x0 / xStep) * xStep; v <= x1; v += xStep * (narrow ? 2 : 1))
+    svg.appendChild(el("text", { x: X(v), y: H - m.b + 20, "text-anchor": "middle", class: "tick" }, `${v}`));
+  put(svg, "g-rule", R.line(m.l, H - m.b, W - m.r, H - m.b, { stroke: "currentColor", strokeWidth: 1, roughness: 0.6, seed: 2 }));
+  put(svg, "g-rule", R.line(m.l, m.t, m.l, H - m.b, { stroke: "currentColor", strokeWidth: 1, roughness: 0.6, seed: 4 }));
+  svg.appendChild(el("text", { x: (m.l + W - m.r) / 2, y: H - 6, "text-anchor": "middle", class: "axis" }, xLabel));
+
+  // Patient's x: faint vertical guide.
+  svg.appendChild(el("line", { x1: X(patient.x), x2: X(patient.x), y1: m.t, y2: H - m.b, class: "guide" }));
+
+  // Series: predicted (solid) and upper limit (dashed); faded outside the study range.
+  shown.forEach((s, i) => {
+    const seed = 101 + s.colorIndex * 31;
+    for (const key of ["pred", "uln"]) {
+      for (const run of runs(s.pts, key)) {
+        if (run.pts.length < 2) continue;
+        const cls = `g-c${s.colorIndex}` + (run.extrap ? " extrap" : "");
+        const pts = run.pts.map((p) => [X(p.x), Y(p[key])]);
+        let g;
+        if (key === "pred") {
+          g = put(svg, cls, R.linearPath(pts, { stroke: "currentColor", strokeWidth: 2, roughness: 0.55, bowing: 0.6, seed }));
+        } else {
+          // Upper limit: one continuous dashed path (rough.js restarts dashes on every segment).
+          g = el("g", { class: cls });
+          g.appendChild(el("path", { d: "M" + pts.map((q) => q.map((v) => v.toFixed(1)).join(",")).join("L"), class: "uln" }));
+          svg.appendChild(g);
+        }
+        g.appendChild(el("title", {}, `${s.label}: ${key === "pred" ? "predicted" : "upper limit of normal"}`));
+      }
+    }
+  });
+
+  // Patient dot + label.
+  put(svg, "g-dot", R.circle(X(patient.x), Y(patient.y), 13, { stroke: "currentColor", strokeWidth: 1.4, fill: "currentColor", fillStyle: "solid", roughness: 1.1, seed: 9 }));
+  const right = X(patient.x) < W - 120;
+  svg.appendChild(el("text", { x: X(patient.x) + (right ? 12 : -12), y: Y(patient.y) - 10, "text-anchor": right ? "start" : "end", class: "pt" }, patient.label));
+}

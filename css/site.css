@@ -152,6 +152,25 @@ svg text.note { font-size: 15px; fill: var(--muted); }
 .legend > span { display: inline-flex; align-items: center; gap: 6px; }
 .legend svg { width: 26px; height: 16px; overflow: visible; display: block; }
 
+/* Curve card: one colour per reference (registry order) */
+:root { --c0: #2b5d8a; --c1: #b4532a; --c2: #5d7a2c; --c3: #7a3f73; --c4: #a07a12; --c5: #2f7f7a; }
+@media (prefers-color-scheme: dark) { :root { --c0: #86b4e0; --c1: #e8936a; --c2: #a5c77a; --c3: #c995c2; --c4: #e3c25a; --c5: #7fcfc8; } }
+.g-c0, .key.c0 { color: var(--c0); } .g-c1, .key.c1 { color: var(--c1); } .g-c2, .key.c2 { color: var(--c2); }
+.g-c3, .key.c3 { color: var(--c3); } .g-c4, .key.c4 { color: var(--c4); } .g-c5, .key.c5 { color: var(--c5); }
+g.extrap { opacity: .35; }
+svg.curve { display: block; width: 100%; height: auto; margin-top: 8px; overflow: visible; }
+svg line.grid { stroke: var(--rule); stroke-width: 1; opacity: .35; }
+svg line.guide { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 4; opacity: .6; }
+svg text.axis { font-family: var(--f-body); font-size: 12.5px; fill: var(--muted); }
+svg text.pt { font-family: var(--f-hand); font-size: 18px; font-weight: 700; fill: var(--accent); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+svg path.uln { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-dasharray: 7 5; stroke-linecap: round; }
+.small-seg label { font-size: 13px; padding: 4px 10px; }
+.legend.keys { gap: 8px 10px; }
+button.key { font: inherit; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; padding: 3px 10px 3px 8px;
+  border: 1px solid var(--rule); border-radius: 99px; background: var(--surface); cursor: pointer; }
+button.key::before { content: ""; width: 18px; border-top: 2.5px solid currentColor; }
+button.key[aria-pressed="false"] { color: var(--muted); opacity: .55; text-decoration: line-through; }
+
 /* Sketched charts (rough.js strokes use currentColor) */
 .g-rule { color: var(--muted); }
 .g-band { color: var(--band); }

@@ -7,7 +7,8 @@ import { score, notesFor } from "../lib/evaluator.js";
 import { covariates } from "../lib/covariates.js";
 import { SITES, modelsForSite, applyChoices } from "../lib/conventions.js";
 import { decodeHash, encodeHash, convFromCode, picksFor, sdVariantFor, DEFAULT_CONV } from "../lib/state.js";
-import { drawPctCard, drawLegend } from "./cards.js";
+import { drawPctCard, drawLegend, drawCurveCard } from "./cards.js";
+import { curveSeries, SWEEP } from "./curve.js";
 import { SITE_NAMES, scalingOf, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine } from "../lib/describe.js";
 
 export const VERSION = "v0.1";
@@ -17,6 +18,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 
 let state;
 const checked = new Set(); // report rows ticked (survives re-render, not saved in the link)
+const curveView = { xVar: "height_cm", hidden: new Set() }; // curve card display choices (this visit only)
 
 function setHash(mutate) {
   mutate(state);
@@ -140,7 +142,34 @@ function render() {
     const svg = document.getElementById(`pct_${site}`);
     if (pctRows.length) { drawPctCard(svg, pctRows); drawLegend(svg.parentElement); }
     else svg.closest(".card").hidden = true;
+
+    // Card 2: patient on the curve.
+    const series = curveSeries(registry, state, site, curveView.xVar).map((s) => ({
+      ...s, colorIndex: registry.indexOf(s.ref), hidden: curveView.hidden.has(s.ref.id),
+    }));
+    if (series.some((s) => s.pts.some(Boolean))) {
+      const xv = curveView.xVar;
+      main.insertAdjacentHTML("beforeend", `
+        <section class="card" aria-label="${SITE_NAMES[site]}: patient on the curve">
+          <div class="card-head"><h3>Patient on the curve</h3>
+            <span class="handnote">${xv === "age" ? "same person, any age" : "same person, any height"}: what each reference expects</span>
+            <span class="seg small-seg" style="margin-left:auto">
+              <label><input type="radio" name="cx_${site}" value="height_cm" ${xv === "height_cm" ? "checked" : ""}> vs height</label>
+              <label><input type="radio" name="cx_${site}" value="age" ${xv === "age" ? "checked" : ""}> vs age</label></span></div>
+          <svg class="curve" id="curve_${site}" role="img" aria-label="Predicted diameter and upper limit of normal for each reference against ${xv === "age" ? "age" : "height"}; values for this patient are in the table above"></svg>
+          <div class="legend keys">${series.map((s) => `<button type="button" class="key c${s.colorIndex}" data-ref="${esc(s.ref.id)}" aria-pressed="${!s.hidden}" title="${esc(s.sub)}">${esc(s.label)}</button>`).join("")}
+            <span class="muted">solid: predicted · dashed: upper limit of normal · faded: outside the study's range · ${xv === "age" ? "height and weight" : "age, sex and weight"} held at this patient's values</span></div>
+        </section>`);
+      const csvg = document.getElementById(`curve_${site}`);
+      const px = xv === "age" ? p.age : p.height_cm;
+      drawCurveCard(csvg, series, { x: Math.min(Math.max(px, SWEEP[xv].min), SWEEP[xv].max), y, label: fmtObserved(y, units) },
+        SWEEP[xv].label, (v) => (units === "cm" ? (v / 10).toFixed(1) : `${v}`));
+    }
   }
+  for (const r of main.querySelectorAll("input[name^=cx_]"))
+    r.onchange = () => { curveView.xVar = r.value; render(); };
+  for (const b of main.querySelectorAll("button.key"))
+    b.onclick = () => { const id = b.dataset.ref; curveView.hidden.has(id) ? curveView.hidden.delete(id) : curveView.hidden.add(id); render(); };
 
   // Wire up controls rendered above
   for (const s of main.querySelectorAll("select[data-pick]"))
