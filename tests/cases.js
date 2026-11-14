@@ -52,6 +52,10 @@ export function runAll() {
     ["saura2017", "sov", undefined, ["sov-ll-ed-ht", "sov-ll-ed-bsa"]],
     ["saura2017", "annulus", undefined, ["annulus-ii-ms-ht", "annulus-ii-ms-bsa"]],
     ["saura2017", "aao", II_ED, ["aao-ii-ed-ht", "aao-ii-ed-bsa", "aao-ii-ed-ht-reg", "aao-ii-ed-bsa-reg"]],
+    ["yao2026", "annulus", undefined, []],
+    ["yao2026", "annulus", { edge: "leading", phase: "end-diastole", view: "parasternal long axis" }, ["annulus-combined", "annulus-chinese", "annulus-italian"]],
+    ["yao2026", "sov", undefined, ["sov-combined", "sov-chinese", "sov-italian"]],
+    ["patel2022", "sov", undefined, ["sov-abs-18to40", "sov-bsa-18to40", "sov-ht-18to40", "sov-fig-bsa-18to40", "sov-fig-ht-18to40"]],
   ];
   for (const [refId, site, conv, want] of expectations) {
     const ref = registry.find((r) => r.id === refId);
