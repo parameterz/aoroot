@@ -7,11 +7,12 @@ export default {
   schema: 1,
   id: "devereux2012",
   label: "Devereux 2012",
-  entryVersion: "0.3.0",
+  entryVersion: "0.3.1",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Ported to schema 1; annulus status caution; height SEE variant 'consistency-corrected'" },
     { version: "0.3.0", date: "2026-11-14", by: "Claude", change: "Convention fields as enums (annulus inner edge, mid-systole); legacy-site independent tests; annulus notes" },
+    { version: "0.3.1", date: "2026-11-14", by: "Claude", change: "Age coefficients entered per decade as printed in Tables 1 and 2 (was per year, from the abstract); results unchanged. Raised in Dan's review." },
   ],
 
   citation: {
@@ -54,7 +55,7 @@ export default {
         type: "linear",
         intercept: 2.423,
         terms: [
-          { var: "age", coef: 0.009 },                                   // per year (Table 1: 0.090 per decade)
+          { var: "age", transform: { per: 10 }, coef: 0.090 },           // per decade, as Table 1 (abstract: 0.009 per year)
           { var: "bsa_dubois", coef: 0.461 },
           { var: "sex", coding: { male: 1, female: 2 }, coef: -0.267 },  // women get double the subtraction
         ],
@@ -75,7 +76,7 @@ export default {
         type: "linear",
         intercept: 1.519,
         terms: [
-          { var: "age", coef: 0.010 },
+          { var: "age", transform: { per: 10 }, coef: 0.10 },            // per decade, as Table 1 (abstract: 0.010 per year)
           { var: "height_cm", coef: 0.010 },
           { var: "sex", coding: { male: 1, female: 2 }, coef: -0.247 },
         ],
@@ -101,7 +102,7 @@ export default {
         type: "linear",
         intercept: 1.439,
         terms: [
-          { var: "age", coef: 0.002 }, // Table 2: 0.02 per decade
+          { var: "age", transform: { per: 10 }, coef: 0.02 },  // per decade, as Table 2
           { var: "bsa_dubois", coef: 0.457 },
           { var: "sex", coding: { male: 1, female: 2 }, coef: -0.121 },
         ],
@@ -122,7 +123,7 @@ export default {
         type: "linear",
         intercept: 1.535,
         terms: [
-          { var: "age", coef: 0.001 }, // Table 2: 0.01 per decade
+          { var: "age", transform: { per: 10 }, coef: 0.01 },  // per decade, as Table 2
           { var: "height_cm", coef: 0.004 },
           { var: "sex", coding: { male: 1, female: 2 }, coef: -0.152 },
         ],

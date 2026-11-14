@@ -97,7 +97,8 @@ export default {
       // Variables come from lib/covariates.js ONLY:
       //   age, sex, height_cm, height_m, weight_kg, bmi,
       //   bsa_dubois, bsa_mosteller, bsa_haycock, bsa_gehan
-      // Term transforms: "ln" | "log10" | "sqrt" | "inv" | { pow: n }
+      // Term transforms: "ln" | "log10" | "sqrt" | "inv" | { pow: n } | { per: n }
+      //   { per: 10 } on age = coefficient per decade, as some tables print it (Devereux)
       // Any number (intercept, coef, value, a, exp, base) may be keyed by sex:
       //   coef: { male: 19.0, female: 18.1 }
       // Ratio-indexed references (NORRE, WASE) are linear with no intercept:
