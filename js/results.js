@@ -102,7 +102,7 @@ function render() {
         const notesHtml = notes.length
           ? `<details class="notes"><summary>Why? (${notes.length} note${notes.length > 1 ? "s" : ""})</summary><ul>` +
             notes.map((n) => `<li class="${n.severity}">${esc(n.text)}</li>`).join("") +
-            `<li>${esc(ref.citation.authors.split(",")[0])} et al. ${esc(ref.citation.journal)} ${ref.citation.year}. <a href="https://doi.org/${esc(ref.citation.doi)}">doi:${esc(ref.citation.doi)}</a></li></ul></details>`
+            `<li>${esc(ref.citation.authors.split(",")[0])} et al. ${esc(ref.citation.journal)} ${ref.citation.year}. <a href="https://doi.org/${esc(ref.citation.doi)}">doi:${esc(ref.citation.doi)}</a> · <a href="references.html#${esc(ref.id)}">equations and sources</a></li></ul></details>`
           : "";
         pctRows.push({
           label: `${ref.label.split(" (")[0]} · ${shortLabel(ref, model)}`.replace(/ · (SoV|SV|TAA|VAJ|annulus|ascending aorta|OMAM [^,]+),? ?/, " · ").replace(/ · $/, ""),

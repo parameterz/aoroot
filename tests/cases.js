@@ -12,6 +12,35 @@ import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, p
 
 const TOL = { pred: 0.001, z: 0.01, pctPred: 0.1, uln: 0.01, lln: 0.01, covariates: 0.001 };
 
+/**
+ * Run one reference's `tests` block. Each result lists every compared value
+ * (expected, got, tolerance) so the verification page can show the working.
+ */
+export function runRefTests(ref) {
+  return (ref.tests ?? []).map((t, i) => {
+    const name = `${ref.id}: test ${i + 1} (${t.kind}${t.sdVariant ? `, ${t.sdVariant}` : ""})`;
+    const tol = { ...TOL, ...t.tol };
+    const rows = [];
+    const cov = covariates(t.input);
+    for (const [k, want] of Object.entries(t.expect.covariates ?? {}))
+      rows.push({ what: k, want, got: cov[k], tol: tol.covariates, ok: Math.abs(cov[k] - want) <= tol.covariates });
+    for (const [modelId, want] of Object.entries(t.expect)) {
+      if (modelId === "covariates") continue;
+      const model = ref.models.find((m) => m.id === modelId);
+      const site = model.measurement.site;
+      const y = t.y?.[site] == null ? null : convert(t.y[site], model.measurement.units, "mm");
+      const r = score(ref, model, t.input, y, { sdVariant: t.sdVariant, ulnZ: t.ulnZ });
+      const u = model.measurement.units;
+      const got = { pred: r.published.pred, z: r.z, pctPred: r.pctPred, uln: r.uln == null ? null : convert(r.uln, "mm", u),
+        lln: r.lln == null ? null : convert(r.lln, "mm", u) };
+      for (const [k, w] of Object.entries(want))
+        rows.push({ what: `${modelId}.${k}`, want: w, got: got[k], tol: tol[k], ok: got[k] != null && Math.abs(got[k] - w) <= tol[k] });
+    }
+    const fails = rows.filter((r) => !r.ok).map((r) => `${r.what} ${r.got?.toFixed(4)} ≠ ${r.want}`);
+    return { name, kind: t.kind, source: t.source, input: t.input, y: t.y, sdVariant: t.sdVariant, rows, pass: fails.length === 0, detail: fails.join("; ") };
+  });
+}
+
 /** @returns {{ name: string, pass: boolean, detail: string }[]} */
 export function runAll() {
   const results = [];
@@ -21,30 +50,7 @@ export function runAll() {
     const problems = validate(ref);
     check(`${ref.id}: schema`, problems.length === 0, problems.join("; "));
 
-    (ref.tests ?? []).forEach((t, i) => {
-      const label = `${ref.id}: test ${i + 1} (${t.kind}${t.sdVariant ? `, ${t.sdVariant}` : ""})`;
-      const tol = { ...TOL, ...t.tol };
-      const fails = [];
-
-      const cov = covariates(t.input);
-      for (const [k, want] of Object.entries(t.expect.covariates ?? {}))
-        if (Math.abs(cov[k] - want) > tol.covariates) fails.push(`${k} ${cov[k].toFixed(4)} ≠ ${want}`);
-
-      for (const [modelId, want] of Object.entries(t.expect)) {
-        if (modelId === "covariates") continue;
-        const model = ref.models.find((m) => m.id === modelId);
-        const site = model.measurement.site;
-        const y = t.y?.[site] == null ? null : convert(t.y[site], model.measurement.units, "mm");
-        const r = score(ref, model, t.input, y, { sdVariant: t.sdVariant, ulnZ: t.ulnZ });
-        const u = model.measurement.units;
-        const got = { pred: r.published.pred, z: r.z, pctPred: r.pctPred, uln: r.uln == null ? null : convert(r.uln, "mm", u),
-          lln: r.lln == null ? null : convert(r.lln, "mm", u) };
-        for (const [k, w] of Object.entries(want))
-          if (got[k] == null || Math.abs(got[k] - w) > tol[k])
-            fails.push(`${modelId}.${k} ${got[k]?.toFixed(4)} ≠ ${w}`);
-      }
-      check(label, fails.length === 0, fails.join("; "));
-    });
+    for (const r of runRefTests(ref)) check(r.name, r.pass, r.detail);
   }
   // Convention matching: which models each reference offers for a site + convention.
   const P = { sex: "male", age: 40, height_cm: 175, weight_kg: 70 };

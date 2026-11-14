@@ -192,6 +192,35 @@ label.inline-report { display: inline-flex; flex-direction: row; align-items: ce
 .sw { display: inline-block; width: 22px; border-top: 2.5px solid; }
 .sw.risk { border-color: var(--warn); border-top-style: dashed; } .sw.surg { border-color: var(--crit); }
 
+/* References / verification page */
+.refsec { margin-top: 40px; }
+.refsec > h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.cite { font-size: 13.5px; color: var(--muted); max-width: 90ch; margin: 0 0 12px; }
+.cite i { font-family: var(--f-display); font-size: 14.5px; }
+h3.sub3 { font-size: 18px; margin: 22px 0 8px; }
+dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; font-size: 13.5px; }
+dl.facts dt { color: var(--muted); font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; padding-top: 2px; }
+dl.facts dd { margin: 0; }
+.eq { font-family: var(--f-mono); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.eq.sp { color: var(--muted); font-size: 12.5px; margin-bottom: 4px; }
+.eq .sex { font-family: var(--f-body); font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); background: var(--accent-soft); border-radius: 4px; padding: 0 5px; }
+table.models td:first-child { width: 28px; }
+table.models tr.checked td { background: color-mix(in srgb, var(--ok-soft) 70%, transparent); }
+table.models input[type=checkbox] { width: 18px; height: 18px; }
+.ok { color: var(--ok); font-weight: 600; } .bad { color: var(--crit); font-weight: 600; }
+.flag.ok { background: var(--ok-soft); color: var(--ok); }
+table.tests td:first-child { width: 28px; font-size: 18px; }
+.kind:not(.risk):not(.surgery) { background: var(--bg); color: var(--muted); }
+ul.notelist { font-size: 13.5px; max-width: 90ch; padding-left: 20px; }
+ul.notelist li { margin: 4px 0; }
+ul.notelist li.important::marker { color: var(--warn); }
+pre.src { font: 12px/1.45 var(--f-mono); background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; max-height: 32rem; overflow: auto; white-space: pre; }
+details.source summary::before { content: "→ "; }
+.review { margin-top: 16px; }
+.review textarea { width: 100%; font: 14px/1.5 var(--f-body); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px; margin-top: 6px; }
+button.small-btn { font-size: 13px; padding: 4px 10px; }
+@media (max-width: 600px) { dl.facts { grid-template-columns: 1fr; } table.models td:nth-child(4), table.models th:nth-child(4) { display: none; } }
+
 /* Sketched charts (rough.js strokes use currentColor) */
 .g-rule { color: var(--muted); }
 .g-band { color: var(--band); }
