@@ -74,11 +74,13 @@ export default {
         // sinus: "right" | "left" | "non" | "mean of three"   (short-axis measurements only)
       },
 
-      // Which population this equation was derived in. When a paper publishes
-      // separate equations per population (Yao 2026: Chinese, Italian, combined),
-      // each is its own model sharing a `group`; the user picks which to show
-      // (a view option, not a patient attribute). `default` marks the one shown first.
-      // population: { label: "Chinese Han", group: "sov", default: false },
+      // Alternatives: when a paper gives several versions of the same equation and only
+      // one should be shown at a time (Yao: Chinese / Italian / combined populations;
+      // Campens: DuBois / Haycock BSA), give each a `choice` with the same group. Exactly
+      // one per group is the default; the user can switch (a view option, saved in the link).
+      // Never a patient attribute.
+      // choice: { group: "sov-population", label: "Chinese (Han)", default: false },
+      // population: "Chinese (Han)",   // documentation: where this equation was derived
 
       // Optional stratum guard. The model applies only when ALL conditions hold.
       // Use for sex-specific equations (Campens) or age-group tables (WASE).

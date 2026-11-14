@@ -10,7 +10,7 @@
 //   z = (Yc − mean Yc) / SD Yc             (dist: "ratio")
 //
 // Three equation sets, one per derivation population. Each site's three models share a
-// `population.group`; the user picks the population as a view option (combined = default).
+// `choice.group`; the user picks the population as a view option (combined = default).
 // Race/ethnicity is never a patient input.
 //
 // All levels, INCLUDING THE ANNULUS, were measured leading edge, end-diastole (Figure 2).
@@ -23,9 +23,10 @@ export default {
   schema: 1,
   id: "yao2026",
   label: "Yao 2026 (OMAM)",
-  entryVersion: "0.1.0",
+  entryVersion: "0.1.1",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Sections 2.6–2.8, Tables 4–5)" },
+    { version: "0.1.1", date: "2026-11-14", by: "Claude", change: "population group/default moved to the shared `choice` field" },
   ],
 
   citation: {
@@ -60,7 +61,8 @@ export default {
     // ── Combined Chinese–Italian equations (Section 2.8); Yc from Table 4 (group B, by sex) ──
     {
       id: "annulus-combined", label: "Yao 2026 OMAM Ao-a (annulus), Combined Chinese–Italian", status: "ok",
-      population: { label: "Combined Chinese–Italian", group: "annulus", default: true },
+      population: "Combined Chinese–Italian",
+      choice: { group: "annulus-population", label: "Combined Chinese–Italian", default: true },
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "power", a: 2.948,
@@ -78,7 +80,8 @@ export default {
     },
     {
       id: "sov-combined", label: "Yao 2026 OMAM Ao-s (sinus), Combined Chinese–Italian", status: "ok",
-      population: { label: "Combined Chinese–Italian", group: "sov", default: true },
+      population: "Combined Chinese–Italian",
+      choice: { group: "sov-population", label: "Combined Chinese–Italian", default: true },
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "power", a: 2.689,
@@ -97,7 +100,8 @@ export default {
     },
     {
       id: "aao-combined", label: "Yao 2026 OMAM Ao-asc (ascending), Combined Chinese–Italian", status: "ok",
-      population: { label: "Combined Chinese–Italian", group: "aao", default: true },
+      population: "Combined Chinese–Italian",
+      choice: { group: "aao-population", label: "Combined Chinese–Italian", default: true },
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "power", a: 4.375,
@@ -117,7 +121,8 @@ export default {
     // ── Chinese (Han) equations (Section 2.6); Yc from Table 5 ──
     {
       id: "annulus-chinese", label: "Yao 2026 OMAM Ao-a (annulus), Chinese (Han)", status: "ok",
-      population: { label: "Chinese (Han)", group: "annulus", default: false },
+      population: "Chinese (Han)",
+      choice: { group: "annulus-population", label: "Chinese (Han)", default: false },
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "power", a: 9.593,
@@ -135,7 +140,8 @@ export default {
     },
     {
       id: "sov-chinese", label: "Yao 2026 OMAM Ao-s (sinus), Chinese (Han)", status: "ok",
-      population: { label: "Chinese (Han)", group: "sov", default: false },
+      population: "Chinese (Han)",
+      choice: { group: "sov-population", label: "Chinese (Han)", default: false },
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "power", a: 8.085,
@@ -153,7 +159,8 @@ export default {
     },
     {
       id: "aao-chinese", label: "Yao 2026 OMAM Ao-asc (ascending), Chinese (Han)", status: "ok",
-      population: { label: "Chinese (Han)", group: "aao", default: false },
+      population: "Chinese (Han)",
+      choice: { group: "aao-population", label: "Chinese (Han)", default: false },
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "power", a: 5.028,
@@ -173,7 +180,8 @@ export default {
     // ── Italian equations (Section 2.7); Yc from Table 5 ──
     {
       id: "annulus-italian", label: "Yao 2026 OMAM Ao-a (annulus), Italian", status: "ok",
-      population: { label: "Italian", group: "annulus", default: false },
+      population: "Italian",
+      choice: { group: "annulus-population", label: "Italian", default: false },
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "power", a: 1.042,
@@ -192,7 +200,8 @@ export default {
     },
     {
       id: "sov-italian", label: "Yao 2026 OMAM Ao-s (sinus), Italian", status: "ok",
-      population: { label: "Italian", group: "sov", default: false },
+      population: "Italian",
+      choice: { group: "sov-population", label: "Italian", default: false },
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "power", a: 2.268,
@@ -211,7 +220,8 @@ export default {
     },
     {
       id: "aao-italian", label: "Yao 2026 OMAM Ao-asc (ascending), Italian", status: "ok",
-      population: { label: "Italian", group: "aao", default: false },
+      population: "Italian",
+      choice: { group: "aao-population", label: "Italian", default: false },
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "power", a: 6.385,

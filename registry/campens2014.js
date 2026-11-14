@@ -7,6 +7,8 @@
 //   ULN = 10^(predicted log10 + 1.96·SEE)
 // The paper gives each equation for BSA by DuBois and by Haycock; they share one model ID
 // per formula, with sex-keyed coefficients. ULNs agree between formulas (paper, Results).
+// The two formulas are a `choice` per site: DuBois by default (adult convention), Haycock
+// as an option (pediatric convention; the old parameterz Campens page used it).
 //
 // Model IDs: <sov|aao>-<dubois|haycock>.
 
@@ -15,10 +17,11 @@ export default {
   schema: 1,
   id: "campens2014",
   label: "Campens 2014",
-  entryVersion: "0.1.1",
+  entryVersion: "0.1.2",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Table 2)" },
     { version: "0.1.1", date: "2026-11-14", by: "Claude", change: "Independent tests from the legacy parameterz Campens calculator" },
+    { version: "0.1.2", date: "2026-11-14", by: "Claude", change: "DuBois/Haycock as a `choice` (DuBois default)" },
   ],
 
   citation: {
@@ -47,6 +50,7 @@ export default {
 
   models: [
     {
+      choice: { group: "sov-bsa", label: "BSA (DuBois)", default: true },
       id: "sov-dubois", label: "Campens 2014 SoV, BSA (DuBois)", status: "ok",
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
@@ -64,6 +68,7 @@ export default {
       stats: { r2: { male: 0.84, female: 0.67 } },
     },
     {
+      choice: { group: "sov-bsa", label: "BSA (Haycock)", default: false },
       id: "sov-haycock", label: "Campens 2014 SoV, BSA (Haycock)", status: "ok",
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
@@ -80,6 +85,7 @@ export default {
       validity: { age: [1, 85] },
     },
     {
+      choice: { group: "aao-bsa", label: "BSA (DuBois)", default: true },
       id: "aao-dubois", label: "Campens 2014 ascending aorta, BSA (DuBois)", status: "ok",
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis",
         viewNote: "ascending aorta at the level of the right pulmonary artery" },
@@ -98,6 +104,7 @@ export default {
       stats: { r2: { male: 0.82, female: 0.74 } },
     },
     {
+      choice: { group: "aao-bsa", label: "BSA (Haycock)", default: false },
       id: "aao-haycock", label: "Campens 2014 ascending aorta, BSA (Haycock)", status: "ok",
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis",
         viewNote: "ascending aorta at the level of the right pulmonary artery" },

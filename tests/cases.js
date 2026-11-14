@@ -5,7 +5,8 @@ import registry from "../registry/index.js";
 import { score } from "../lib/evaluator.js";
 import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
-import { modelsForSite } from "../lib/conventions.js";
+import { modelsForSite, applyChoices } from "../lib/conventions.js";
+import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor } from "../lib/state.js";
 
 const TOL = { pred: 0.001, z: 0.01, pctPred: 0.1, uln: 0.01, lln: 0.01, covariates: 0.001 };
 
@@ -66,5 +67,41 @@ export function runAll() {
     const label = `conventions: ${refId} ${site} ${conv ? `${conv.edge}/${conv.phase}` : "ASE default"}`;
     check(label, JSON.stringify(got) === JSON.stringify([...want].sort()), `got [${got}]`);
   }
+  // Choices: one model per choice group (default unless picked).
+  {
+    const yao = registry.find((r) => r.id === "yao2026");
+    const cam = registry.find((r) => r.id === "campens2014");
+    const ids = (ms) => ms.map((m) => m.id).sort().join(",");
+    check("choices: Yao SoV default = combined", ids(applyChoices(modelsForSite(yao, P, "sov"))) === "sov-combined");
+    check("choices: Yao SoV pick = chinese", ids(applyChoices(modelsForSite(yao, P, "sov"), { "sov-population": "sov-chinese" })) === "sov-chinese");
+    check("choices: Campens AAo default = DuBois", ids(applyChoices(modelsForSite(cam, P, "aao"))) === "aao-dubois");
+    check("choices: bad pick falls back to default", ids(applyChoices(modelsForSite(cam, P, "sov"), { "sov-bsa": "nonsense" })) === "sov-dubois");
+  }
+
+  // State ↔ hash.
+  {
+    const st = defaultState();
+    Object.assign(st.patient, { sex: "female", age: 65.5, height_cm: 160, weight_kg: 60 });
+    Object.assign(st.y, { sov: 36, annulus: 21 });
+    st.conv.annulus = "ll-ed";
+    st.view.units = "cm";
+    st.view.picks["yao2026.sov-population"] = "sov-italian";
+    st.view.sd["devereux2012.sov-height"] = "consistency-corrected";
+    const h = encodeHash(st);
+    check("hash: encodes only what is set", h === "#sex=f&age=65.5&ht=160&wt=60&ann=21&ann_c=ll-ed&sov=36&u=cm&pick.yao2026.sov-population=sov-italian&sd.devereux2012.sov-height=consistency-corrected", h);
+    const back = decodeHash(h);
+    check("hash: round trip", JSON.stringify(back.state) === JSON.stringify(st) && back.errors.length === 0, JSON.stringify(back));
+    check("hash: picksFor", JSON.stringify(picksFor(back.state, "yao2026")) === JSON.stringify({ "sov-population": "sov-italian" }));
+    const bad = decodeHash("#sex=x&age=-3&ht=170&sov=abc&stj=500&aao_c=zz");
+    check("hash: bad values dropped and reported", bad.errors.length === 5 && bad.state.patient.height_cm === 170 && bad.state.y.sov === null, bad.errors.join("; "));
+    check("hash: default conventions omitted", encodeHash(defaultState()) === "#");
+    check("conv: ii-ms", JSON.stringify(convFromCode("ii-ms")) === JSON.stringify({ edge: "inner", phase: "mid-systole", view: "parasternal long axis" }));
+  }
+
+  // Input checks.
+  check("input: 3.8 mm flagged as cm", checkMeasurement("sov", 3.8, "mm").level === "cm?" && checkMeasurement("sov", 3.8, "mm").suggestion === 38);
+  check("input: 3.8 cm is fine", checkMeasurement("sov", 3.8, "cm").level === "ok");
+  check("input: 85 mm SoV unusual", checkMeasurement("sov", 85, "mm").level === "unusual");
+  check("input: 36 mm SoV ok", checkMeasurement("sov", 36, "mm").level === "ok");
   return results;
 }
