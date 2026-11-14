@@ -10,7 +10,7 @@ import { decodeHash, encodeHash, convFromCode, picksFor, sdVariantFor, DEFAULT_C
 import { drawPctCard, drawLegend, drawCurveCard, drawThresholdCard } from "./cards.js";
 import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
 import { curveSeries, SWEEP } from "./curve.js";
-import { SITE_NAMES, scalingOf, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine } from "../lib/describe.js";
+import { SITE_NAMES, scalingOf, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine, indexedReportLine } from "../lib/describe.js";
 
 export const VERSION = "v0.1";
 const CONV_LABEL = { "ll-ed": "leading edge, end-diastole", "ll-ms": "leading edge, mid-systole",
@@ -169,7 +169,7 @@ function render() {
   }
   for (const site of ["sov", "aao"]) {
     if (state.y[site] == null || !p.sex) continue;
-    renderThresholds(main, site, state.y[site], units, p);
+    renderThresholds(main, site, state.y[site], units, p, reportRows);
   }
   for (const r of main.querySelectorAll("input[name^=cx_]"))
     r.onchange = () => { curveView.xVar = r.value; render(); };
@@ -187,7 +187,9 @@ function render() {
 }
 
 /** Card 3: risk thresholds (AHI / CSAH / diameter) for the SoV and ascending aorta. */
-function renderThresholds(main, site, y, units, p) {
+function renderThresholds(main, site, y, units, p, reportRows) {
+  const key = `${site}|indexed`;
+  reportRows.push({ key, line: indexedReportLine(site, y, p, units) });
   const h = p.height_cm;
   const ahi = indexValue("AHI", y, h), csah = indexValue("CSAH", y, h);
   const ths = THRESHOLDS.filter((t) => appliesTo(t, p)).map((t) => ({ ...t, d: diameterAt(t, h) })).sort((a, b) => a.d - b.d);
@@ -223,7 +225,8 @@ function renderThresholds(main, site, y, units, p) {
         <span class="handnote">"abnormal for you" and "at risk" are different questions</span></div>
       <p class="small" style="margin:6px 0 10px">${SITE_NAMES[site]} ${fmtObserved(y, units)} at ${Math.round(h)} cm:
         <b class="mono">AHI ${ahi.toFixed(2)} cm/m</b> (diameter ÷ height) ·
-        <b class="mono">CSAH ${csah.toFixed(1)} cm²/m</b> (π·(D/2)² ÷ height, assuming a circular cross-section)</p>
+        <b class="mono">CSAH ${csah.toFixed(1)} cm²/m</b> (π·(D/2)² ÷ height, assuming a circular cross-section)
+        <label class="inline-report"><input type="checkbox" data-report="${key}" ${checked.has(key) ? "checked" : ""}> add AHI and CSAH to the report</label></p>
       <div class="tablewrap"><table>
         <thead><tr><th>Threshold</th><th class="num">As diameter at this height</th><th class="num">This patient</th><th>Status</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
@@ -246,7 +249,10 @@ function renderThresholds(main, site, y, units, p) {
 }
 
 function updateReport(rows) {
-  const lines = rows.filter((r) => checked.has(r.key)).map((r) => r.line);
+  // Report order: by site, then as the rows appear (indexed line after that site's references).
+  const lines = rows.filter((r) => checked.has(r.key))
+    .map((r, i) => ({ ...r, i, s: SITES.indexOf(r.key.split("|")[0]) }))
+    .sort((a, b) => a.s - b.s || a.i - b.i).map((r) => r.line);
   document.getElementById("report").hidden = rows.length === 0;
   document.getElementById("reportText").value = lines.length ? [...lines, `aoroot.parameterz.com ${VERSION}`].join("\n") : "";
   document.getElementById("copy").disabled = !lines.length;

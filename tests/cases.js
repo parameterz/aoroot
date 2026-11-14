@@ -7,7 +7,7 @@ import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
 import { modelsForSite, applyChoices } from "../lib/conventions.js";
 import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
-import { scalingOf, adjustsFor, reportLine, shortLabel } from "../lib/describe.js";
+import { scalingOf, adjustsFor, reportLine, shortLabel, indexedReportLine } from "../lib/describe.js";
 import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor } from "../lib/state.js";
 
 const TOL = { pred: 0.001, z: 0.01, pctPred: 0.1, uln: 0.01, lln: 0.01, covariates: 0.001 };
@@ -138,6 +138,14 @@ export function runAll() {
     check("thresholds: 3.21 vs 10 at 124 cm", near(crossoverHeight(3.21, 10), 123.6, 0.1), crossoverHeight(3.21, 10).toFixed(1));
     check("thresholds: women-only and short-only rules", !appliesTo(T("desai-women"), { sex: "male", height_cm: 180 }) &&
       appliesTo(T("eacts-50"), { sex: "male", height_cm: 165 }) && !appliesTo(T("eacts-50"), { sex: "male", height_cm: 169 }));
+  }
+
+  // Indexed report line.
+  {
+    const w = indexedReportLine("aao", 44, { sex: "female", age: 62, height_cm: 158, weight_kg: 60 }, "mm");
+    check("report: indexed line, woman 158 cm", w === "Ascending aorta 44 mm at 158 cm: AHI 2.78 cm/m, CSAH 9.6 cm2/m (area from diameter, assumed circular). Desai 2026 risk thresholds reached: AHI >= 2.5 cm/m, CSAH >= 9 cm2/m; not reached: >= 45 mm (women). 2022 ACC/AHA indexed thresholds not reached: CSAH >= 10 cm2/m (IIa), AHI >= 3.21 cm/m (IIb).", w);
+    const m = indexedReportLine("aao", 44, { sex: "male", age: 60, height_cm: 190, weight_kg: 95 }, "cm");
+    check("report: indexed line, man 190 cm, cm units", m.startsWith("Ascending aorta 4.4 cm at 190 cm: AHI 2.32 cm/m, CSAH 8.0 cm2/m") && !/thresholds reached/.test(m) && m.includes("not reached") && !m.includes("women"), m);
   }
 
   // Input checks.
