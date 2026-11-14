@@ -6,6 +6,7 @@ import { score } from "../lib/evaluator.js";
 import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
 import { modelsForSite, applyChoices } from "../lib/conventions.js";
+import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
 import { scalingOf, adjustsFor, reportLine, shortLabel } from "../lib/describe.js";
 import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor } from "../lib/state.js";
 
@@ -119,6 +120,24 @@ export function runAll() {
     check("report line", line === "Sinus of Valsalva 36 mm (z = +2.56; 128% of predicted for sex and height; NORRE (Saura 2017), SV L–L end-diastole, height-indexed).", line);
     const [dref, dmodel] = get("devereux2012", "sov-height");
     check("short label", shortLabel(dref, dmodel) === "height model", shortLabel(dref, dmodel));
+  }
+
+  // Thresholds (Desai 2026 definitions).
+  {
+    const near = (a, b, t = 0.01) => Math.abs(a - b) < t;
+    const T = (id) => THRESHOLDS.find((t) => t.id === id);
+    // Desai's cohort means: D 4.4 cm, height 1.76 m → AHI 2.50 cm/m, CSAH 8.64 cm²/m (paper: 2.53 ± 0.3, 8.8 ± 1)
+    check("thresholds: AHI 44 mm / 176 cm = 2.50", near(indexValue("AHI", 44, 176), 2.5));
+    check("thresholds: CSAH 44 mm / 176 cm = 8.64", near(indexValue("CSAH", 44, 176), 8.64));
+    check("thresholds: AHI 2.5 at 175 cm = 43.75 mm", near(diameterAt(T("desai-ahi"), 175), 43.75));
+    check("thresholds: CSAH 10 at 175 cm = 47.2 mm", near(diameterAt(T("gl-csah"), 175), 47.20, 0.01), diameterAt(T("gl-csah"), 175).toFixed(3));
+    check("thresholds: round trip", near(indexValue("CSAH", diameterAt(T("desai-csah"), 160), 160), 9, 1e-9));
+    // Crossovers quoted in the design notes: Desai pair 1.83 m; AHI 2.43 vs CSAH 10 at 2.16 m; AHI 3.21 vs CSAH 10 at 1.24 m
+    check("thresholds: Desai crossover 183 cm", near(crossoverHeight(2.5, 9), 183.3, 0.1), crossoverHeight(2.5, 9).toFixed(1));
+    check("thresholds: 2.43 vs 10 at 216 cm", near(crossoverHeight(2.43, 10), 215.6, 0.1), crossoverHeight(2.43, 10).toFixed(1));
+    check("thresholds: 3.21 vs 10 at 124 cm", near(crossoverHeight(3.21, 10), 123.6, 0.1), crossoverHeight(3.21, 10).toFixed(1));
+    check("thresholds: women-only and short-only rules", !appliesTo(T("desai-women"), { sex: "male", height_cm: 180 }) &&
+      appliesTo(T("eacts-50"), { sex: "male", height_cm: 165 }) && !appliesTo(T("eacts-50"), { sex: "male", height_cm: 169 }));
   }
 
   // Input checks.

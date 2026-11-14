@@ -171,6 +171,26 @@ button.key { font: inherit; font-size: 13px; font-weight: 600; display: inline-f
 button.key::before { content: ""; width: 18px; border-top: 2.5px solid currentColor; }
 button.key[aria-pressed="false"] { color: var(--muted); opacity: .55; text-decoration: line-through; }
 
+/* Threshold card */
+.g-risk { color: var(--warn); } .g-surg { color: var(--crit); }
+svg path.thr { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+svg path.thr.risk { stroke-dasharray: 8 5; }
+svg text.thrlbl { font-family: var(--f-hand); font-size: 16px; font-weight: 700; }
+svg text.thrlbl.risk, svg text.note-risk { fill: var(--warn); }
+svg text.thrlbl.surg { fill: var(--crit); }
+.thresholds tr.reached td { background: var(--crit-soft); }
+.kind { display: inline-block; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; border-radius: 4px; padding: 0 6px; margin-right: 4px; }
+.kind.risk { background: var(--warn-soft); color: var(--warn); } .kind.surgery { background: var(--crit-soft); color: var(--crit); }
+svg text.thrlbl.small { font-size: 13.5px; }
+@media (max-width: 600px) {
+  .thresholds .model { display: none; }
+  .thresholds th:nth-child(3), .thresholds td:nth-child(3) { display: none; }
+  .thresholds th, .thresholds td { padding: 8px; }
+  .thresholds th:nth-child(2) { white-space: normal; }
+}
+.sw { display: inline-block; width: 22px; border-top: 2.5px solid; }
+.sw.risk { border-color: var(--warn); border-top-style: dashed; } .sw.surg { border-color: var(--crit); }
+
 /* Sketched charts (rough.js strokes use currentColor) */
 .g-rule { color: var(--muted); }
 .g-band { color: var(--band); }

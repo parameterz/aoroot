@@ -201,3 +201,72 @@ export function drawCurveCard(svg, series, patient, xLabel, fmtY = (v) => `${v}`
   const right = X(patient.x) < W - 120;
   svg.appendChild(el("text", { x: X(patient.x) + (right ? 12 : -12), y: Y(patient.y) - 10, "text-anchor": right ? "start" : "end", class: "pt" }, patient.label));
 }
+
+/**
+ * Risk-threshold card: diameter vs height.
+ * lines:    [{ id, kind: "risk"|"surgery", label, pts: [{x, y}] }]   (y mm; absent where the rule doesn't apply)
+ * envelope: [{ x, lo, hi }]   range of the references' upper limits of normal (mm)
+ * patient:  { x, y, label }   cross: { x, y, label } | null
+ */
+export function drawThresholdCard(svg, { lines, envelope, patient, cross, xRange }, fmtY = (v) => `${v}`) {
+  const W = Math.max(320, Math.round(svg.getBoundingClientRect().width) || 760);
+  const narrow = W < 600;
+  const H = narrow ? 320 : 400;
+  const m = { l: narrow ? 40 : 56, r: narrow ? 74 : 170, t: 14, b: 46 };
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.replaceChildren();
+  const R = rough.svg(svg);
+
+  const [x0, x1] = xRange;
+  const ys = [patient.y, ...envelope.flatMap((e) => [e.lo, e.hi]), ...lines.flatMap((l) => l.pts.map((p) => p.y))];
+  const y0 = Math.floor((Math.min(...ys) - 2) / 5) * 5, y1 = Math.ceil((Math.max(...ys) + 2) / 5) * 5;
+  const X = (v) => m.l + ((v - x0) / (x1 - x0)) * (W - m.l - m.r);
+  const Y = (v) => H - m.b - ((v - y0) / (y1 - y0)) * (H - m.t - m.b);
+
+  for (let v = y0; v <= y1; v += 5) {
+    svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), class: "grid" }));
+    svg.appendChild(el("text", { x: m.l - 8, y: Y(v) + 5, "text-anchor": "end", class: "tick" }, fmtY(v)));
+  }
+  for (let v = Math.ceil(x0 / 10) * 10; v <= x1; v += narrow ? 20 : 10)
+    svg.appendChild(el("text", { x: X(v), y: H - m.b + 20, "text-anchor": "middle", class: "tick" }, `${v}`));
+  put(svg, "g-rule", R.line(m.l, H - m.b, W - m.r, H - m.b, { stroke: "currentColor", strokeWidth: 1, roughness: 0.6, seed: 2 }));
+  put(svg, "g-rule", R.line(m.l, m.t, m.l, H - m.b, { stroke: "currentColor", strokeWidth: 1, roughness: 0.6, seed: 4 }));
+  svg.appendChild(el("text", { x: (m.l + W - m.r) / 2, y: H - 6, "text-anchor": "middle", class: "axis" }, "Height (cm)"));
+
+  // Upper limits of normal across the references: hatched band.
+  if (envelope.length > 1) {
+    const poly = [...envelope.map((e) => [X(e.x), Y(e.hi)]), ...envelope.slice().reverse().map((e) => [X(e.x), Y(e.lo)])];
+    put(svg, "g-band", R.polygon(poly, { stroke: "none", fill: "currentColor", fillStyle: "hachure", hachureGap: 4, fillWeight: 1, hachureAngle: -41, roughness: 1, seed: 21 }));
+  }
+
+  // Threshold lines, labelled at the right edge (labels nudged apart so they don't collide).
+  const labels = [];
+  lines.forEach((l, i) => {
+    if (l.pts.length < 2) return;
+    const pts = l.pts.map((p) => [X(p.x), Y(p.y)]);
+    const g = el("g", { class: l.kind === "risk" ? "g-risk" : "g-surg" });
+    g.appendChild(el("path", { d: "M" + pts.map((q) => q.map((v) => v.toFixed(1)).join(",")).join("L"),
+      class: "thr" + (l.kind === "risk" ? " risk" : "") }));
+    g.appendChild(el("title", {}, l.label));
+    svg.appendChild(g);
+    const last = l.pts.at(-1);
+    labels.push({ y: Y(last.y), x: X(last.x), text: narrow ? (l.short ?? l.label) : l.label, kind: l.kind });
+  });
+  labels.sort((a, b) => a.y - b.y);
+  const gap = narrow ? 13 : 15;
+  for (let i = 1; i < labels.length; i++) if (labels[i].y - labels[i - 1].y < gap) labels[i].y = labels[i - 1].y + gap;
+  for (const lb of labels)
+    svg.appendChild(el("text", { x: W - m.r + 6, y: lb.y + 4, class: "thrlbl " + (lb.kind === "risk" ? "risk" : "surg") + (narrow ? " small" : "") }, lb.text));
+
+  // Where Desai's two thresholds agree.
+  if (cross && cross.x > x0 && cross.x < x1) {
+    put(svg, "g-risk", R.circle(X(cross.x), Y(cross.y), 10, { stroke: "currentColor", strokeWidth: 1.3, roughness: 1.2, seed: 33 }));
+    if (!narrow) svg.appendChild(el("text", { x: X(cross.x) - 10, y: Y(cross.y) - 12, "text-anchor": "end", class: "pt note-risk" }, cross.label));
+  }
+
+  // Patient.
+  svg.appendChild(el("line", { x1: X(patient.x), x2: X(patient.x), y1: m.t, y2: H - m.b, class: "guide" }));
+  put(svg, "g-dot", R.circle(X(patient.x), Y(patient.y), 13, { stroke: "currentColor", strokeWidth: 1.4, fill: "currentColor", fillStyle: "solid", roughness: 1.1, seed: 9 }));
+  const right = X(patient.x) < (W - m.r) - 90;
+  svg.appendChild(el("text", { x: X(patient.x) + (right ? 12 : -12), y: Y(patient.y) + 22, "text-anchor": right ? "start" : "end", class: "pt" }, patient.label));
+}

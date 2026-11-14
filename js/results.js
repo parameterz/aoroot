@@ -7,7 +7,8 @@ import { score, notesFor } from "../lib/evaluator.js";
 import { covariates } from "../lib/covariates.js";
 import { SITES, modelsForSite, applyChoices } from "../lib/conventions.js";
 import { decodeHash, encodeHash, convFromCode, picksFor, sdVariantFor, DEFAULT_CONV } from "../lib/state.js";
-import { drawPctCard, drawLegend, drawCurveCard } from "./cards.js";
+import { drawPctCard, drawLegend, drawCurveCard, drawThresholdCard } from "./cards.js";
+import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
 import { curveSeries, SWEEP } from "./curve.js";
 import { SITE_NAMES, scalingOf, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine } from "../lib/describe.js";
 
@@ -166,6 +167,10 @@ function render() {
         SWEEP[xv].label, (v) => (units === "cm" ? (v / 10).toFixed(1) : `${v}`));
     }
   }
+  for (const site of ["sov", "aao"]) {
+    if (state.y[site] == null || !p.sex) continue;
+    renderThresholds(main, site, state.y[site], units, p);
+  }
   for (const r of main.querySelectorAll("input[name^=cx_]"))
     r.onchange = () => { curveView.xVar = r.value; render(); };
   for (const b of main.querySelectorAll("button.key"))
@@ -179,6 +184,65 @@ function render() {
   for (const c of main.querySelectorAll("input[data-report]"))
     c.onchange = () => { c.checked ? checked.add(c.dataset.report) : checked.delete(c.dataset.report); updateReport(reportRows); };
   updateReport(reportRows);
+}
+
+/** Card 3: risk thresholds (AHI / CSAH / diameter) for the SoV and ascending aorta. */
+function renderThresholds(main, site, y, units, p) {
+  const h = p.height_cm;
+  const ahi = indexValue("AHI", y, h), csah = indexValue("CSAH", y, h);
+  const ths = THRESHOLDS.filter((t) => appliesTo(t, p)).map((t) => ({ ...t, d: diameterAt(t, h) })).sort((a, b) => a.d - b.d);
+  const fmtIdx = (t) => (t.index === "AHI" ? `${ahi.toFixed(2)} cm/m` : t.index === "CSAH" ? `${csah.toFixed(1)} cm²/m` : fmtObserved(y, units));
+  const rows = ths.map((t) => {
+    const reached = y >= t.d - 1e-9;
+    const gap = t.d - y;
+    return `<tr class="${reached ? "reached" : ""}">
+      <td><span class="kind ${t.kind}">${t.kind === "risk" ? "risk" : "surgery"}</span> ${esc(t.label)}<div class="model">${esc(t.source)}</div></td>
+      <td class="num">${fmtLen(t.d, units)}</td>
+      <td class="num">${fmtIdx(t)}</td>
+      <td>${reached ? "<b>reached</b>" : `${fmtLen(gap, units)} below`}</td></tr>`;
+  }).join("");
+
+  // Chart data: thresholds and the references' upper limits across heights (rest of the patient fixed).
+  const xRange = [140, 205];
+  // Chart: one line per distinct rule (the EACTS 50 mm rule coincides with the 50 mm line, so table only).
+  const lines = THRESHOLDS.filter((t) => (!t.when?.sex || t.when.sex === p.sex) && !t.when?.height_cm).map((t) => {
+    const pts = [];
+    for (let x = xRange[0]; x <= xRange[1]; x += 1) if (appliesTo(t, { ...p, height_cm: x })) pts.push({ x, y: diameterAt(t, x) });
+    return { id: t.id, kind: t.kind, label: t.label, short: t.short, pts };
+  });
+  const series = curveSeries(registry, state, site, "height_cm");
+  const envelope = [];
+  for (let i = 0; i <= xRange[1] - xRange[0]; i++) {
+    const ulns = series.map((s) => s.pts[i]?.uln).filter((v) => v != null);
+    if (ulns.length) envelope.push({ x: xRange[0] + i, lo: Math.min(...ulns), hi: Math.max(...ulns) });
+  }
+  const cx = crossoverHeight(2.5, 9);
+  main.insertAdjacentHTML("beforeend", `
+    <section class="card thresholds" aria-label="${SITE_NAMES[site]}: risk thresholds">
+      <div class="card-head"><h3>Risk thresholds</h3>
+        <span class="handnote">"abnormal for you" and "at risk" are different questions</span></div>
+      <p class="small" style="margin:6px 0 10px">${SITE_NAMES[site]} ${fmtObserved(y, units)} at ${Math.round(h)} cm:
+        <b class="mono">AHI ${ahi.toFixed(2)} cm/m</b> (diameter ÷ height) ·
+        <b class="mono">CSAH ${csah.toFixed(1)} cm²/m</b> (π·(D/2)² ÷ height, assuming a circular cross-section)</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Threshold</th><th class="num">As diameter at this height</th><th class="num">This patient</th><th>Status</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>
+      <svg class="curve" id="thr_${site}" role="img" aria-label="Threshold diameters against height with this patient; values are in the table above"></svg>
+      <div class="legend"><span><span class="sw risk"></span> risk association (Desai 2026)</span><span><span class="sw surg"></span> guideline surgical threshold</span>
+        <span><span data-lg="band"></span> upper limits of normal across the references</span><span><span data-lg="dot"></span> this patient</span></div>
+      <details class="notes"><summary>About these thresholds</summary><ul>
+        <li class="important">These are not normal ranges. Desai 2026 studied 8,887 unoperated patients with a 4–5 cm ascending aorta (mean age 68, 79% men, echo L–L end-diastole) and all-cause death; AHI and CSAH separated risk only modestly (AUC 0.56 and 0.54).</li>
+        <li>Desai used the larger of the root and ascending aorta for every index. The site applies each threshold to whichever level you entered.</li>
+        <li>CSAH from an echo diameter assumes a circular lumen (π·r²); Desai notes it may be inaccurate with an eccentric root.</li>
+        <li>AHI rises in proportion to height (D ∝ H) and CSAH with its square root (D ∝ √H). Desai's two thresholds give the same diameter only at ${(cx / 100).toFixed(2)} m: below that AHI ≥ 2.5 is reached first, above it CSAH ≥ 9.</li>
+        <li>Guideline classes (I, IIa, IIb) as cited by Desai 2026 from the 2022 ACC/AHA guideline and the 2024 EACTS/STS guideline (5.0 cm if shorter than 1.69 m). Check the guidelines themselves before acting on them.</li>
+        <li>Desai MY et al. JACC Adv 2026;5:102859. <a href="https://doi.org/10.1016/j.jacadv.2026.102859">doi:10.1016/j.jacadv.2026.102859</a></li></ul></details>
+    </section>`);
+  const svg = document.getElementById(`thr_${site}`);
+  drawThresholdCard(svg, { lines, envelope, patient: { x: h, y, label: fmtObserved(y, units) },
+    cross: { x: cx, y: diameterAt({ index: "AHI", value: 2.5 }, cx), label: "AHI 2.5 = CSAH 9 here" }, xRange },
+    (v) => (units === "cm" ? (v / 10).toFixed(1) : `${v}`));
+  drawLegend(svg.parentElement);
 }
 
 function updateReport(rows) {
