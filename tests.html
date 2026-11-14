@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>aoroot registry tests</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; }
+  li { list-style: none; } .pass::before { content: "✓ "; color: #1a7f37; } .fail::before { content: "✗ "; color: #cf222e; }
+  .detail { color: #cf222e; font-size: 13px; margin-left: 1.4rem; }
+</style>
+</head>
+<body>
+<h1>Registry tests</h1>
+<p id="summary">Running…</p>
+<ul id="list"></ul>
+<script type="module">
+  import { runAll } from "./tests/cases.js";
+  const results = runAll();
+  const list = document.getElementById("list");
+  for (const r of results) {
+    const li = document.createElement("li");
+    li.className = r.pass ? "pass" : "fail";
+    li.textContent = r.name;
+    if (!r.pass) { const d = document.createElement("div"); d.className = "detail"; d.textContent = r.detail; li.append(d); }
+    list.append(li);
+  }
+  const failed = results.filter((r) => !r.pass).length;
+  document.getElementById("summary").textContent = `${results.length - failed} passed, ${failed} failed`;
+</script>
+</body>
+</html>
