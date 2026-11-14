@@ -4,5 +4,6 @@ import devereux2012 from "./devereux2012.js";
 import saura2017 from "./saura2017.js";
 import patel2022 from "./patel2022.js";
 import yao2026 from "./yao2026.js";
+import campens2014 from "./campens2014.js";
 
-export default [devereux2012, saura2017, patel2022, yao2026];
+export default [devereux2012, campens2014, saura2017, patel2022, yao2026];

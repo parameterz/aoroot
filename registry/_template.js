@@ -133,6 +133,7 @@ export default {
       // [EVAL] How z is computed from mean (μ) and SD (σ):
       //   "normal"     z = (y − μ) / σ
       //   "lognormal"  z = (ln y − μ) / σ        (μ, σ on the ln scale)
+      //   "lognormal10" z = (log10 y − μ) / σ    (σ = SEE on the log10 scale, e.g. Campens)
       //   "boxcox"     z = ((y/μ)^L − 1) / (L·σ) (LMS; σ is S, needs `L` below)
       //   "ratio"      z = (y/μ − c) / s          (OMAM-style corrected value; sd: null and
       //                ratio: { mean: c, sd: s } — the paper's mean and SD of observed/predicted)
