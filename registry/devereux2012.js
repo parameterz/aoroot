@@ -7,10 +7,11 @@ export default {
   schema: 1,
   id: "devereux2012",
   label: "Devereux 2012",
-  entryVersion: "0.2.0",
+  entryVersion: "0.3.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Ported to schema 1; annulus status caution; height SEE variant 'consistency-corrected'" },
+    { version: "0.3.0", date: "2026-11-14", by: "Claude", change: "Convention fields as enums (annulus inner edge, mid-systole); legacy-site independent tests; annulus notes" },
   ],
 
   citation: {
@@ -48,7 +49,7 @@ export default {
       label: "Devereux 2012, BSA model",
       status: "ok",
       measurement: { site: "sov", units: "cm", modality: "echo", edge: "leading", phase: "end-diastole",
-        view: "parasternal (occasionally apical) long axis, maximum diameter parallel to the annular plane" },
+        view: "parasternal long axis", viewNote: "parasternal (occasionally apical) long axis, maximum diameter parallel to the annular plane" },
       mean: {
         type: "linear",
         intercept: 2.423,
@@ -69,7 +70,7 @@ export default {
       label: "Devereux 2012, height model",
       status: "ok",
       measurement: { site: "sov", units: "cm", modality: "echo", edge: "leading", phase: "end-diastole",
-        view: "parasternal (occasionally apical) long axis, maximum diameter parallel to the annular plane" },
+        view: "parasternal long axis", viewNote: "parasternal (occasionally apical) long axis, maximum diameter parallel to the annular plane" },
       mean: {
         type: "linear",
         intercept: 1.519,
@@ -94,8 +95,8 @@ export default {
       id: "annulus-bsa",
       label: "Devereux 2012 annulus, BSA model",
       status: "caution",
-      measurement: { site: "annulus", units: "cm", modality: "echo", edge: "hinge points of right and non-coronary cusps",
-        phase: "systole", view: "parasternal long axis" },
+      measurement: { site: "annulus", units: "cm", modality: "echo", edge: "inner", phase: "mid-systole",
+        view: "parasternal long axis", edgeNote: "between the hinge points of the right and non-coronary cusps, 'in systole' (exact timing not stated)" },
       mean: {
         type: "linear",
         intercept: 1.439,
@@ -115,8 +116,8 @@ export default {
       id: "annulus-height",
       label: "Devereux 2012 annulus, height model",
       status: "caution",
-      measurement: { site: "annulus", units: "cm", modality: "echo", edge: "hinge points of right and non-coronary cusps",
-        phase: "systole", view: "parasternal long axis" },
+      measurement: { site: "annulus", units: "cm", modality: "echo", edge: "inner", phase: "mid-systole",
+        view: "parasternal long axis", edgeNote: "between the hinge points of the right and non-coronary cusps, 'in systole' (exact timing not stated)" },
       mean: {
         type: "linear",
         intercept: 1.535,
@@ -159,6 +160,18 @@ export default {
       text: "The text gives annulus SEEs of 0.113 cm (BSA) and 0.070 cm (height); Table 2 places these values the other way around, in the intercept SE column. SEEs of 0.7 to 1.1 mm are implausibly small for the annulus, so annulus z-scores from this paper are unreliable. Percent of predicted is unaffected.",
     },
     {
+      id: "annulus-convention",
+      appliesTo: ["annulus-bsa", "annulus-height"],
+      severity: "info",
+      text: "The annulus was measured between the hinge points of the right and non-coronary cusps 'in systole'. Hinge-to-hinge corresponds to the inner-edge convention, and is matched here to the ASE mid-systolic annulus measurement; the paper does not state the exact systolic timing.",
+    },
+    {
+      id: "annulus-legacy-see",
+      appliesTo: ["annulus-bsa", "annulus-height"],
+      severity: "info",
+      text: "The original aoroot.parameterz.com calculator (2013) used the Table 2 placement of the annulus SEEs (0.070 cm BSA model, 0.113 cm height model); this version follows the text (0.113 and 0.070). Both are implausibly small; see the SEE note.",
+    },
+    {
       id: "population",
       appliesTo: "all",
       severity: "info",
@@ -178,10 +191,58 @@ export default {
     },
   ],
 
-  // Arithmetic checks only (hand-calculated from the coefficients above).
-  // TODO: add `independent` cases from the old aoroot.parameterz.com before it goes offline,
-  // and `paper` cases if any printed values can be found.
+  // `independent`: values computed by the original aoroot.parameterz.com code (devereux.py,
+  // 31 Mar 2013, Dan's own transcription): mean and mean + 2 SE, age coefficient per decade × age/10.
+  // `arithmetic`: hand-calculated from the paper's equations.
   tests: [
+    {
+      kind: "independent", source: "aoroot.parameterz.com devereux.py (2013): mean, mean + 2 SE",
+      input: { sex: "male", age: 40, height_cm: 175, weight_kg: 70 },
+      ulnZ: 2,
+      expect: { "sov-bsa": { pred: 3.3680, uln: 3.8900 } },
+    },
+    {
+      kind: "independent", source: "aoroot.parameterz.com devereux.py (2013): mean, mean + 2 SE",
+      input: { sex: "male", age: 40, height_cm: 175, weight_kg: 70 },
+      ulnZ: 2,
+      expect: { "sov-height": { pred: 3.4220, uln: 3.8520 } },
+    },
+    {
+      kind: "independent", source: "aoroot.parameterz.com devereux.py (2013): mean, mean + 2 SE",
+      input: { sex: "female", age: 65, height_cm: 160, weight_kg: 60 },
+      ulnZ: 2,
+      expect: { "sov-bsa": { pred: 3.2218, uln: 3.7438 } },
+    },
+    {
+      kind: "independent", source: "aoroot.parameterz.com devereux.py (2013): mean, mean + 2 SE",
+      input: { sex: "female", age: 65, height_cm: 160, weight_kg: 60 },
+      ulnZ: 2,
+      expect: { "sov-height": { pred: 3.2750, uln: 3.7050 } },
+    },
+    {
+      kind: "independent", source: "aoroot.parameterz.com devereux.py (2013): mean, mean + 2 SE",
+      input: { sex: "male", age: 18, height_cm: 192, weight_kg: 80 },
+      ulnZ: 2,
+      expect: { "sov-bsa": { pred: 3.2824, uln: 3.8044 } },
+    },
+    {
+      kind: "independent", source: "aoroot.parameterz.com devereux.py (2013): mean, mean + 2 SE",
+      input: { sex: "female", age: 82, height_cm: 150, weight_kg: 48 },
+      ulnZ: 2,
+      expect: { "sov-height": { pred: 3.3450, uln: 3.7750 } },
+    },
+    {
+      kind: "independent", source: "aoroot.parameterz.com devereux.py (2013): mean, mean + 2 SE",
+      input: { sex: "male", age: 40, height_cm: 175, weight_kg: 70 },
+      ulnZ: 2,
+      expect: { "annulus-bsa": { pred: 2.2426 } },  // ULN not compared: legacy used the Table 2 SEE placement
+    },
+    {
+      kind: "independent", source: "aoroot.parameterz.com devereux.py (2013): mean, mean + 2 SE",
+      input: { sex: "female", age: 65, height_cm: 160, weight_kg: 60 },
+      ulnZ: 2,
+      expect: { "annulus-height": { pred: 1.9360 } },  // ULN not compared: legacy used the Table 2 SEE placement
+    },
     {
       kind: "arithmetic", source: "Hand calculation, 2026-11-14",
       input: { sex: "male", age: 40, height_cm: 175, weight_kg: 70 },
@@ -213,6 +274,6 @@ export default {
     status: "draft",
     reviewedBy: null,
     date: null,
-    against: "Published Am J Cardiol version: abstract, Table 1, Table 2",
+    against: "Published Am J Cardiol version: abstract, Table 1, Table 2, Methods",
   },
 };

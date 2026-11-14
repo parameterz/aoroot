@@ -1,10 +1,11 @@
 // Shared test logic. Runs every registry entry's schema check and `tests`
-// block. Used by tests/run.js (Node) and tests.html (browser).
+// block, plus convention-matching checks. Used by tests/run.js (Node) and tests.html (browser).
 
 import registry from "../registry/index.js";
 import { score } from "../lib/evaluator.js";
 import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
+import { modelsForSite } from "../lib/conventions.js";
 
 const TOL = { pred: 0.001, z: 0.01, pctPred: 0.1, uln: 0.01, covariates: 0.001 };
 
@@ -31,7 +32,7 @@ export function runAll() {
         const model = ref.models.find((m) => m.id === modelId);
         const site = model.measurement.site;
         const y = t.y?.[site] == null ? null : convert(t.y[site], model.measurement.units, "mm");
-        const r = score(ref, model, t.input, y, { sdVariant: t.sdVariant });
+        const r = score(ref, model, t.input, y, { sdVariant: t.sdVariant, ulnZ: t.ulnZ });
         const u = model.measurement.units;
         const got = { pred: r.published.pred, z: r.z, pctPred: r.pctPred, uln: r.uln == null ? null : convert(r.uln, "mm", u) };
         for (const [k, w] of Object.entries(want))
@@ -40,6 +41,23 @@ export function runAll() {
       }
       check(label, fails.length === 0, fails.join("; "));
     });
+  }
+  // Convention matching: which models each reference offers for a site + convention.
+  const P = { sex: "male", age: 40, height_cm: 175, weight_kg: 70 };
+  const II_ED = { edge: "inner", phase: "end-diastole", view: "parasternal long axis" };
+  const expectations = [
+    ["devereux2012", "sov", undefined, ["sov-bsa", "sov-height"]],
+    ["devereux2012", "annulus", undefined, ["annulus-bsa", "annulus-height"]],
+    ["devereux2012", "sov", II_ED, []],
+    ["saura2017", "sov", undefined, ["sov-ll-ed-ht", "sov-ll-ed-bsa"]],
+    ["saura2017", "annulus", undefined, ["annulus-ii-ms-ht", "annulus-ii-ms-bsa"]],
+    ["saura2017", "aao", II_ED, ["aao-ii-ed-ht", "aao-ii-ed-bsa", "aao-ii-ed-ht-reg", "aao-ii-ed-bsa-reg"]],
+  ];
+  for (const [refId, site, conv, want] of expectations) {
+    const ref = registry.find((r) => r.id === refId);
+    const got = modelsForSite(ref, P, site, conv).map((m) => m.id).sort();
+    const label = `conventions: ${refId} ${site} ${conv ? `${conv.edge}/${conv.phase}` : "ASE default"}`;
+    check(label, JSON.stringify(got) === JSON.stringify([...want].sort()), `got [${got}]`);
   }
   return results;
 }

@@ -65,9 +65,12 @@ export default {
         site: "sov",               //   "annulus" | "sov" | "stj" | "aao"
         units: "cm",               //   units of the published outcome: "cm" | "mm"
         modality: "echo",          //   "echo" | "ct" | "cmr"
-        edge: "leading",           //   "leading" | "inner" | "outer"
-        phase: "end-diastole",     //   "end-diastole" | "mid-systole" | "systole"
-        view: "",                  //   "parasternal long axis" | "parasternal short axis"
+        // edge / phase / view are enums (lib/conventions.js); they decide which model
+        // matches the convention the user selected. Put the paper's own wording in
+        // edgeNote / phaseNote / viewNote. Hinge-to-hinge annulus = "inner".
+        edge: "leading",           //   "leading" | "inner"
+        phase: "end-diastole",     //   "end-diastole" | "mid-systole"
+        view: "parasternal long axis", // "parasternal long axis" | "parasternal short axis"
         // sinus: "right" | "left" | "non" | "mean of three"   (short-axis measurements only)
       },
 
@@ -171,7 +174,7 @@ export default {
   //                guard against later edits to the file; done from the file's
   //                own coefficients, they check the evaluator only.
   // Expect any of: pred, z, pctPred, uln (published units). covariates: { bsa_dubois: … }.
-  // Optional per test: sdVariant: "<variant id>", tol: { pred, z, pctPred, uln }.
+  // Optional per test: sdVariant: "<variant id>", ulnZ: 2 (default 1.96), tol: { pred, z, pctPred, uln }.
   // A legacy calculator that showed predicted mean and ULN only is still a good
   // `independent` test: expect { pred, uln } with no observed y.
   tests: [
