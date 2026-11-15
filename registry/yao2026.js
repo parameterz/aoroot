@@ -26,11 +26,12 @@ export default {
   schema: 1,
   id: "yao2026",
   label: "Yao 2026 (OMAM)",
-  entryVersion: "0.2.0",
+  entryVersion: "0.3.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Sections 2.6–2.8, Tables 4–5)" },
     { version: "0.1.1", date: "2026-11-14", by: "Claude", change: "population group/default moved to the shared `choice` field" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Normal range from published Yc limits (Chinese, Italian); tests from parameterz/OMAM-Aortic-Root" },
+    { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 9 of 9 models, all tests passing; agrees with values and notes" },
   ],
 
   citation: {
@@ -356,9 +357,10 @@ export default {
   ],
 
   verification: {
-    status: "draft",
-    reviewedBy: null,
-    date: null,
+    status: "reviewed",
+    reviewedBy: "Dan Dyar",
+    date: "2026-11-15",
     against: "MedComm 2026;7:e70788 (published version): Sections 2.6–2.8, Tables 4–5, Figure 2",
+    summary: "9 of 9 models checked against the paper; 11/11 tests passing (9 independent, 2 arithmetic). Agrees with values and notes.",
   },
 };
