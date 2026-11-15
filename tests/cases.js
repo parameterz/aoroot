@@ -70,6 +70,9 @@ export function runAll() {
     ["muraru2014", "sov", undefined, ["sov-ll-ed-ht", "sov-ll-ed-bsa"]],
     ["muraru2014", "stj", II_ED, ["stj-ii-ed-ht"]],  // stj-ii-ed-bsa suppressed
     ["muraru2014", "annulus", undefined, []],
+    ["lang2015", "sov", undefined, ["sov-abs", "sov-bsa"]],
+    ["lang2015", "annulus", undefined, ["annulus-abs", "annulus-bsa"]],
+    ["lang2015", "sov", II_ED, []],
     ["mirea2013", "sov", undefined, []],
     ["mirea2013", "aao", II_ED, ["aao-bsa-40to49"]],
     ["mirea2013", "annulus", II_ED, ["annulus-bsa-40to49"]],
