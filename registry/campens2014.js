@@ -17,11 +17,12 @@ export default {
   schema: 1,
   id: "campens2014",
   label: "Campens 2014",
-  entryVersion: "0.1.2",
+  entryVersion: "0.2.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Table 2)" },
     { version: "0.1.1", date: "2026-11-14", by: "Claude", change: "Independent tests from the legacy parameterz Campens calculator" },
     { version: "0.1.2", date: "2026-11-14", by: "Claude", change: "DuBois/Haycock as a `choice` (DuBois default)" },
+    { version: "0.2.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 4 of 4 models, all tests passing; agrees with values and notes" },
   ],
 
   citation: {
@@ -228,9 +229,10 @@ export default {
   ],
 
   verification: {
-    status: "draft",
-    reviewedBy: null,
-    date: null,
+    status: "reviewed",
+    reviewedBy: "Dan Dyar",
+    date: "2026-11-15",
     against: "Am J Cardiol 2014;114:914-920 (published version): Table 2; Methods; Table 1",
+    summary: "4 of 4 models checked against the paper; 8/8 tests passing (2 paper, 2 independent, 4 arithmetic). Agrees with values and notes.",
   },
 };
