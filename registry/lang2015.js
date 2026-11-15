@@ -1,7 +1,7 @@
 // @ts-check
 // Lang 2015 (ASE/EACVI chamber quantification guideline), Table 14: "Aortic root
 // dimensions in normal adults", mean ± SD by sex, absolute (cm) and indexed to BSA
-// (cm/m²), for the annulus, sinuses of Valsalva, STJ and proximal ascending aorta.
+// (cm/m²; used here), for the annulus, sinuses of Valsalva, STJ and proximal ascending aorta.
 // Transcribed as published.
 //
 // Secondary data: the table is "adapted from Roman et al. (ref. 195) and Hiratzka et al.
@@ -14,16 +14,19 @@
 // Included as the guideline table many labs still report against, so it can be seen
 // next to the references with age and body-size models. Every model is `caution`.
 //
-// Model IDs: <site>-abs (sex only) and <site>-bsa (mean ratio × BSA, SD scaled the same way).
+// Model IDs: <site>-bsa (mean ratio × BSA, SD scaled the same way).
+// Not used: the absolute (cm) columns, sex only with no body size or age (Dan, 2026-11-15:
+// the site moves beyond absolute values; drafted in 0.1.0, removed in 0.2.0).
 
 /** @type {any} */
 export default {
   schema: 1,
   id: "lang2015",
   label: "ASE/EACVI 2015",
-  entryVersion: "0.1.0",
+  entryVersion: "0.2.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-15", by: "Claude", change: "Initial draft from PDF (Table 14)" },
+    { version: "0.2.0", date: "2026-11-15", by: "Claude", change: "Removed the 4 absolute (sex-only) models at Dan's request: the site moves beyond absolute values. BSA-indexed models unchanged." },
   ],
 
   citation: {
@@ -51,36 +54,6 @@ export default {
   },
 
   models: [
-
-    // ── Table 14, absolute values (cm), sex only ──
-    {
-      id: "annulus-abs", label: "ASE/EACVI 2015 annulus, absolute", status: "caution",
-      measurement: { site: "annulus", units: "cm", modality: "echo", edge: "inner", phase: "mid-systole", view: "parasternal long axis", edgeNote: "Hinge points of the aortic leaflets", phaseNote: "Peak systole (Figure 10)" },
-      mean: { type: "constant", value: { male: 2.6, female: 2.3 }, source: "Table 14 (annulus, absolute)" },
-      sd:   { type: "constant", value: { male: 0.3, female: 0.2 }, source: "Table 14 (annulus, absolute)" },
-      dist: "normal", validity: {},
-    },
-    {
-      id: "sov-abs", label: "ASE/EACVI 2015 sinuses of Valsalva, absolute", status: "caution",
-      measurement: { site: "sov", units: "cm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
-      mean: { type: "constant", value: { male: 3.4, female: 3.0 }, source: "Table 14 (sinuses of Valsalva, absolute)" },
-      sd:   { type: "constant", value: { male: 0.3, female: 0.3 }, source: "Table 14 (sinuses of Valsalva, absolute)" },
-      dist: "normal", validity: {},
-    },
-    {
-      id: "stj-abs", label: "ASE/EACVI 2015 STJ, absolute", status: "caution",
-      measurement: { site: "stj", units: "cm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
-      mean: { type: "constant", value: { male: 2.9, female: 2.6 }, source: "Table 14 (sinotubular junction, absolute)" },
-      sd:   { type: "constant", value: { male: 0.3, female: 0.3 }, source: "Table 14 (sinotubular junction, absolute)" },
-      dist: "normal", validity: {},
-    },
-    {
-      id: "aao-abs", label: "ASE/EACVI 2015 proximal ascending aorta, absolute", status: "caution",
-      measurement: { site: "aao", units: "cm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis", viewNote: "Proximal ascending aorta; level not defined (the guideline asks for the distance from the annular plane to be reported)" },
-      mean: { type: "constant", value: { male: 3.0, female: 2.7 }, source: "Table 14 (proximal ascending aorta, absolute)" },
-      sd:   { type: "constant", value: { male: 0.4, female: 0.4 }, source: "Table 14 (proximal ascending aorta, absolute)" },
-      dist: "normal", validity: {},
-    },
 
     // ── Table 14, indexed values (cm/m²): predicted = ratio × BSA, SD scaled the same way ──
     {
@@ -125,7 +98,7 @@ export default {
       id: "against-own-use",
       appliesTo: "all",
       severity: "important",
-      text: "A guideline table that recommends against its own use: the same document says the sinus of Valsalva diameter \"should be compared with age- and BSA-related nomograms or to values calculated from specific allometric equations\" (section IV), and reprints the Roman nomograms (Figure 13) for that purpose. Table 14 has neither age nor an allometric body-size term. It is shown here because many labs still report against it, so it can be compared with the references that do.",
+      text: "A guideline table that recommends against its own use: the same document says the sinus of Valsalva diameter \"should be compared with age- and BSA-related nomograms or to values calculated from specific allometric equations\" (section IV), and reprints the Roman nomograms (Figure 13) for that purpose. Table 14 has neither age nor an allometric body-size term. It is shown here because many labs still report against it, so it can be compared with the references that do. The table's absolute (sex-only) values are not used.",
     },
     {
       id: "secondary-source",
@@ -140,14 +113,8 @@ export default {
       text: "No age term. Aortic size increases with age at every level above the annulus (about 1 mm per decade at the sinuses in Devereux 2012 and Mirea 2013), so these z-scores run high in older and low in younger adults.",
     },
     {
-      id: "abs-no-body-size",
-      appliesTo: { match: "-abs$" },
-      severity: "important",
-      text: "Absolute values depend on sex only: one normal range for every man and every woman, whatever their size. A 4.0 cm sinus is z = +2.0 in a man of any height.",
-    },
-    {
       id: "bsa-ratio",
-      appliesTo: { match: "-bsa$" },
+      appliesTo: "all",
       severity: "important",
       text: "Predicted = the mean ratio × the patient's BSA (DuBois), and the SD is scaled the same way. Dividing a diameter by BSA overcorrects for body size (Mirea 2013, Table 5; Oxborough 2014 found an exponent nearer BSA^0.6 than BSA^1), so these z-scores run low in large and high in small patients.",
     },
@@ -173,22 +140,16 @@ export default {
 
   tests: [
     {
-      kind: "paper", source: "Table 14 men, sinuses of Valsalva, absolute: 3.4 ± 0.3 cm",
+      kind: "paper", source: "Table 14 men, sinuses of Valsalva, indexed: 1.7 cm/m²; at BSA 1.8481 → 3.1418 cm",
       input: { sex: "male", age: 40, height_cm: 175, weight_kg: 70 },
-      expect: { "sov-abs": { pred: 3.4 } },
+      expect: { "sov-bsa": { pred: 3.1418 } },
+      tol: { pred: 0.0002 },
     },
     {
       kind: "paper", source: "Table 14 women, proximal ascending aorta, indexed: 1.6 cm/m²; at BSA 1.6221 → 2.5953 cm",
       input: { sex: "female", age: 65, height_cm: 160, weight_kg: 60 },
       expect: { "aao-bsa": { pred: 2.5953 } },
       tol: { pred: 0.0002 },
-    },
-    {
-      kind: "arithmetic", source: "Hand calculation (Python), 2026-11-15: (4.0 − 3.4) / 0.3; ULN 3.4 + 1.96 × 0.3",
-      input: { sex: "male", age: 40, height_cm: 175, weight_kg: 70 },
-      y: { sov: 4.0 },
-      expect: { "sov-abs": { pred: 3.4, z: 2.0, uln: 3.988 } },
-      tol: { z: 0.001, uln: 0.0002 },
     },
     {
       kind: "arithmetic", source: "Hand calculation (Python), 2026-11-15: BSA 1.8481; 1.7 × BSA, SD 0.2 × BSA; z = (4.0 − 3.1418) / 0.3696",
