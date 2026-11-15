@@ -7,13 +7,14 @@ export default {
   schema: 1,
   id: "devereux2012",
   label: "Devereux 2012",
-  entryVersion: "0.3.2",
+  entryVersion: "0.3.3",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Ported to schema 1; annulus status caution; height SEE variant 'consistency-corrected'" },
     { version: "0.3.0", date: "2026-11-14", by: "Claude", change: "Convention fields as enums (annulus inner edge, mid-systole); legacy-site independent tests; annulus notes" },
     { version: "0.3.1", date: "2026-11-14", by: "Claude", change: "Age coefficients entered per decade as printed in Tables 1 and 2 (was per year, from the abstract); results unchanged. Raised in Dan's review." },
     { version: "0.3.2", date: "2026-11-14", by: "Claude", change: "Annulus SEEs from Table 2 (BSA 0.070, height 0.113) instead of the text, per Dan's review; legacy-code tests now compare the annulus ULN too" },
+    { version: "0.3.3", date: "2026-11-14", by: "Claude", change: "Annulus 'consistency-corrected' SD option (0.18 cm); published Table 2 values stay the default" },
   ],
 
   citation: {
@@ -109,7 +110,10 @@ export default {
         ],
         source: "Table 2",
       },
-      sd: { type: "constant", value: 0.070, source: "Table 2, SE column of the intercept row (text gives 0.113)" },
+      sd: {
+        type: "constant", value: 0.070, source: "Table 2, SE column of the intercept row (text gives 0.113)",
+        variants: [{ id: "consistency-corrected", value: 0.18, label: "consistency-corrected", note: "see-annulus" }],
+      },
       dist: "normal",
       validity: { age: [15, 86], bsa_dubois: [1.13, 2.41] },
       stats: { r: 0.64 },
@@ -130,7 +134,10 @@ export default {
         ],
         source: "Table 2",
       },
-      sd: { type: "constant", value: 0.113, source: "Table 2, SE column of the intercept row (text gives 0.070)" },
+      sd: {
+        type: "constant", value: 0.113, source: "Table 2, SE column of the intercept row (text gives 0.070)",
+        variants: [{ id: "consistency-corrected", value: 0.18, label: "consistency-corrected", note: "see-annulus" }],
+      },
       dist: "normal",
       validity: { age: [15, 86], height_cm: [143, 206] },
       stats: { r: 0.63 },
@@ -159,7 +166,7 @@ export default {
       id: "see-annulus",
       appliesTo: ["annulus-bsa", "annulus-height"],
       severity: "important",
-      text: "Annulus SEEs are taken from Table 2 (0.070 cm BSA model, 0.113 cm height model), on the reasoning that the table is the statistics output and the text was transcribed from it; the text gives them the other way around. In Table 2 both sit in the SE column of the intercept row, beside a p-value, so they are most likely standard errors of the intercept, not SEEs. Either way they are implausibly small: the paper's own age coefficient and its standardized beta imply an annulus SD of about 2.3 mm, and with R = 0.64 an SEE of about 1.8 mm (0.18 cm), consistent with annulus SDs of 1.9 to 2.4 mm in WASE, NORRE and Campens. Annulus z-scores from this paper are therefore about 1.6 to 2.5 times too large. Percent of predicted is unaffected.",
+      text: "Annulus SEEs are taken from Table 2 (0.070 cm BSA model, 0.113 cm height model), on the reasoning that the table is the statistics output and the text was transcribed from it; the text gives them the other way around. In Table 2 both sit in the SE column of the intercept row, beside a p-value, so they are most likely standard errors of the intercept, not SEEs. Either way they are implausibly small: the paper's own age coefficient and its standardized beta imply an annulus SD of about 2.3 mm, and with R = 0.64 an SEE of about 1.8 mm (0.18 cm), consistent with annulus SDs of 1.9 to 2.4 mm in WASE, NORRE and Campens. Annulus z-scores from this paper are therefore about 1.6 to 2.5 times too large. The published values are shown by default; the 'consistency-corrected' option uses 0.18 cm. Percent of predicted is unaffected.",
     },
     {
       id: "annulus-convention",
@@ -269,6 +276,19 @@ export default {
       y: { sov: 3.8 },
       sdVariant: "consistency-corrected",
       expect: { "sov-height": { pred: 3.422, z: 1.45 } },
+    },
+    {
+      kind: "arithmetic", source: "Hand calculation, 2026-11-14: 1.535 + 0.01·4.5 + 0.004·178 − 0.152 = 2.140; z = (2.5 − 2.140) / 0.18",
+      input: { sex: "male", age: 45, height_cm: 178, weight_kg: 80 },
+      y: { annulus: 2.5 },
+      sdVariant: "consistency-corrected",
+      expect: { "annulus-height": { pred: 2.140, z: 2.00, uln: 2.4928 } },
+    },
+    {
+      kind: "arithmetic", source: "Hand calculation, 2026-11-14: published Table 2 SEE 0.113: z = (2.5 − 2.140) / 0.113",
+      input: { sex: "male", age: 45, height_cm: 178, weight_kg: 80 },
+      y: { annulus: 2.5 },
+      expect: { "annulus-height": { pred: 2.140, z: 3.19 } },
     },
   ],
 
