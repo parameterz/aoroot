@@ -182,6 +182,9 @@ svg text.thrlbl.surg { fill: var(--crit); }
 svg text.thrlbl.norm { fill: var(--accent); } svg .faded { opacity: .45; }
 .thresholds tr.normal.above td { background: var(--accent-soft, rgba(43, 93, 138, .08)); }
 .kind.normal { background: var(--accent-soft, rgba(43, 93, 138, .1)); color: var(--accent); }
+button.tkey { font: inherit; color: inherit; background: none; border: 1px solid transparent; border-radius: 6px; padding: 2px 6px; margin: -2px -6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+button.tkey:hover { border-color: var(--rule); }
+button.tkey[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
 .sw.norm { border-color: var(--accent); border-top-style: dotted; }
 .thresholds tr.reached td { background: var(--crit-soft); }
 .kind { display: inline-block; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; border-radius: 4px; padding: 0 6px; margin-right: 4px; }

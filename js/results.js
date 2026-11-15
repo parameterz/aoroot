@@ -20,6 +20,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 let state;
 const checked = new Set(); // report rows ticked (survives re-render, not saved in the link)
 const curveView = { xVar: "height_cm", hidden: new Set() }; // curve card display choices (this visit only)
+const thrView = { hidden: new Set() }; // thresholds chart: hidden groups (risk, surgery, normal, band); this visit only
 
 function setHash(mutate) {
   mutate(state);
@@ -215,7 +216,7 @@ function renderThresholds(main, site, y, units, p, reportRows) {
   // Chart data: thresholds and the references' upper limits across heights (rest of the patient fixed).
   const xRange = [140, 205];
   // Chart: one line per distinct rule (the EACTS 50 mm rule coincides with the 50 mm line, so table only).
-  const lines = THRESHOLDS.filter((t) => (!t.when?.sex || t.when.sex === p.sex) && !t.when?.height_cm).map((t) => {
+  const allLines = THRESHOLDS.filter((t) => (!t.when?.sex || t.when.sex === p.sex) && !t.when?.height_cm).map((t) => {
     const pts = [];
     for (let x = xRange[0]; x <= xRange[1]; x += 1) if (appliesTo(t, { ...p, height_cm: x })) pts.push({ x, y: diameterAt(t, x) });
     return { id: t.id, kind: t.kind, label: t.label, short: t.short, pts };
@@ -223,7 +224,7 @@ function renderThresholds(main, site, y, units, p, reportRows) {
   if (cmr) {
     const pts = [];
     for (let x = xRange[0]; x <= xRange[1]; x += 1) pts.push({ x, y: diameterAt(cmr, x) });
-    lines.push({ id: cmr.id, kind: "normal", label: `CMR normal, ${Math.round(p.age)} y`, short: "CMR normal", pts, faded: cmr.extrapolated });
+    allLines.push({ id: cmr.id, kind: "normal", label: `CMR normal, ${Math.round(p.age)} y`, short: "CMR normal", pts, faded: cmr.extrapolated });
   }
   const series = curveSeries(registry, state, site, "height_cm");
   const envelope = [];
@@ -231,7 +232,10 @@ function renderThresholds(main, site, y, units, p, reportRows) {
     const ulns = series.map((s) => s.pts[i]?.uln).filter((v) => v != null);
     if (ulns.length) envelope.push({ x: xRange[0] + i, lo: Math.min(...ulns), hi: Math.max(...ulns) });
   }
+  const hid = thrView.hidden;
+  const lines = allLines.filter((l) => !hid.has(l.kind));
   const cx = crossoverHeight(2.5, 9);
+  const tk = (k, inner, text) => `<button type="button" class="tkey" data-thr="${k}" aria-pressed="${!hid.has(k)}">${inner} ${text}</button>`;
   main.insertAdjacentHTML("beforeend", `
     <section class="card thresholds" aria-label="${SITE_NAMES[site]}: risk thresholds">
       <div class="card-head"><h3>Risk thresholds</h3>
@@ -244,8 +248,9 @@ function renderThresholds(main, site, y, units, p, reportRows) {
         <thead><tr><th>Threshold</th><th class="num">As diameter at this height</th><th class="num">This patient</th><th>Status</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
       <svg class="curve" id="thr_${site}" role="img" aria-label="Threshold diameters against height with this patient; values are in the table above"></svg>
-      <div class="legend"><span><span class="sw risk"></span> risk association (Desai 2026)</span><span><span class="sw surg"></span> guideline surgical threshold</span>${cmr ? `<span><span class="sw norm"></span> CMR upper normal for age and sex (Tavolinejad 2025)</span>` : ""}
-        <span><span data-lg="band"></span> upper limits of normal across the references</span><span><span data-lg="dot"></span> this patient</span></div>
+      <div class="legend">${tk("risk", `<span class="sw risk"></span>`, "risk association (Desai 2026)")}${tk("surgery", `<span class="sw surg"></span>`, "guideline surgical threshold")}${cmr ? tk("normal", `<span class="sw norm"></span>`, "CMR upper normal for age and sex (Tavolinejad 2025)") : ""}
+        ${tk("band", `<span data-lg="band"></span>`, "upper limits of normal across the references")}<span><span data-lg="dot"></span> this patient</span>
+        <span class="small muted handnote">tap to hide or show</span></div>
       <details class="notes"><summary>About these thresholds</summary><ul>
         <li class="important">These are not normal ranges. Desai 2026 studied 8,887 unoperated patients with a 4–5 cm ascending aorta (mean age 68, 79% men, echo L–L end-diastole) and all-cause death; AHI and CSAH separated risk only modestly (AUC 0.56 and 0.54).</li>
         <li>Desai used the larger of the root and ascending aorta for every index. The site applies each threshold to whichever level you entered.</li>
@@ -258,8 +263,10 @@ function renderThresholds(main, site, y, units, p, reportRows) {
         <li>Desai MY et al. JACC Adv 2026;5:102859. <a href="https://doi.org/10.1016/j.jacadv.2026.102859">doi:10.1016/j.jacadv.2026.102859</a></li></ul></details>
     </section>`);
   const svg = document.getElementById(`thr_${site}`);
-  drawThresholdCard(svg, { lines, envelope, patient: { x: h, y, label: fmtObserved(y, units) },
-    cross: { x: cx, y: diameterAt({ index: "AHI", value: 2.5 }, cx), label: "AHI 2.5 = CSAH 9 here" }, xRange },
+  for (const b of svg.parentElement.querySelectorAll("button.tkey"))
+    b.onclick = () => { const k = b.dataset.thr; hid.has(k) ? hid.delete(k) : hid.add(k); render(); };
+  drawThresholdCard(svg, { lines, envelope: hid.has("band") ? [] : envelope, patient: { x: h, y, label: fmtObserved(y, units) },
+    cross: hid.has("risk") ? null : { x: cx, y: diameterAt({ index: "AHI", value: 2.5 }, cx), label: "AHI 2.5 = CSAH 9 here" }, xRange },
     (v) => (units === "cm" ? (v / 10).toFixed(1) : `${v}`));
   drawLegend(svg.parentElement);
 }
