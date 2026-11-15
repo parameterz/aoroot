@@ -18,9 +18,10 @@ export default {
   schema: 1,
   id: "saura2017",
   label: "NORRE (Saura 2017)",
-  entryVersion: "0.1.0",
+  entryVersion: "0.2.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Tables 3 and 5)" },
+    { version: "0.2.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 42 of 42 models, all tests passing; agrees with values and notes" },
   ],
 
   citation: {
@@ -485,9 +486,10 @@ export default {
   ],
 
   verification: {
-    status: "draft",
-    reviewedBy: null,
-    date: null,
+    status: "reviewed",
+    reviewedBy: "Dan Dyar",
+    date: "2026-11-15",
     against: "EHJ-CVI 2017;18:167-179 (online 3 April 2016): Tables 3 and 5",
+    summary: "42 of 42 models checked against the paper; 5/5 tests passing (2 independent, 3 arithmetic). Agrees with values and notes.",
   },
 };
