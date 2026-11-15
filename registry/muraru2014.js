@@ -151,7 +151,7 @@ export default {
   ],
 
   definitions: {
-    ulnZ: 1.645,
+    ulnZ: 1.645, // the paper's own limit (documentation); the site keeps its 1.96 default (decided 2026-11-14)
     bands: [],
     source: "Table 2 footnote: upper limit = 95th percentile of normality (but Statistical analysis: limits = mean ± 2 SD)",
   },
@@ -161,7 +161,7 @@ export default {
       id: "percentile-sd",
       appliesTo: { match: "-ed-(ht|bsa)$" },
       severity: "important",
-      text: "Table 2 gives the median and the 95th percentile, not mean ± SD. Predicted here = median ratio × the patient's height or BSA; SD = (95th percentile − median) ÷ 1.645, scaled the same way. So z = +1.645 is the paper's own upper limit, and the site's default limit (z = 1.96) lies a little above it.",
+      text: "Table 2 gives the median and the 95th percentile, not mean ± SD. Predicted here = median ratio × the patient's height or BSA; SD = (95th percentile − median) ÷ 1.645, scaled the same way. So z = +1.645 is the paper's own upper limit, and the site's default limit (z = 1.96, used for every reference) lies a little above it.",
     },
     {
       id: "integer-rounding",
