@@ -11,17 +11,19 @@
 // Model IDs: <site>-<ll|ii|sax-…>-<ed|ms>-<ht|bsa>[-reg]. Notes target groups by ID pattern.
 //  2. Regressions (Table 5): age + sex + height or BSA, for SV (mean of three
 //     short-axis diameters) and TAA, inner edge, end-diastole. No residual SD
-//     published, so these are mean-only: % predicted, no z-score.
+//     published, so no normal range: SUPPRESSED (site rule from 2026-11-14:
+//     a model is shown only if the paper gives a range). Kept as transcribed.
 
 /** @type {any} */
 export default {
   schema: 1,
   id: "saura2017",
   label: "NORRE (Saura 2017)",
-  entryVersion: "0.2.0",
+  entryVersion: "0.3.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Tables 3 and 5)" },
     { version: "0.2.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 42 of 42 models, all tests passing; agrees with values and notes" },
+    { version: "0.3.0", date: "2026-11-14", by: "Claude", change: "Table 5 regressions (4) suppressed: no published SD, so no normal range (site rule adopted by Dan Dyar 2026-11-14). Coefficients unchanged." },
   ],
 
   citation: {
@@ -319,11 +321,11 @@ export default {
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 2.4, female: 2.6 } }], source: "Table 3 (NCor/BSA, short-axis end-diastole, mm/m²)" },
       dist: "normal", validity: { age: [19, 78] },
     },
-    // ── Regressions (Table 5), mm. Sex coded male = 1, female = 0. Mean-only. ──
+    // ── Regressions (Table 5), mm. Sex coded male = 1, female = 0. Mean-only, so suppressed. ──
     // Minus signs are rendered as "2" in the PDF text: "21.67 (27.06 to 3.72)"
     // is −1.67 (−7.06 to 3.72); the CI confirms the sign.
     {
-      id: "sov-sax-mean-ed-ht-reg", label: "NORRE SV regression, height model", status: "caution",
+      id: "sov-sax-mean-ed-ht-reg", label: "NORRE SV regression, height model", status: "suppressed",
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole",
         view: "parasternal short axis", sinus: "mean of three" },
       mean: {
@@ -340,7 +342,7 @@ export default {
       stats: { r2: 0.301 },
     },
     {
-      id: "aao-ii-ed-ht-reg", label: "NORRE TAA regression, height model", status: "caution",
+      id: "aao-ii-ed-ht-reg", label: "NORRE TAA regression, height model", status: "suppressed",
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "linear", intercept: 2.4,
@@ -356,7 +358,7 @@ export default {
       stats: { r2: 0.29 },
     },
     {
-      id: "sov-sax-mean-ed-bsa-reg", label: "NORRE SV regression, BSA model", status: "ok",
+      id: "sov-sax-mean-ed-bsa-reg", label: "NORRE SV regression, BSA model", status: "suppressed",
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole",
         view: "parasternal short axis", sinus: "mean of three" },
       mean: {
@@ -373,7 +375,7 @@ export default {
       stats: { r2: 0.259 },
     },
     {
-      id: "aao-ii-ed-bsa-reg", label: "NORRE TAA regression, BSA model", status: "ok",
+      id: "aao-ii-ed-bsa-reg", label: "NORRE TAA regression, BSA model", status: "suppressed",
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: {
         type: "linear", intercept: 16.07,
@@ -425,7 +427,7 @@ export default {
       id: "regression-no-sd",
       appliesTo: ["sov-sax-mean-ed-ht-reg", "aao-ii-ed-ht-reg", "sov-sax-mean-ed-bsa-reg", "aao-ii-ed-bsa-reg"],
       severity: "info",
-      text: "No residual SD is published for the regressions (adjusted R² 0.26 to 0.30 only), so they give percent of predicted but no z-score.",
+      text: "Not shown on the site. No residual SD is published for the regressions (adjusted R² 0.26 to 0.30 only), so they have no normal range; the site uses only models whose paper gives one. Kept here as transcribed.",
     },
     {
       id: "regression-rounding",

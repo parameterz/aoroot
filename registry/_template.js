@@ -13,6 +13,13 @@
 //  5. Intervals are HALF-OPEN everywhere: [min, max). Use null for open ends.
 //  6. IDs are permanent. They appear in shared URLs and report text. Never
 //     rename one; retire it with status: "suppressed" instead.
+//  7. No range, no model. A model is used only if the paper gives a spread:
+//     an SD/SEE, a CV, or a published limit (ULN or percentile) from which the SD
+//     can be backed out with `fromLimits` — the latter only when a normal
+//     distribution looks reasonable (e.g. mean ≈ median, SDs agree within
+//     rounding); say how that was checked in a note. Equations with no spread
+//     (mean-only) are left out, or suppressed in an entry already reviewed.
+//     The validator enforces this. (Decided 2026-11-14.)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** @type {any} */  // later: import('../lib/schema.js').Reference for editor autocomplete
@@ -122,9 +129,12 @@ export default {
       //   cv          { value }                 SD = value × mean (constant CV)
       //   linear / table                        same shapes as mean
       //   fromLimits  { uln: <mean-like spec>, z: 1.96 }
-      //               for papers that publish only a ULN; SD = (ULN − mean) / z
+      //               for papers that publish only a ULN; SD = (ULN − mean) / z.
+      //               z = 1.96 for a 97.5th percentile / mean + 1.96 SD,
+      //               z = 1.645 for a 95th percentile, z = 2 for mean + 2 SD.
       // Optional variants: alternative values the UI can toggle, each tied to a note.
-      // sd may be null for a mean-only model: % predicted is still shown, z is not.
+      // sd is REQUIRED (rule 7). Only `dist: "ratio"` takes its spread from `ratio`
+      // instead, and a suppressed model may keep sd: null.
       // % predicted = observed / predicted median, for EVERY model (exp(μ) for lognormal).
       sd: {
         type: "constant",

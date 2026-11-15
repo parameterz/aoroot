@@ -1,18 +1,19 @@
 // @ts-check
 // Muraru 2014: ascending aorta (root, STJ, tubular) by leading-edge AND inner-edge
 // conventions in 218 healthy Caucasian volunteers (Padua).
-// Transcribed as published from Tables 2 and 4.
+// Transcribed as published from Table 2.
 //
-// Two kinds of model, end-diastole only (the paper's reference values are end-diastolic):
-//  1. Table 2: median (IQR) and 95th percentile of diameter/BSA and diameter/height,
-//     by sex, both conventions. Predicted = median ratio × body size. The SD is backed
-//     out of the printed 95th percentile: (P95 − median) / 1.645, scaled the same way.
-//     All values are printed as integers, so these models are `caution`.
-//  2. Table 4: age + sex + BSA regressions, both conventions. No residual SD is
-//     published, so these are mean-only: % predicted, no z-score.
+// End-diastole only (the paper's reference values are end-diastolic).
+// Table 2: median (IQR) and 95th percentile of diameter/BSA and diameter/height, by sex,
+// both conventions. Predicted = median ratio × body size. The SD is backed out of the
+// printed 95th percentile: (P95 − median) / 1.645, scaled the same way (rule 7; normality
+// checked against Tables 3 and 5, see note normality-check). All values are printed as
+// integers, so these models are `caution`.
 //
-// Model IDs: <site>-<ll|ii>-ed-<ht|bsa>, and <site>-<ll|ii>-ed-bsa-reg (same scheme as NORRE).
-// Not used: Table 2 absolute (mm) values (sex only, no age or body size); Table 5 systolic
+// Model IDs: <site>-<ll|ii>-ed-<ht|bsa> (same scheme as NORRE).
+// Not used: Table 4 regressions (age, sex, BSA): no residual SD, so no normal range
+// (rule 7; drafted in 0.1.0, removed in 0.2.0); Table 2 absolute (mm) values (sex only,
+// no age or body size); Table 5 systolic
 // means (pooled mean ± SD only); the height-and-weight models in the Supplementary data
 // (not in the project).
 
@@ -21,9 +22,10 @@ export default {
   schema: 1,
   id: "muraru2014",
   label: "Muraru 2014",
-  entryVersion: "0.1.0",
+  entryVersion: "0.2.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Tables 2 and 4)" },
+    { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Removed the 6 Table 4 regressions: no published SD (site rule 7, no range, no model). Added the normality check and 95th-percentile paper tests. Table 2 models unchanged." },
   ],
 
   citation: {
@@ -146,100 +148,6 @@ export default {
       dist: "normal", validity: { age: [18, 80] },
     },
 
-    // ── Table 4: age + sex + BSA regressions (mm), mean-only ──
-    // Sex coding is not stated ("a dummy variable"); men = 1, women = 0 reproduces the
-    // Table 2 medians at the Table 1 group means (tests 1–2). Phase is not stated in the
-    // table; the predictions at the group means match end-diastole (Table 5), not end-systole.
-    {
-      id: "sov-ii-ed-bsa-reg", label: "Muraru 2014 aortic root I–I end-diastole, regression", status: "ok",
-      measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", phaseNote: "Not stated for Table 4; end-diastole inferred", view: "parasternal long axis", viewNote: "Aortic root at the sinuses of Valsalva" },
-      mean: {
-        type: "linear", intercept: 8.1,
-        terms: [
-          { var: "sex", coding: { male: 1, female: 0 }, coef: 1.5 },
-          { var: "age", coef: 0.11 },
-          { var: "bsa_dubois", coef: 8.7 },
-        ],
-        source: "Table 4 (root, inner edge)",
-      },
-      sd: null, dist: "normal", validity: { age: [18, 80] },
-      stats: { r2: 0.48, n: 218 },
-    },
-    {
-      id: "stj-ii-ed-bsa-reg", label: "Muraru 2014 STJ I–I end-diastole, regression", status: "ok",
-      measurement: { site: "stj", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", phaseNote: "Not stated for Table 4; end-diastole inferred", view: "parasternal long axis" },
-      mean: {
-        type: "linear", intercept: 7.1,
-        terms: [
-          { var: "sex", coding: { male: 1, female: 0 }, coef: 0.8 },
-          { var: "age", coef: 0.09 },
-          { var: "bsa_dubois", coef: 8.3 },
-        ],
-        source: "Table 4 (STJ, inner edge)",
-      },
-      sd: null, dist: "normal", validity: { age: [18, 80] },
-      stats: { r2: 0.46, n: 218 },
-    },
-    {
-      id: "aao-ii-ed-bsa-reg", label: "Muraru 2014 tubular aorta I–I end-diastole, regression", status: "ok",
-      measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", phaseNote: "Not stated for Table 4; end-diastole inferred", view: "parasternal long axis", viewNote: "Proximal tubular ascending aorta, 1 cm from the STJ" },
-      mean: {
-        type: "linear", intercept: 2.1,
-        terms: [
-          { var: "sex", coding: { male: 1, female: 0 }, coef: -0.9 },
-          { var: "age", coef: 0.15 },
-          { var: "bsa_dubois", coef: 10.5 },
-        ],
-        source: "Table 4 (Asc Ao, inner edge)",
-      },
-      sd: null, dist: "normal", validity: { age: [18, 80] },
-      stats: { r2: 0.51, n: 218 },
-    },
-    {
-      id: "sov-ll-ed-bsa-reg", label: "Muraru 2014 aortic root L–L end-diastole, regression", status: "ok",
-      measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", phaseNote: "Not stated for Table 4; end-diastole inferred", view: "parasternal long axis", viewNote: "Aortic root at the sinuses of Valsalva" },
-      mean: {
-        type: "linear", intercept: 7.8,
-        terms: [
-          { var: "sex", coding: { male: 1, female: 0 }, coef: 1.5 },
-          { var: "age", coef: 0.13 },
-          { var: "bsa_dubois", coef: 9.9 },
-        ],
-        source: "Table 4 (root, leading edge)",
-      },
-      sd: null, dist: "normal", validity: { age: [18, 80] },
-      stats: { r2: 0.52, n: 218 },
-    },
-    {
-      id: "stj-ll-ed-bsa-reg", label: "Muraru 2014 STJ L–L end-diastole, regression", status: "ok",
-      measurement: { site: "stj", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", phaseNote: "Not stated for Table 4; end-diastole inferred", view: "parasternal long axis" },
-      mean: {
-        type: "linear", intercept: 7.4,
-        terms: [
-          { var: "sex", coding: { male: 1, female: 0 }, coef: 1.0 },
-          { var: "age", coef: 0.11 },
-          { var: "bsa_dubois", coef: 9.1 },
-        ],
-        source: "Table 4 (STJ, leading edge)",
-      },
-      sd: null, dist: "normal", validity: { age: [18, 80] },
-      stats: { r2: 0.52, n: 218 },
-    },
-    {
-      id: "aao-ll-ed-bsa-reg", label: "Muraru 2014 tubular aorta L–L end-diastole, regression", status: "ok",
-      measurement: { site: "aao", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", phaseNote: "Not stated for Table 4; end-diastole inferred", view: "parasternal long axis", viewNote: "Proximal tubular ascending aorta, 1 cm from the STJ" },
-      mean: {
-        type: "linear", intercept: 4.6,
-        terms: [
-          { var: "sex", coding: { male: 1, female: 0 }, coef: -0.3 },
-          { var: "age", coef: 0.16 },
-          { var: "bsa_dubois", coef: 10.0 },
-        ],
-        source: "Table 4 (Asc Ao, leading edge)",
-      },
-      sd: null, dist: "normal", validity: { age: [18, 80] },
-      stats: { r2: 0.55, n: 218 },
-    },
   ],
 
   definitions: {
@@ -259,7 +167,13 @@ export default {
       id: "integer-rounding",
       appliesTo: { match: "-ed-(ht|bsa)$" },
       severity: "important",
-      text: "Every Table 2 value is printed as a whole number (e.g. 17 mm/m², upper limit 20). Rounding alone moves the predicted value by up to about ±3% and the SD by up to about ±25%, so z-scores from these models are approximate. The regressions (Table 4) are more precise for the predicted value but have no SD.",
+      text: "Every Table 2 value is printed as a whole number (e.g. 17 mm/m², upper limit 20). Rounding alone moves the predicted value by up to about ±3% and the SD by up to about ±25%, so z-scores from these models are approximate.",
+    },
+    {
+      id: "normality-check",
+      appliesTo: { match: "-ed-(ht|bsa)$" },
+      severity: "info",
+      text: "Is a normal distribution reasonable? The paper reports the pooled absolute diameters both ways (Table 3: median and 95th percentile; Table 5: mean ± SD). Mean and median agree within 1 mm at every level and convention, and the SD backed out of the 95th percentile (3.6 to 4.9 mm) agrees with the printed SD (3 to 4 mm, whole numbers) within rounding, with a slightly longer upper tail at the root. Close enough to normal to back out an SD.",
     },
     {
       id: "uln-definition",
@@ -271,7 +185,7 @@ export default {
       id: "stj-ii-bsa-uln",
       appliesTo: ["stj-ii-ed-bsa"],
       severity: "important",
-      text: "Hidden. Table 2 prints the inner-edge STJ/BSA upper limit as 28 mm/m² for both women (median 15) and men (median 14), about 8 SD above the median on the scale of every other row; probably a typesetting error (the pooled value in Table 3 is 18). Transcribed as printed and not shown. The inner-edge STJ height-indexed model and regression are unaffected.",
+      text: "Hidden. Table 2 prints the inner-edge STJ/BSA upper limit as 28 mm/m² for both women (median 15) and men (median 14), about 8 SD above the median on the scale of every other row; probably a typesetting error (the pooled value in Table 3 is 18). Transcribed as printed and not shown. The inner-edge STJ height-indexed model is unaffected.",
     },
     {
       id: "no-age-term",
@@ -286,18 +200,6 @@ export default {
       text: "Indexing to height or BSA assumes diameter is proportional to body size (exponent 1). The authors recommend the BSA-indexed, sex-specific values; height-indexed values are offered for obese patients.",
     },
     {
-      id: "regression-no-sd",
-      appliesTo: { match: "-reg$" },
-      severity: "info",
-      text: "No residual SD is published for the regressions (R² 0.46 to 0.55), so they give percent of predicted but no z-score.",
-    },
-    {
-      id: "regression-coding",
-      appliesTo: { match: "-reg$" },
-      severity: "info",
-      text: "The paper does not state how sex was coded or the cardiac phase for Table 4. Men = 1, women = 0 and end-diastole are inferred: with that coding, predictions at the Table 1 group means reproduce all twelve Table 2 medians within 1 mm, and the pooled predictions match the end-diastolic (not end-systolic) means in Table 5.",
-    },
-    {
       id: "aao-level",
       appliesTo: { match: "^aao-" },
       severity: "info",
@@ -307,7 +209,7 @@ export default {
       id: "errata",
       appliesTo: "all",
       severity: "info",
-      text: "Minor inconsistencies not affecting the values used: Table 5 gives the leading-edge end-diastolic root as 30 ± 4 mm, against medians of 30 (women) and 34 (men) in Table 2 and 31 pooled in Table 3; the abstract gives age 42 ± 15 (all 227 enrolled) and Table 1 44 ± 15 (218 analysed). The paper notes that height- and weight-based models (Supplementary data, not reviewed here) did not improve on BSA.",
+      text: "Minor inconsistencies not affecting the values used: Table 4 (regressions, not used here) does not state the sex coding or cardiac phase; Table 5 gives the leading-edge end-diastolic root as 30 ± 4 mm, against medians of 30 (women) and 34 (men) in Table 2 and 31 pooled in Table 3; the abstract gives age 42 ± 15 (all 227 enrolled) and Table 1 44 ± 15 (218 analysed). The paper notes that height- and weight-based models (Supplementary data, not reviewed here) did not improve on BSA.",
     },
     {
       id: "population",
@@ -319,22 +221,24 @@ export default {
 
   tests: [
     {
-      kind: "paper", source: "Table 1 women (45 y, 164 cm, 61 kg) → Table 2 women medians: root 28 / 30, STJ 25 / 27, tubular 26 / 29 mm (inner / leading edge); prediction at the group means ≈ group median",
-      input: { sex: "female", age: 45, height_cm: 164, weight_kg: 61 },
-      expect: {
-        "sov-ii-ed-bsa-reg": { pred: 28 }, "stj-ii-ed-bsa-reg": { pred: 25 }, "aao-ii-ed-bsa-reg": { pred: 26 },
-        "sov-ll-ed-bsa-reg": { pred: 30 }, "stj-ll-ed-bsa-reg": { pred: 27 }, "aao-ll-ed-bsa-reg": { pred: 29 },
-      },
-      tol: { pred: 1.0 },
+      kind: "paper", source: "Table 2 women, tubular/BSA, inner edge: median 16, upper limit 19 mm/m²; at BSA 1.6221 → 25.953 and 30.819 mm",
+      input: { sex: "female", age: 65, height_cm: 160, weight_kg: 60 },
+      ulnZ: 1.645,
+      expect: { "aao-ii-ed-bsa": { pred: 25.953, uln: 30.819 } },
+      tol: { pred: 0.002, uln: 0.002 },
     },
     {
-      kind: "paper", source: "Table 1 men (44 y, 177 cm, 76 kg) → Table 2 men medians: root 31 / 34, STJ 28 / 31, tubular 29 / 31 mm (inner / leading edge)",
-      input: { sex: "male", age: 44, height_cm: 177, weight_kg: 76 },
-      expect: {
-        "sov-ii-ed-bsa-reg": { pred: 31 }, "stj-ii-ed-bsa-reg": { pred: 28 }, "aao-ii-ed-bsa-reg": { pred: 29 },
-        "sov-ll-ed-bsa-reg": { pred: 34 }, "stj-ll-ed-bsa-reg": { pred: 31 }, "aao-ll-ed-bsa-reg": { pred: 31 },
-      },
-      tol: { pred: 1.0 },
+      kind: "paper", source: "Table 2 women, sinotubular junction/height, leading edge: median 17, upper limit 19 mm/m; at 1.60 m → 27.2 and 30.4 mm",
+      input: { sex: "female", age: 50, height_cm: 160, weight_kg: 60 },
+      ulnZ: 1.645,
+      expect: { "stj-ll-ed-ht": { pred: 27.2, uln: 30.4 } },
+    },
+    {
+      kind: "paper", source: "Table 2 men, aortic root/BSA, inner edge: median 16, upper limit 19 mm/m²; at BSA 1.8481 → 29.570 and 35.114 mm",
+      input: { sex: "male", age: 40, height_cm: 175, weight_kg: 70 },
+      ulnZ: 1.645,
+      expect: { "sov-ii-ed-bsa": { pred: 29.570, uln: 35.114 } },
+      tol: { pred: 0.002, uln: 0.002 },
     },
     {
       kind: "paper", source: "Table 2 men, aortic root/height, leading edge: median 19, upper limit 24 mm/m; at 1.75 m → 33.25 and 42.0 mm",
@@ -350,13 +254,6 @@ export default {
       tol: { pred: 0.002, uln: 0.002 },
     },
     {
-      kind: "arithmetic", source: "Hand calculation (Python), 2026-11-14: 4.6 − 0.3 + 0.16 × 40 + 10.0 × 1.8481",
-      input: { sex: "male", age: 40, height_cm: 175, weight_kg: 70 },
-      y: { aao: 36 },
-      expect: { "aao-ll-ed-bsa-reg": { pred: 29.181, pctPred: 123.4 } },
-      tol: { pred: 0.002 },
-    },
-    {
       kind: "arithmetic", source: "Hand calculation (Python), 2026-11-14: 19 × 1.75 + 1.96 × (24 − 19)/1.645 × 1.75 (site default limit)",
       input: { sex: "male", age: 40, height_cm: 175, weight_kg: 70 },
       expect: { "sov-ll-ed-ht": { uln: 43.676 } },
@@ -368,6 +265,6 @@ export default {
     status: "draft",
     reviewedBy: null,
     date: null,
-    against: "Eur Heart J Cardiovasc Imaging 2014;15:415-422 (online 4 October 2013): Tables 1, 2, 4 and 5",
+    against: "Eur Heart J Cardiovasc Imaging 2014;15:415-422 (online 4 October 2013): Tables 1, 2, 3 and 5",
   },
 };
