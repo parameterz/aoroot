@@ -11,6 +11,8 @@
 //     Mean = printed fit line; SD backed out of the printed ULN line.
 //
 // Model IDs: <site>-<abs|bsa|ht>-<18to40|41to65|over65>, and sov-fig-<bsa|ht>-<group>.
+// The absolute (abs) models are suppressed since 0.3.0 (Dan, 2026-11-15: the site moves
+// beyond absolute values); kept as transcribed so their IDs and tests stay valid.
 // Age groups use completed years: 18–40 → [18, 41), 41–65 → [41, 66), >65 → [66, ∞).
 
 /** @type {any} */
@@ -18,10 +20,11 @@ export default {
   schema: 1,
   id: "patel2022",
   label: "WASE (Patel 2022)",
-  entryVersion: "0.2.0",
+  entryVersion: "0.3.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Table 3; Figures 2 and 3)" },
     { version: "0.2.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 33 of 33 models, all tests passing; agrees with values and notes" },
+    { version: "0.3.0", date: "2026-11-15", by: "Claude", change: "Suppressed the 9 absolute (mm) Table 3 models at Dan's request: the site moves beyond absolute values. BSA- and height-indexed models and the nomograms unchanged; coefficients kept as transcribed." },
   ],
 
   citation: {
@@ -57,7 +60,7 @@ export default {
 
     // ── Table 3: annulus (I–I mid-systole), mean ± SD by age group and sex ──
     {
-      id: "annulus-abs-18to40", label: "WASE annulus, absolute, 18–40 y", status: "ok",
+      id: "annulus-abs-18to40", label: "WASE annulus, absolute, 18–40 y", status: "suppressed",
       when: { age: [18, 41] },
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "inner", phase: "mid-systole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 21.5, female: 19.5 }, source: "Table 3 (annulus, mm)" },
@@ -65,7 +68,7 @@ export default {
       dist: "normal", validity: { age: [18, null] },
     },
     {
-      id: "annulus-abs-41to65", label: "WASE annulus, absolute, 41–65 y", status: "ok",
+      id: "annulus-abs-41to65", label: "WASE annulus, absolute, 41–65 y", status: "suppressed",
       when: { age: [41, 66] },
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "inner", phase: "mid-systole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 21.2, female: 19.5 }, source: "Table 3 (annulus, mm)" },
@@ -73,7 +76,7 @@ export default {
       dist: "normal", validity: { age: [18, null] },
     },
     {
-      id: "annulus-abs-over65", label: "WASE annulus, absolute, >65 y", status: "ok",
+      id: "annulus-abs-over65", label: "WASE annulus, absolute, >65 y", status: "suppressed",
       when: { age: [66, null] },
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "inner", phase: "mid-systole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 20.7, female: 19.4 }, source: "Table 3 (annulus, mm)" },
@@ -131,7 +134,7 @@ export default {
 
     // ── Table 3: SoV (L–L end-diastole), mean ± SD by age group and sex ──
     {
-      id: "sov-abs-18to40", label: "WASE SoV, absolute, 18–40 y", status: "ok",
+      id: "sov-abs-18to40", label: "WASE SoV, absolute, 18–40 y", status: "suppressed",
       when: { age: [18, 41] },
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 31.2, female: 28.1 }, source: "Table 3 (SoV, mm)" },
@@ -139,7 +142,7 @@ export default {
       dist: "normal", validity: { age: [18, null] },
     },
     {
-      id: "sov-abs-41to65", label: "WASE SoV, absolute, 41–65 y", status: "ok",
+      id: "sov-abs-41to65", label: "WASE SoV, absolute, 41–65 y", status: "suppressed",
       when: { age: [41, 66] },
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 32.8, female: 29.8 }, source: "Table 3 (SoV, mm)" },
@@ -147,7 +150,7 @@ export default {
       dist: "normal", validity: { age: [18, null] },
     },
     {
-      id: "sov-abs-over65", label: "WASE SoV, absolute, >65 y", status: "ok",
+      id: "sov-abs-over65", label: "WASE SoV, absolute, >65 y", status: "suppressed",
       when: { age: [66, null] },
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 33.1, female: 31.1 }, source: "Table 3 (SoV, mm)" },
@@ -205,7 +208,7 @@ export default {
 
     // ── Table 3: STJ (L–L end-diastole), mean ± SD by age group and sex ──
     {
-      id: "stj-abs-18to40", label: "WASE STJ, absolute, 18–40 y", status: "ok",
+      id: "stj-abs-18to40", label: "WASE STJ, absolute, 18–40 y", status: "suppressed",
       when: { age: [18, 41] },
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 26.7, female: 24.4 }, source: "Table 3 (STJ, mm)" },
@@ -213,7 +216,7 @@ export default {
       dist: "normal", validity: { age: [18, null] },
     },
     {
-      id: "stj-abs-41to65", label: "WASE STJ, absolute, 41–65 y", status: "ok",
+      id: "stj-abs-41to65", label: "WASE STJ, absolute, 41–65 y", status: "suppressed",
       when: { age: [41, 66] },
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 28.4, female: 26.0 }, source: "Table 3 (STJ, mm)" },
@@ -221,7 +224,7 @@ export default {
       dist: "normal", validity: { age: [18, null] },
     },
     {
-      id: "stj-abs-over65", label: "WASE STJ, absolute, >65 y", status: "ok",
+      id: "stj-abs-over65", label: "WASE STJ, absolute, >65 y", status: "suppressed",
       when: { age: [66, null] },
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 28.6, female: 26.7 }, source: "Table 3 (STJ, mm)" },
@@ -341,6 +344,12 @@ export default {
   },
 
   notes: [
+    {
+      id: "abs-suppressed",
+      appliesTo: { match: "-abs-" },
+      severity: "info",
+      text: "Hidden. Table 3 also gives absolute diameters (mm) by sex and age group, with no body-size term. They are transcribed but not shown: the site uses only references that account for body size.",
+    },
     {
       id: "uln-definition",
       appliesTo: { match: "-(abs|bsa|ht)-" },

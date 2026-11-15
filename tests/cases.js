@@ -76,7 +76,7 @@ export function runAll() {
     ["mirea2013", "sov", undefined, []],
     ["mirea2013", "aao", II_ED, ["aao-bsa-40to49"]],
     ["mirea2013", "annulus", II_ED, ["annulus-bsa-40to49"]],
-    ["patel2022", "sov", undefined, ["sov-abs-18to40", "sov-bsa-18to40", "sov-ht-18to40", "sov-fig-bsa-18to40", "sov-fig-ht-18to40"]],
+    ["patel2022", "sov", undefined, ["sov-bsa-18to40", "sov-ht-18to40", "sov-fig-bsa-18to40", "sov-fig-ht-18to40"]],
   ];
   for (const [refId, site, conv, want] of expectations) {
     const ref = registry.find((r) => r.id === refId);
