@@ -15,6 +15,9 @@ math. Per-reference change history lives in each registry entry's `changelog`.
   build step, no dependencies. The goal is no tech stack to migrate ever again.
 - **Domain:** `aoroot.parameterz.com`, pointed at GitHub Pages. The old App
   Engine site had no meaningful inbound links, so there are no redirects.
+  `404.html` (root-absolute paths, so it only styles correctly on the custom
+  domain) catches everything else and sends any `/devereux...` URL to the
+  `devereux/` stub, which points to the calculator and the Devereux entry.
 - **Credit:** author name linked to LinkedIn on the page, plus a citation for
   every reference.
 
