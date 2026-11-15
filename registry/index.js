@@ -8,5 +8,6 @@ import campens2014 from "./campens2014.js";
 import mirea2013 from "./mirea2013.js";
 import muraru2014 from "./muraru2014.js";
 import lang2015 from "./lang2015.js";
+import carrero2025 from "./carrero2025.js";
 
-export default [devereux2012, mirea2013, campens2014, muraru2014, lang2015, saura2017, patel2022, yao2026];
+export default [devereux2012, mirea2013, campens2014, muraru2014, lang2015, saura2017, patel2022, carrero2025, yao2026];
