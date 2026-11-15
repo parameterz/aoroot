@@ -101,6 +101,7 @@ function renderRefs() {
           <dt>Exclusion</dt><dd>${esc(p.exclusion)}</dd>
           <dt>Source</dt><dd>${esc(p.source)}</dd>
           <dt>Checked against</dt><dd>${esc(v.against ?? "—")}${v.reviewedBy ? ` · reviewed by ${esc(v.reviewedBy)}, ${esc(v.date)}` : ""}</dd>
+          ${v.summary ? `<dt>Review</dt><dd>${esc(v.summary)}</dd>` : ""}
         </dl>
       </div>
       <h3 class="sub3">Models <span class="small muted">(${ref.models.length})</span></h3>

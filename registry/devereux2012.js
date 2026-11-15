@@ -7,7 +7,7 @@ export default {
   schema: 1,
   id: "devereux2012",
   label: "Devereux 2012",
-  entryVersion: "0.3.3",
+  entryVersion: "0.4.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Ported to schema 1; annulus status caution; height SEE variant 'consistency-corrected'" },
@@ -15,6 +15,7 @@ export default {
     { version: "0.3.1", date: "2026-11-14", by: "Claude", change: "Age coefficients entered per decade as printed in Tables 1 and 2 (was per year, from the abstract); results unchanged. Raised in Dan's review." },
     { version: "0.3.2", date: "2026-11-14", by: "Claude", change: "Annulus SEEs from Table 2 (BSA 0.070, height 0.113) instead of the text, per Dan's review; legacy-code tests now compare the annulus ULN too" },
     { version: "0.3.3", date: "2026-11-14", by: "Claude", change: "Annulus 'consistency-corrected' SD option (0.18 cm); published Table 2 values stay the default" },
+    { version: "0.4.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 4 of 4 models, all tests passing; agrees with notes and values" },
   ],
 
   citation: {
@@ -293,9 +294,10 @@ export default {
   ],
 
   verification: {
-    status: "draft",
-    reviewedBy: null,
-    date: null,
+    status: "reviewed",
+    reviewedBy: "Dan Dyar",
+    date: "2026-11-15",
     against: "Published Am J Cardiol version: abstract, Table 1, Table 2, Methods",
+    summary: "4 of 4 models checked against the paper; 14/14 tests passing (8 independent, 6 arithmetic). Agrees with notes and values.",
   },
 };
