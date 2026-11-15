@@ -3,6 +3,7 @@
 // Fixed seeds per row, so redraws (unit switch, what-if) don't make the lines wobble.
 
 import rough from "../vendor/rough.esm.js";
+import { CHIP_TEXT } from "../lib/describe.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
 
@@ -31,21 +32,72 @@ function niceDomain(values, minSpan) {
   return { lo, hi, step };
 }
 
+/** Width of a text string in this SVG (falls back to an estimate when it can't be measured). */
+function textWidth(svg, str, cls) {
+  const t = el("text", { class: cls, x: -9999, y: -9999 }, str);
+  svg.appendChild(t);
+  let w = 0;
+  try { w = t.getComputedTextLength(); } catch { /* not rendered */ }
+  t.remove();
+  return w || str.length * (cls.includes("ref") ? 7.4 : 6.2);
+}
+
 /**
- * Percent-of-predicted card: one row per model, shared axis.
- * rows: [{ label, sub, pct, lo, hi, outside }]   (lo/hi = normal range as % of predicted; null = mean-only)
+ * Component chips for one row, left to right from x (vertical centre cy).
+ * comps: componentsOf(model); extrap: chip keys whose input is outside the study's range.
+ * Returns the width used. With draw = false, only measures.
+ */
+function drawChips(svg, parent, x, cy, comps, extrap = [], draw = true) {
+  const chips = [];
+  for (const k of comps.size) chips.push({ text: (comps.ratio ? "÷" : "") + CHIP_TEXT[k], cls: "chip", key: k });
+  if (comps.age) chips.push(comps.age.kind === "eq"
+    ? { text: "age", cls: "chip age", key: "age" }
+    : { text: `age ${comps.age.text}`, cls: "chip band", key: "age" });
+  // An input outside the study's range with no chip of its own (e.g. age validity on a ratio model).
+  for (const k of extrap) if (!chips.some((c) => c.key === k)) chips.push({ text: `${CHIP_TEXT[k] ?? k}?`, cls: "chip", key: k, extraOnly: true });
+  if (comps.tag) chips.push({ text: comps.tag, cls: "chiptag" });
+  let cx = x;
+  for (const c of chips) {
+    const tw = textWidth(svg, c.text, "chiptxt");
+    const tag = c.cls === "chiptag";
+    const w = tag ? tw + 2 : tw + 10;
+    if (draw) {
+      const g = el("g", { class: c.cls + (c.key && extrap.includes(c.key) ? " warn" : "") });
+      if (!tag) g.appendChild(el("rect", { x: cx, y: cy - 8, width: w, height: 16, rx: 4 }));
+      g.appendChild(el("text", { x: cx + (tag ? 1 : 5), y: cy + 4, class: "chiptxt" }, c.text));
+      if (c.key && extrap.includes(c.key)) g.appendChild(el("title", {}, `This patient is outside the study's ${c.key === "ht" ? "height" : c.key === "wt" ? "weight" : c.key === "bsa" ? "BSA" : "age"} range`));
+      parent.appendChild(g);
+    }
+    cx += w + 4;
+  }
+  return cx - x - (chips.length ? 4 : 0);
+}
+
+/**
+ * Percent-of-predicted card: one row per model, shared axis, grouped by reference.
+ * rows: [{ ref, groupStart, comps, extrap, title, pct, lo, hi, outside, extrapolated, dim }]
+ *   ref: reference name, shown on the group's first row only; comps: componentsOf(model);
+ *   lo/hi: normal range as % of predicted (null = no published range); dim: filtered out.
  */
 export function drawPctCard(svg, rows) {
   // Draw at the element's real width so text stays a fixed size; narrow screens put
-  // each label above its line instead of to the left.
+  // the reference and chips above each line instead of to the left.
   const W = Math.max(320, Math.round(svg.getBoundingClientRect().width) || 760);
   const narrow = W < 600;
-  const rowH = narrow ? 44 : 34, top = narrow ? 6 : 10, labelW = narrow ? 12 : 300, padR = narrow ? 16 : 28;
+  svg.setAttribute("viewBox", `0 0 ${W} 100`);
+  svg.replaceChildren();
+
+  const refW = Math.max(0, ...rows.map((r) => (r.ref ? textWidth(svg, r.ref, "lbl ref") : 0)));
+  const chipsW = Math.max(0, ...rows.map((r) => drawChips(svg, svg, 0, 0, r.comps, r.extrap, false)));
+  const chipX = refW + 12;
+  const rowH = narrow ? 44 : 32, top = narrow ? 6 : 12, padR = narrow ? 16 : 28;
+  const labelW = narrow ? 12 : chipX + chipsW + 22;
+  const groupGap = 6;
+  const groups = rows.filter((r, i) => r.groupStart && i > 0).length;
   const axisGap = 10, axisH = 36;
-  const plotBottom = top + rows.length * rowH;
+  const plotBottom = top + rows.length * rowH + groups * groupGap;
   const H = plotBottom + axisGap + axisH;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  svg.replaceChildren();
 
   const vals = rows.flatMap((r) => [r.lo, r.hi, r.pct]).filter((v) => v != null);
   const { lo, hi, step } = niceDomain(vals, 30);
@@ -58,37 +110,52 @@ export function drawPctCard(svg, rows) {
     put(svg, "g-rule", R.line(X(100), top - 4, X(100), plotBottom + 2,
       { stroke: "currentColor", strokeWidth: 0.9, roughness: 0.5, strokeLineDash: [5, 5], seed: 3 }));
 
+  let y = top;
   rows.forEach((r, i) => {
-    const cy = top + i * rowH + (narrow ? 30 : rowH / 2);
+    if (r.groupStart && i > 0) {
+      y += groupGap;
+      put(svg, "g-sep", R.line(0, y - groupGap / 2 - 1, W - padR, y - groupGap / 2 - 1,
+        { stroke: "currentColor", strokeWidth: 0.6, roughness: 0.4, seed: 70 + i }));
+    }
+    const cy = y + (narrow ? 30 : rowH / 2);
+    y += rowH;
     const seed = 17 + i * 13;
+    const g = el("g", { class: "prow" + (r.dim ? " dim" : "") });
+    svg.appendChild(g);
+    if (r.title) g.appendChild(el("title", {}, r.title));
+    // Invisible hit area so the whole row shows the tooltip.
+    g.appendChild(el("rect", { x: 0, y: cy - rowH / 2, width: W, height: rowH, class: "hit" }));
+
     if (narrow) {
-      const t = el("text", { x: labelW, y: cy - 14, class: "lbl" }, r.label);
-      if (r.sub) t.appendChild(el("tspan", { class: "sub", dx: 6 }, r.sub));
-      svg.appendChild(t);
+      let x = labelW;
+      if (r.ref) { g.appendChild(el("text", { x, y: cy - 14, class: "lbl ref" }, r.ref)); x += textWidth(svg, r.ref, "lbl ref") + 8; }
+      drawChips(svg, g, x, cy - 18, r.comps, r.extrap);
     } else {
-      svg.appendChild(el("text", { x: labelW - 14, y: cy - 1, "text-anchor": "end", class: "lbl" }, r.label));
-      if (r.sub) svg.appendChild(el("text", { x: labelW - 14, y: cy + 12, "text-anchor": "end", class: "lbl sub" }, r.sub));
+      if (r.ref) g.appendChild(el("text", { x: 0, y: cy + 4.5, class: "lbl ref" }, r.ref));
+      drawChips(svg, g, chipX, cy, r.comps, r.extrap);
     }
 
     // Normal range: hatched band.
     if (r.lo != null && r.hi != null) {
-      put(svg, "g-band", R.rectangle(X(r.lo), cy - 8, X(r.hi) - X(r.lo), 16,
+      put(g, "g-band", R.rectangle(X(r.lo), cy - 8, X(r.hi) - X(r.lo), 16,
         { stroke: "none", fill: "currentColor", fillStyle: "hachure", hachureGap: 3.5, fillWeight: 1.1, hachureAngle: -41, roughness: 1.3, seed }));
       for (const v of [r.lo, r.hi])
-        put(svg, "g-rule", R.line(X(v), cy - 9, X(v), cy + 9, { stroke: "currentColor", strokeWidth: 1.1, roughness: 0.6, seed: seed + 2 }));
+        put(g, "g-rule", R.line(X(v), cy - 9, X(v), cy + 9, { stroke: "currentColor", strokeWidth: 1.1, roughness: 0.6, seed: seed + 2 }));
     } else {
-      svg.appendChild(el("text", { x: X(hi) - 2, y: cy + 4, "text-anchor": "end", class: "note" }, "no published range"));
+      g.appendChild(el("text", { x: X(hi) - 2, y: cy + 4, "text-anchor": "end", class: "note" }, "no published range"));
     }
     if (narrow)
-      put(svg, "g-rule", R.line(X(100), cy - 11, X(100), cy + 11,
+      put(g, "g-rule", R.line(X(100), cy - 11, X(100), cy + 11,
         { stroke: "currentColor", strokeWidth: 0.9, roughness: 0.4, strokeLineDash: [4, 4], seed: seed + 9 }));
     // Baseline.
-    put(svg, "g-rule", R.line(X(lo), cy, X(hi), cy, { stroke: "currentColor", strokeWidth: 0.7, roughness: 0.8, bowing: 1, seed: seed + 1 }));
-    // Patient.
+    put(g, "g-rule", R.line(X(lo), cy, X(hi), cy, { stroke: "currentColor", strokeWidth: 0.7, roughness: 0.8, bowing: 1, seed: seed + 1 }));
+    // Patient: hollow when an input is outside the study's range.
     if (r.pct != null) {
-      const g = put(svg, "g-dot" + (r.outside ? " out" : ""), R.circle(X(Math.min(Math.max(r.pct, lo), hi)), cy, 12,
-        { stroke: "currentColor", strokeWidth: 1.4, fill: "currentColor", fillStyle: "solid", roughness: 1.1, seed: seed + 5 }));
-      g.appendChild(el("title", {}, `${r.label}: ${Math.round(r.pct)}% of predicted`));
+      const hollow = r.extrap?.length > 0;
+      put(g, "g-dot" + (r.outside ? " out" : ""), R.circle(X(Math.min(Math.max(r.pct, lo), hi)), cy, hollow ? 11 : 12,
+        hollow
+          ? { stroke: "currentColor", strokeWidth: 2.2, roughness: 1, seed: seed + 5 }
+          : { stroke: "currentColor", strokeWidth: 1.4, fill: "currentColor", fillStyle: "solid", roughness: 1.1, seed: seed + 5 }));
     }
   });
 
@@ -114,6 +181,8 @@ export function drawLegend(container) {
     rc.rectangle(2, 2, 22, 12, { stroke: "none", fill: "currentColor", fillStyle: "hachure", hachureGap: 3, hachureAngle: -41, seed: 9 })));
   container.querySelector("[data-lg=dot]")?.replaceChildren(mk("g-dot", (rc) =>
     rc.circle(13, 8, 11, { stroke: "currentColor", fill: "currentColor", fillStyle: "solid", roughness: 1.1, seed: 7 })));
+  container.querySelector("[data-lg=hollow]")?.replaceChildren(mk("g-dot", (rc) =>
+    rc.circle(13, 8, 10, { stroke: "currentColor", strokeWidth: 2, roughness: 1, seed: 6 })));
   container.querySelector("[data-lg=out]")?.replaceChildren(mk("g-dot out", (rc) =>
     rc.circle(13, 8, 11, { stroke: "currentColor", fill: "currentColor", fillStyle: "solid", roughness: 1.1, seed: 8 })));
 }

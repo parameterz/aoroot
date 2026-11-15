@@ -6,11 +6,11 @@ import registry from "../registry/index.js";
 import { score, notesFor } from "../lib/evaluator.js";
 import { covariates } from "../lib/covariates.js";
 import { SITES, modelsForSite, applyChoices } from "../lib/conventions.js";
-import { decodeHash, encodeHash, convFromCode, picksFor, sdVariantFor, DEFAULT_CONV } from "../lib/state.js";
+import { decodeHash, encodeHash, convFromCode, picksFor, sdVariantFor, DEFAULT_CONV, FILTER_KINDS } from "../lib/state.js";
 import { drawPctCard, drawLegend, drawCurveCard, drawThresholdCard } from "./cards.js";
 import { THRESHOLDS, CMR_NORMAL, cmrThreshold, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
 import { curveSeries, SWEEP } from "./curve.js";
-import { SITE_NAMES, scalingOf, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine, indexedReportLine } from "../lib/describe.js";
+import { SITE_NAMES, scalingOf, adjustsFor, componentsOf, passesFilter, CHIP_OF, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine, indexedReportLine } from "../lib/describe.js";
 
 export const VERSION = "v0.1";
 const CONV_LABEL = { "ll-ed": "leading edge, end-diastole", "ll-ms": "leading edge, mid-systole",
@@ -105,10 +105,14 @@ function render() {
             notes.map((n) => `<li class="${n.severity}">${esc(n.text)}</li>`).join("") +
             `<li>${esc(ref.citation.authors.split(",")[0])} et al. ${esc(ref.citation.journal)} ${ref.citation.year}. <a href="https://doi.org/${esc(ref.citation.doi)}">doi:${esc(ref.citation.doi)}</a> · <a href="references.html#${esc(ref.id)}">equations and sources</a></li></ul></details>`
           : "";
+        const comps = componentsOf(model);
         pctRows.push({
-          label: `${ref.label.split(" (")[0]} · ${shortLabel(ref, model)}`.replace(/ · (SoV|SV|TAA|VAJ|annulus|ascending aorta|OMAM [^,]+),? ?/, " · ").replace(/ · $/, ""),
-          sub: scalingOf(model),
+          ref: i === 0 ? ref.label : "", groupStart: i === 0, comps,
+          extrap: [...new Set(r.extrapolated.map(CHIP_OF).filter(Boolean))],
+          title: `${ref.label} · ${shortLabel(ref, model)}\n${scalingOf(model)}; adjusts for ${adjustsFor(model)}` +
+            (r.pctPred == null ? "" : `\n${fmtPct(r.pctPred)} of predicted` + (r.llnPct == null ? "" : ` (normal ${fmtPct(r.llnPct)}–${fmtPct(r.ulnPct)})`)),
           pct: r.pctPred, lo: r.llnPct, hi: r.ulnPct, outside: !!r.outside,
+          dim: !passesFilter(comps, view.filter),
         });
         const key = `${site}|${ref.id}|${model.id}`;
         const line = reportLine(site, y, r, ref, model, units);
@@ -139,7 +143,16 @@ function render() {
           <span class="handnote">same ${fmtObserved(y, units)}, as a share of what each reference expects</span></div>
         <svg class="pct" id="pct_${site}" role="img" aria-label="Percent of predicted for each reference; values are in the table above"></svg>
         <div class="legend"><span><span data-lg="band"></span> normal range</span><span><span data-lg="dot"></span> this patient</span>
-          <span><span data-lg="out"></span> outside the normal range</span><span class="muted">dashed line: 100% of predicted</span></div>
+          <span><span data-lg="out"></span> outside the normal range</span>${pctRows.some((r) => r.extrap.length) ? `<span><span data-lg="hollow"></span> outside the study's range</span>` : ""}
+          <span class="muted">dashed line: 100% of predicted</span></div>
+        <div class="legend chips-key"><span><span class="chipkey">BSA</span> in the equation</span><span><span class="chipkey">÷BSA</span> simple ratio</span>
+          <span><span class="chipkey age">age</span> age in the equation</span><span><span class="chipkey band">age 41–65</span> age group used</span>
+          ${pctRows.some((r) => r.extrap.length) ? `<span><span class="chipkey warn">ht</span> patient outside the study's range</span>` : ""}<span class="muted">no age chip: age ignored · sex not shown (nearly all are sex-specific)</span></div>
+        <div class="pfilter"><span>Show only references using</span>
+          ${[["age", "age"], ["ht", "ht"], ["wt", "wt"], ["bsa", "BSA"]].map(([k, t]) => `<button type="button" class="pf" data-pf="${k}" aria-pressed="${view.filter.includes(k)}">${t}</button>`).join("")}
+          <span class="sep"></span>
+          ${[["ratio", "÷ ratios"], ["eq", "fitted equations"]].map(([k, t]) => `<button type="button" class="pf" data-pf="${k}" aria-pressed="${view.filter.includes(k)}">${t}</button>`).join("")}
+          <span class="count">${view.filter.length ? `showing ${pctRows.filter((r) => !r.dim).length} of ${pctRows.length}` : ""}</span></div>
       </section>`);
     const svg = document.getElementById(`pct_${site}`);
     if (pctRows.length) { drawPctCard(svg, pctRows); drawLegend(svg.parentElement); }
@@ -172,6 +185,12 @@ function render() {
     if (state.y[site] == null || !p.sex) continue;
     renderThresholds(main, site, state.y[site], units, p, reportRows);
   }
+  for (const b of main.querySelectorAll("button[data-pf]"))
+    b.onclick = () => setHash((st) => {
+      const k = b.dataset.pf, f = st.view.filter;
+      if (f.includes(k)) st.view.filter = f.filter((x) => x !== k);
+      else st.view.filter = [...f.filter((x) => !(FILTER_KINDS.includes(k) && FILTER_KINDS.includes(x))), k];
+    });
   for (const r of main.querySelectorAll("input[name^=cx_]"))
     r.onchange = () => { curveView.xVar = r.value; render(); };
   for (const b of main.querySelectorAll("button.key"))

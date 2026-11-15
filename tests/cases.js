@@ -7,7 +7,7 @@ import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
 import { modelsForSite, applyChoices } from "../lib/conventions.js";
 import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight, cmrThreshold } from "../lib/thresholds.js";
-import { scalingOf, adjustsFor, reportLine, shortLabel, indexedReportLine } from "../lib/describe.js";
+import { scalingOf, adjustsFor, reportLine, shortLabel, indexedReportLine, componentsOf, passesFilter, ageBandText } from "../lib/describe.js";
 import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor } from "../lib/state.js";
 
 const TOL = { pred: 0.001, z: 0.01, pctPred: 0.1, uln: 0.01, lln: 0.01, covariates: 0.001 };
@@ -129,6 +129,27 @@ export function runAll() {
       const [, model] = get(r, m);
       check(`describe: ${r}/${m}`, scalingOf(model) === sc && adjustsFor(model) === adj, `${scalingOf(model)} | ${adjustsFor(model)}`);
     }
+    // Component chips (percent-of-predicted card), derived from the equations.
+    const chipCases = [
+      ["saura2017", "sov-ll-ed-ht", { size: ["ht"], ratio: true, age: null, tag: null }],
+      ["devereux2012", "sov-bsa", { size: ["bsa"], ratio: false, age: { kind: "eq" }, tag: null }],
+      ["campens2014", "sov-dubois", { size: ["bsa"], ratio: false, age: { kind: "eq" }, tag: null }],
+      ["patel2022", "sov-bsa-41to65", { size: ["bsa"], ratio: true, age: { kind: "band", text: "41–65" }, tag: null }],
+      ["patel2022", "sov-fig-ht-over65", { size: ["ht"], ratio: false, age: { kind: "band", text: ">65" }, tag: "nomogram" }],
+      ["yao2026", "sov-combined", { size: ["ht", "wt"], ratio: false, age: { kind: "eq" }, tag: "allometric" }],
+    ];
+    for (const [r, m, want] of chipCases) {
+      const [, model] = get(r, m);
+      const got = componentsOf(model);
+      check(`chips: ${r}/${m}`, JSON.stringify(got) === JSON.stringify(want), JSON.stringify(got));
+    }
+    check("chips: age band text", ageBandText([18, 41]) === "18–40" && ageBandText([66, null]) === ">65");
+    const wase = componentsOf(get("patel2022", "sov-bsa-41to65")[1]), dev = componentsOf(get("devereux2012", "sov-bsa")[1]);
+    check("filter: age + ratio keeps WASE ratio, drops Devereux", passesFilter(wase, ["age", "ratio"]) && !passesFilter(dev, ["age", "ratio"]));
+    check("filter: eq keeps Devereux; ht drops it", passesFilter(dev, ["eq", "bsa"]) && !passesFilter(dev, ["ht"]) && passesFilter(dev, []));
+    const fh = decodeHash("#sex=m&f=age,ratio,eq,zz");
+    check("hash: filter decoded, one kind only, bad token reported", JSON.stringify(fh.state.view.filter) === '["age","ratio"]' && fh.errors.length === 1, JSON.stringify(fh));
+    check("hash: filter encoded", encodeHash(fh.state).endsWith("&f=age,ratio"), encodeHash(fh.state));
     const [ref, model] = get("saura2017", "sov-ll-ed-ht");
     const p = { sex: "female", age: 70, height_cm: 155, weight_kg: 55 };
     const line = reportLine("sov", 36, score(ref, model, p, 36), ref, model, "mm");
