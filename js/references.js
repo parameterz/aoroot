@@ -4,7 +4,8 @@
 
 import registry from "../registry/index.js";
 import { notesFor } from "../lib/evaluator.js";
-import { runRefTests } from "../tests/cases.js";
+import { runRefTests, runAll } from "../tests/cases.js";
+import { THRESHOLDS, CMR_NORMAL } from "../lib/thresholds.js";
 import { meanText, spreadText, isSexKeyed, SITE_NAMES } from "../lib/describe.js";
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -123,6 +124,60 @@ function renderRefs() {
   }).join("");
 }
 
+// ── Thresholds and context (lib/thresholds.js), reviewed like a reference ──
+const THR = { id: "thresholds", label: "Thresholds and context (lib/thresholds.js)" };
+const thrItems = [...THRESHOLDS, CMR_NORMAL];
+const thrTests = runAll().filter((t) => /^(thresholds|CMR normal):/.test(t.name));
+function thrValue(t) {
+  if (t.kind === "normal") return `women ${t.upper.female.perYear} × age + ${t.upper.female.intercept}; men ${t.upper.male.perYear} × age + ${t.upper.male.intercept} (cm²/m, ${t.index})`;
+  return `${t.index} ≥ ${t.value}${t.index === "AHI" ? " cm/m" : t.index === "CSAH" ? " cm²/m" : " mm"}`;
+}
+function renderThresholdSection() {
+  const r = rv(THR.id);
+  const rows = thrItems.map((t) => {
+    const on = r.checked.includes(t.id);
+    const restrict = t.when ? (t.when.sex ? `${t.when.sex === "female" ? "women" : "men"} only` : `height < ${t.when.height_cm[1]} cm`) : t.validity ? `age ${t.validity.age[0]}–${t.validity.age[1]} (fades outside)` : "";
+    return `<tr class="${on ? "checked" : ""}">
+      <td><input type="checkbox" data-ref="${THR.id}" data-model="${esc(t.id)}" aria-label="Checked ${esc(t.id)}" ${on ? "checked" : ""}></td>
+      <td><span class="kind ${t.kind}">${t.kind === "normal" ? "CMR normal" : t.kind}</span> <b>${esc(t.label)}</b><div class="model mono">${esc(t.id)}</div>${restrict ? `<div><span class="flag draft">${esc(restrict)}</span></div>` : ""}</td>
+      <td><div class="eq">${esc(thrValue(t))}</div><div class="model">${esc(t.detail ?? t.measurement)}</div></td>
+      <td class="model">${esc(t.source)}</td></tr>`;
+  }).join("");
+  document.getElementById("refs").insertAdjacentHTML("beforeend", `
+    <section class="refsec" id="${THR.id}">
+      <h2>Thresholds and context <span class="small muted mono">lib/thresholds.js</span></h2>
+      <p class="small" style="max-width:75ch">Not normal ranges: the risk and surgical thresholds shown on the risk-thresholds card (Desai 2026 and the guidelines as Desai cites them), plus the CMR upper normal from Tavolinejad 2025 shown on the ascending aorta card for context. AHI = D (cm) ÷ height (m); CSAH = π(D/2)² (cm²) ÷ height (m).</p>
+      <div class="card"><dl class="facts">
+        <dt>Desai 2026</dt><dd>Desai MY et al. JACC Adv 2026;5:102859. <a href="https://doi.org/10.1016/j.jacadv.2026.102859">doi:10.1016/j.jacadv.2026.102859</a></dd>
+        <dt>Tavolinejad 2025</dt><dd>${esc(CMR_NORMAL.citation)} <a href="https://doi.org/${CMR_NORMAL.doi}">doi:${CMR_NORMAL.doi}</a></dd>
+        <dt>CMR measurement</dt><dd>${esc(CMR_NORMAL.measurement)}</dd>
+        <dt>CMR population</dt><dd>${esc(CMR_NORMAL.population)}</dd>
+      </dl></div>
+      <h3 class="sub3">Thresholds <span class="small muted">(${thrItems.length})</span></h3>
+      <div class="tablewrap"><table class="models">
+        <thead><tr><th>✓</th><th>Threshold</th><th>Value, detail</th><th>Source</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>
+      <h3 class="sub3">Tests <span class="small muted">(${thrTests.filter((t) => t.pass).length}/${thrTests.length} passing, run in your browser just now)</span></h3>
+      <div class="tablewrap"><table class="tests"><tbody>${thrTests.map((t) => `<tr><td class="${t.pass ? "ok" : "bad"}">${t.pass ? "✓" : "✗"}</td><td><span class="kind">arithmetic</span></td><td>${esc(t.name)}${t.detail !== "" ? `<div class="model mono">got ${esc(t.detail)}</div>` : ""}</td></tr>`).join("")}</tbody></table></div>
+      <div class="card review">
+        <label>Your comments on the thresholds<textarea data-comments="${THR.id}" rows="3">${esc(r.comments)}</textarea></label>
+        <div class="actions"><button type="button" class="primary" data-copythr="1">Copy review summary</button><span class="small muted" data-copied="${THR.id}"></span></div>
+      </div>
+    </section>`);
+}
+function thrSummaryText() {
+  const r = rv(THR.id);
+  const done = thrItems.filter((t) => r.checked.includes(t.id)).map((t) => t.id);
+  const not = thrItems.filter((t) => !r.checked.includes(t.id)).map((t) => t.id);
+  return [
+    `aoroot review: ${THR.label}, ${today()}`,
+    `Thresholds checked against the papers: ${done.length} of ${thrItems.length}.`,
+    not.length ? `Not checked: ${not.join(", ")}.` : "Not checked: none.",
+    `Tests: ${thrTests.filter((t) => t.pass).length}/${thrTests.length} passing (arithmetic).`,
+    `Comments: ${r.comments.trim() || "none"}`,
+  ].join("\n");
+}
+
 // ── Review summary text ─────────────────────────────────────────────────────
 function summaryText(ref) {
   const r = rv(ref.id), tr = testResults[ref.id];
@@ -162,6 +217,7 @@ function wire() {
   main.addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b) return;
+    if (b.dataset.copythr) return copy(thrSummaryText(), main.querySelector(`[data-copied="${THR.id}"]`));
     const ref = registry.find((r) => r.id === (b.dataset.copy ?? b.dataset.checkall ?? b.dataset.clearall));
     if (b.dataset.copy) copy(summaryText(ref), main.querySelector(`[data-copied="${ref.id}"]`));
     if (b.dataset.checkall || b.dataset.clearall) {
@@ -178,10 +234,11 @@ function wire() {
     catch { pre.textContent = "Could not load the file."; }
   }, true);
   document.getElementById("copyAll").onclick = () =>
-    copy(registry.map(summaryText).join("\n\n"), document.getElementById("copiedAll"));
+    copy([...registry.map(summaryText), thrSummaryText()].join("\n\n"), document.getElementById("copiedAll"));
 }
 
 renderSummary();
 renderRefs();
+renderThresholdSection();
 wire();
 if (location.hash) document.querySelector(location.hash)?.scrollIntoView();

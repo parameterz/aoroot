@@ -6,7 +6,7 @@ import { score } from "../lib/evaluator.js";
 import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
 import { modelsForSite, applyChoices } from "../lib/conventions.js";
-import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
+import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight, cmrThreshold } from "../lib/thresholds.js";
 import { scalingOf, adjustsFor, reportLine, shortLabel, indexedReportLine } from "../lib/describe.js";
 import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor } from "../lib/state.js";
 
@@ -144,6 +144,18 @@ export function runAll() {
     check("thresholds: 3.21 vs 10 at 124 cm", near(crossoverHeight(3.21, 10), 123.6, 0.1), crossoverHeight(3.21, 10).toFixed(1));
     check("thresholds: women-only and short-only rules", !appliesTo(T("desai-women"), { sex: "male", height_cm: 180 }) &&
       appliesTo(T("eacts-50"), { sex: "male", height_cm: 165 }) && !appliesTo(T("eacts-50"), { sex: "male", height_cm: 169 }));
+
+    // Tavolinejad 2025 CMR upper normal (hand-calculated): man 55 y: 0.04×55 + 3.74 = 5.94 cm²/m;
+    // at 1.78 m area 10.573 cm² → D = 2·√(10.573/π) = 36.69 mm. Woman 40 y: 0.0327×40 + 3.68 = 4.988;
+    // at 1.60 m area 7.981 cm² → 31.88 mm.
+    const cm = cmrThreshold({ sex: "male", age: 55, height_cm: 178 });
+    const cf = cmrThreshold({ sex: "female", age: 40, height_cm: 160 });
+    check("CMR normal: man 55 y = 5.94 cm²/m", near(cm.value, 5.94, 1e-9), cm.value);
+    check("CMR normal: man 55 y, 178 cm = 36.69 mm", near(diameterAt(cm, 178), 36.69), diameterAt(cm, 178).toFixed(3));
+    check("CMR normal: woman 40 y = 4.988 cm²/m", near(cf.value, 4.988, 1e-9), cf.value);
+    check("CMR normal: woman 40 y, 160 cm = 31.88 mm", near(diameterAt(cf, 160), 31.88), diameterAt(cf, 160).toFixed(3));
+    check("CMR normal: extrapolated outside 40–70 y", cmrThreshold({ sex: "male", age: 30, height_cm: 180 }).extrapolated &&
+      !cm.extrapolated && cmrThreshold({ sex: "female", age: 75, height_cm: 160 }).extrapolated);
   }
 
   // Indexed report line (terse).

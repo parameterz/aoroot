@@ -244,19 +244,20 @@ export function drawThresholdCard(svg, { lines, envelope, patient, cross, xRange
   lines.forEach((l, i) => {
     if (l.pts.length < 2) return;
     const pts = l.pts.map((p) => [X(p.x), Y(p.y)]);
-    const g = el("g", { class: l.kind === "risk" ? "g-risk" : "g-surg" });
+    const G = { risk: "g-risk", normal: "g-norm" };
+    const g = el("g", { class: (G[l.kind] ?? "g-surg") + (l.faded ? " faded" : "") });
     g.appendChild(el("path", { d: "M" + pts.map((q) => q.map((v) => v.toFixed(1)).join(",")).join("L"),
-      class: "thr" + (l.kind === "risk" ? " risk" : "") }));
+      class: "thr" + (l.kind === "risk" ? " risk" : l.kind === "normal" ? " norm" : "") }));
     g.appendChild(el("title", {}, l.label));
     svg.appendChild(g);
     const last = l.pts.at(-1);
-    labels.push({ y: Y(last.y), x: X(last.x), text: narrow ? (l.short ?? l.label) : l.label, kind: l.kind });
+    labels.push({ y: Y(last.y), x: X(last.x), text: narrow ? (l.short ?? l.label) : l.label, kind: l.kind, faded: l.faded });
   });
   labels.sort((a, b) => a.y - b.y);
   const gap = narrow ? 13 : 15;
   for (let i = 1; i < labels.length; i++) if (labels[i].y - labels[i - 1].y < gap) labels[i].y = labels[i - 1].y + gap;
   for (const lb of labels)
-    svg.appendChild(el("text", { x: W - m.r + 6, y: lb.y + 4, class: "thrlbl " + (lb.kind === "risk" ? "risk" : "surg") + (narrow ? " small" : "") }, lb.text));
+    svg.appendChild(el("text", { x: W - m.r + 6, y: lb.y + 4, class: "thrlbl " + ({ risk: "risk", normal: "norm" }[lb.kind] ?? "surg") + (narrow ? " small" : "") + (lb.faded ? " faded" : "") }, lb.text));
 
   // Where Desai's two thresholds agree.
   if (cross && cross.x > x0 && cross.x < x1) {

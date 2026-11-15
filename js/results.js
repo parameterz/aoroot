@@ -8,7 +8,7 @@ import { covariates } from "../lib/covariates.js";
 import { SITES, modelsForSite, applyChoices } from "../lib/conventions.js";
 import { decodeHash, encodeHash, convFromCode, picksFor, sdVariantFor, DEFAULT_CONV } from "../lib/state.js";
 import { drawPctCard, drawLegend, drawCurveCard, drawThresholdCard } from "./cards.js";
-import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
+import { THRESHOLDS, CMR_NORMAL, cmrThreshold, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
 import { curveSeries, SWEEP } from "./curve.js";
 import { SITE_NAMES, scalingOf, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine, indexedReportLine } from "../lib/describe.js";
 
@@ -192,13 +192,21 @@ function renderThresholds(main, site, y, units, p, reportRows) {
   reportRows.push({ key, line: indexedReportLine(site, y, p, units) });
   const h = p.height_cm;
   const ahi = indexValue("AHI", y, h), csah = indexValue("CSAH", y, h);
-  const ths = THRESHOLDS.filter((t) => appliesTo(t, p)).map((t) => ({ ...t, d: diameterAt(t, h) })).sort((a, b) => a.d - b.d);
+  const cmr = CMR_NORMAL.sites.includes(site) ? cmrThreshold(p) : null;
+  const ths = [...THRESHOLDS.filter((t) => appliesTo(t, p)), ...(cmr ? [cmr] : [])]
+    .map((t) => ({ ...t, d: diameterAt(t, h) })).sort((a, b) => a.d - b.d);
+  const KIND = { risk: "risk", surgery: "surgery", normal: "CMR normal" };
   const fmtIdx = (t) => (t.index === "AHI" ? `${ahi.toFixed(2)} cm/m` : t.index === "CSAH" ? `${csah.toFixed(1)} cm²/m` : fmtObserved(y, units));
   const rows = ths.map((t) => {
     const reached = y >= t.d - 1e-9;
     const gap = t.d - y;
+    if (t.kind === "normal") return `<tr class="normal${reached ? " above" : ""}">
+      <td><span class="kind normal">${KIND.normal}</span> ${esc(t.label)} (${t.value.toFixed(2)} cm²/m)<div class="model">Tavolinejad 2025, UK Biobank, lumen${t.extrapolated ? ` · <span class="flag draft">age outside 40–70: extrapolated</span>` : ""}</div></td>
+      <td class="num">${fmtLen(t.d, units)}</td>
+      <td class="num">${fmtIdx(t)}</td>
+      <td>${reached ? "<b>above</b>" : `${fmtLen(gap, units)} below`}</td></tr>`;
     return `<tr class="${reached ? "reached" : ""}">
-      <td><span class="kind ${t.kind}">${t.kind === "risk" ? "risk" : "surgery"}</span> ${esc(t.label)}<div class="model">${esc(t.source)}</div></td>
+      <td><span class="kind ${t.kind}">${KIND[t.kind]}</span> ${esc(t.label)}<div class="model">${esc(t.source)}</div></td>
       <td class="num">${fmtLen(t.d, units)}</td>
       <td class="num">${fmtIdx(t)}</td>
       <td>${reached ? "<b>reached</b>" : `${fmtLen(gap, units)} below`}</td></tr>`;
@@ -212,6 +220,11 @@ function renderThresholds(main, site, y, units, p, reportRows) {
     for (let x = xRange[0]; x <= xRange[1]; x += 1) if (appliesTo(t, { ...p, height_cm: x })) pts.push({ x, y: diameterAt(t, x) });
     return { id: t.id, kind: t.kind, label: t.label, short: t.short, pts };
   });
+  if (cmr) {
+    const pts = [];
+    for (let x = xRange[0]; x <= xRange[1]; x += 1) pts.push({ x, y: diameterAt(cmr, x) });
+    lines.push({ id: cmr.id, kind: "normal", label: `CMR normal, ${Math.round(p.age)} y`, short: "CMR normal", pts, faded: cmr.extrapolated });
+  }
   const series = curveSeries(registry, state, site, "height_cm");
   const envelope = [];
   for (let i = 0; i <= xRange[1] - xRange[0]; i++) {
@@ -231,7 +244,7 @@ function renderThresholds(main, site, y, units, p, reportRows) {
         <thead><tr><th>Threshold</th><th class="num">As diameter at this height</th><th class="num">This patient</th><th>Status</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
       <svg class="curve" id="thr_${site}" role="img" aria-label="Threshold diameters against height with this patient; values are in the table above"></svg>
-      <div class="legend"><span><span class="sw risk"></span> risk association (Desai 2026)</span><span><span class="sw surg"></span> guideline surgical threshold</span>
+      <div class="legend"><span><span class="sw risk"></span> risk association (Desai 2026)</span><span><span class="sw surg"></span> guideline surgical threshold</span>${cmr ? `<span><span class="sw norm"></span> CMR upper normal for age and sex (Tavolinejad 2025)</span>` : ""}
         <span><span data-lg="band"></span> upper limits of normal across the references</span><span><span data-lg="dot"></span> this patient</span></div>
       <details class="notes"><summary>About these thresholds</summary><ul>
         <li class="important">These are not normal ranges. Desai 2026 studied 8,887 unoperated patients with a 4–5 cm ascending aorta (mean age 68, 79% men, echo L–L end-diastole) and all-cause death; AHI and CSAH separated risk only modestly (AUC 0.56 and 0.54).</li>
@@ -239,6 +252,9 @@ function renderThresholds(main, site, y, units, p, reportRows) {
         <li>CSAH from an echo diameter assumes a circular lumen (π·r²); Desai notes it may be inaccurate with an eccentric root.</li>
         <li>AHI rises in proportion to height (D ∝ H) and CSAH with its square root (D ∝ √H). Desai's two thresholds give the same diameter only at ${(cx / 100).toFixed(2)} m: below that AHI ≥ 2.5 is reached first, above it CSAH ≥ 9.</li>
         <li>Guideline classes (I, IIa, IIb) as cited by Desai 2026 from the 2022 ACC/AHA guideline and the 2024 EACTS/STS guideline (5.0 cm if shorter than 1.69 m). Check the guidelines themselves before acting on them.</li>
+        ${cmr ? `<li class="important">The CMR line is a normal limit, not a risk threshold, and it comes from another modality. Tavolinejad 2025 used the same index as CSAH (area ÷ height): its upper limit of normal is ${CMR_NORMAL.upper.male.perYear} × age + ${CMR_NORMAL.upper.male.intercept} cm²/m in men and ${CMR_NORMAL.upper.female.perYear} × age + ${CMR_NORMAL.upper.female.intercept} in women (97.5th percentile, ${esc(CMR_NORMAL.population)})</li>
+        <li>CMR measures the lumen (closer to echo inner edge than leading edge), takes the largest cross-section anywhere from the root to the arch apex, and gets the area from a 3-D segmentation (π·r², r = centerline-to-wall distance). The cardiac phase isn't stated in the main text. Expect an echo leading-edge diameter to run a little larger than the CMR lumen for the same aorta.${cmr.extrapolated ? " This patient's age is outside 40–70, so the CMR line is extrapolated (shown faded)." : ""}</li>
+        <li>For a measured CMR value, see <a href="https://parameterz.github.io/aao-cmr">parameterz.github.io/aao-cmr</a>. ${esc(CMR_NORMAL.citation)} <a href="https://doi.org/${CMR_NORMAL.doi}">doi:${CMR_NORMAL.doi}</a></li>` : ""}
         <li>Desai MY et al. JACC Adv 2026;5:102859. <a href="https://doi.org/10.1016/j.jacadv.2026.102859">doi:10.1016/j.jacadv.2026.102859</a></li></ul></details>
     </section>`);
   const svg = document.getElementById(`thr_${site}`);

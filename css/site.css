@@ -178,6 +178,11 @@ svg path.thr.risk { stroke-dasharray: 8 5; }
 svg text.thrlbl { font-family: var(--f-hand); font-size: 16px; font-weight: 700; }
 svg text.thrlbl.risk, svg text.note-risk { fill: var(--warn); }
 svg text.thrlbl.surg { fill: var(--crit); }
+.g-norm { color: var(--accent); } svg path.thr.norm { stroke-dasharray: 2 5; stroke-width: 2.4; }
+svg text.thrlbl.norm { fill: var(--accent); } svg .faded { opacity: .45; }
+.thresholds tr.normal.above td { background: var(--accent-soft, rgba(43, 93, 138, .08)); }
+.kind.normal { background: var(--accent-soft, rgba(43, 93, 138, .1)); color: var(--accent); }
+.sw.norm { border-color: var(--accent); border-top-style: dotted; }
 .thresholds tr.reached td { background: var(--crit-soft); }
 .kind { display: inline-block; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; border-radius: 4px; padding: 0 6px; margin-right: 4px; }
 .kind.risk { background: var(--warn-soft); color: var(--warn); } .kind.surgery { background: var(--crit-soft); color: var(--crit); }
@@ -210,7 +215,7 @@ table.models input[type=checkbox] { width: 18px; height: 18px; }
 .ok { color: var(--ok); font-weight: 600; } .bad { color: var(--crit); font-weight: 600; }
 .flag.ok { background: var(--ok-soft); color: var(--ok); }
 table.tests td:first-child { width: 28px; font-size: 18px; }
-.kind:not(.risk):not(.surgery) { background: var(--bg); color: var(--muted); }
+.kind:not(.risk):not(.surgery):not(.normal) { background: var(--bg); color: var(--muted); }
 ul.notelist { font-size: 13.5px; max-width: 90ch; padding-left: 20px; }
 ul.notelist li { margin: 4px 0; }
 ul.notelist li.important::marker { color: var(--warn); }
