@@ -12,7 +12,8 @@ import { THRESHOLDS, CMR_NORMAL, cmrThreshold, indexValue, diameterAt, appliesTo
 import { curveSeries, SWEEP } from "./curve.js";
 import { SITE_NAMES, scalingOf, adjustsFor, componentsOf, passesFilter, CHIP_OF, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine, indexedReportLine } from "../lib/describe.js";
 
-export const VERSION = "v0.1";
+import { VERSION } from "../lib/version.js";
+export { VERSION };
 const CONV_LABEL = { "ll-ed": "leading edge, end-diastole", "ll-ms": "leading edge, mid-systole",
                      "ii-ed": "inner edge, end-diastole", "ii-ms": "inner edge, mid-systole" };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -122,11 +123,11 @@ function render() {
           <td>${refCell}</td>
           <td><div>${esc(shortLabel(ref, model))}</div>
               <div class="model">${esc(scalingOf(model))}</div>${choice}${variant}${flags ? "<div>" + flags + "</div>" : ""}${notesHtml}</td>
-          <td class="num">${fmtLen(r.pred, units)}</td>
-          <td class="num">${r.lln == null ? "—" : `${fmtLen(r.lln, units).replace(/ (mm|cm)$/, "")}–${fmtLen(r.uln, units)}`}</td>
-          <td class="num z${zHi}">${fmtZ(r.z)}</td>
-          <td class="num">${fmtPct(r.pctPred)}</td>
-          <td><input type="checkbox" data-report="${esc(key)}" aria-label="Include in report" ${checked.has(key) ? "checked" : ""}></td>
+          <td class="num" data-label="Predicted">${fmtLen(r.pred, units)}</td>
+          <td class="num" data-label="Normal range">${r.lln == null ? "—" : `${fmtLen(r.lln, units).replace(/ (mm|cm)$/, "")}–${fmtLen(r.uln, units)}`}</td>
+          <td class="num z${zHi}" data-label="z">${fmtZ(r.z)}</td>
+          <td class="num" data-label="% pred">${fmtPct(r.pctPred)}</td>
+          <td class="rep" data-label="Report"><input type="checkbox" data-report="${esc(key)}" aria-label="Include in report" ${checked.has(key) ? "checked" : ""}></td>
         </tr>`;
       });
     }
@@ -134,7 +135,7 @@ function render() {
     const convNote = convCode === DEFAULT_CONV[site] ? "" : ` <span class="flag">non-default</span>`;
     main.insertAdjacentHTML("beforeend", `
       <h2>${SITE_NAMES[site]} ${fmtObserved(y, units)} <span class="muted small">(${CONV_LABEL[convCode]})</span>${convNote}</h2>
-      <div class="tablewrap"><table>
+      <div class="tablewrap"><table class="cmp">
         <thead><tr><th>Reference</th><th>Model</th><th class="num">Predicted</th><th class="num">Normal range</th>
           <th class="num">z</th><th class="num">% pred</th><th>Report</th></tr></thead>
         <tbody>${rows}</tbody></table></div>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About and how to cite · Adult aortic root reference values · aoroot</title>
+<meta name="description" content="What the aoroot calculator does, how its echocardiographic aortic root references were chosen and checked, who curates it, and how to cite it.">
+<meta name="author" content="Dan Dyar">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="aoroot">
+<meta property="og:title" content="Adult aortic root reference values: about and how to cite">
+<meta property="og:description" content="What the aoroot calculator does, how its echocardiographic aortic root references were chosen and checked, who curates it, and how to cite it.">
+<link rel="canonical" href="https://aoroot.parameterz.com/about.html">
+<meta property="og:url" content="https://aoroot.parameterz.com/about.html">
+<meta property="og:image" content="https://aoroot.parameterz.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="One aortic root, several references: sketched chart of a measurement as percent of predicted across six references.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/newsreader-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+<header>
+  <div class="eyebrow">Adult echocardiography · Aortic root reference values</div>
+  <h1>About <em>aoroot</em></h1>
+  <p class="lede">One adult aortic root or ascending aorta measurement, scored against several published echocardiographic references side by side, so the differences between references are visible rather than hidden behind a single number.</p>
+  <p class="small"><a href="index.html">← Calculator</a> · <a href="#cite">How to cite</a></p>
+</header>
+
+<main class="prose">
+<section class="card">
+  <div class="card-head"><h3>What it does</h3></div>
+  <p>Enter sex, age, height and (optionally) weight, then any of the four standard sites: annulus, sinuses of Valsalva, sinotubular junction and ascending aorta.
+    Each reference that covers that site and measurement convention returns its predicted value, normal range, z-score and percent of predicted.
+    There is no default or "headline" reference: the references disagree, sometimes by more than a z of 1, and the comparison is the point.</p>
+  <p>Charts show the same patient as a share of what each reference expects, and how each reference's prediction changes with height or age.
+    Risk and surgical thresholds indexed to height (Desai 2026) are shown for context, alongside a cardiac MRI upper limit of normal (Tavolinejad 2025).</p>
+</section>
+
+<section class="card">
+  <div class="card-head"><h3>How the references were chosen</h3><span class="handnote">no range, no model</span></div>
+  <ul>
+    <li><b>A normal range is required.</b> A reference is included only if the paper gives a spread (an SD, SEE or published limit). Mean-only equations are left out, because a predicted value with no range invites misreading.
+      Where only a percentile limit is printed, the SD is backed out from it if a normal distribution looks reasonable, and that check is written in the reference's notes.</li>
+    <li><b>Body size, not size alone.</b> Sex-only absolute values are not shown; every model adjusts for body size, age or both.</li>
+    <li><b>Race and ethnicity are never an input.</b> Each study's population is described on the references page in the paper's own words.
+      Where a paper publishes separate equations by population, you can choose among them as a view option.</li>
+    <li><b>Every number is traceable.</b> Each coefficient, SD and limit is stored with the table or page it came from, checked by hand against the publication,
+      and covered by tests that reproduce values printed in the paper wherever the paper prints any.</li>
+  </ul>
+  <p class="small">See <a href="references.html">References</a> for every equation, population and note, and <a href="tests.html">Tests</a> to run the checks yourself.</p>
+</section>
+
+<section class="card">
+  <div class="card-head"><h3>What it is not</h3></div>
+  <ul>
+    <li>Adults only. Pediatric aortic z-scores use different references and are well served elsewhere.</li>
+    <li>An educational and reference tool, not a medical device. A z-score is one input to clinical judgment, not a diagnosis; check important results against the original publications.</li>
+  </ul>
+</section>
+
+<section class="card">
+  <div class="card-head"><h3>Privacy</h3></div>
+  <p>All calculation runs in your browser. Nothing you enter is stored or sent to a server; the values live only in the page's link, so sharing a link shares the values.
+    Don't enter names or other identifiers.</p>
+</section>
+
+<section class="card">
+  <div class="card-head"><h3>Who made it</h3></div>
+  <p><a href="https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/">Dan Dyar, MA, ACS, RDCS, FASE</a>, cardiac sonographer, with interests in echocardiographic reference values and body-size scaling.
+    ORCID <a href="https://orcid.org/0000-0002-2025-8944">0000-0002-2025-8944</a>.</p>
+  <p>aoroot.parameterz.com began as an aortic root calculator built on the Devereux 2012 equations. This 2026 rebuild covers adults only and compares current references.
+    The source, including every reference file, is on <a href="https://github.com/parameterz/aoroot">GitHub</a>.</p>
+</section>
+
+<section class="card" id="cite">
+  <div class="card-head"><h3>How to cite</h3><span class="handnote">cite the papers too</span></div>
+  <p>If you use aoroot in a report, talk or paper, cite the reference you relied on, since that is where the numbers come from (the "Copy for report" text names it on every line).
+    To cite the calculator itself:</p>
+  <pre class="cite-block" id="citeAma"></pre>
+  <div class="actions"><button type="button" class="primary" data-copy="citeAma">Copy citation</button><span class="small muted" data-copied="citeAma"></span></div>
+  <details class="notes"><summary>BibTeX</summary>
+    <pre class="cite-block" id="citeBib"></pre>
+    <div class="actions"><button type="button" class="secondary" data-copy="citeBib">Copy BibTeX</button><span class="small muted" data-copied="citeBib"></span></div>
+  </details>
+  <p class="small muted">The access date is today's; change it to the date you used the site.</p>
+</section>
+</main>
+
+<footer>
+  <span>Visual style after <a href="https://intro2echo.com">The Heart by Ultrasound</a>. Sketched figures drawn with rough.js (MIT). <a href="references.html">References</a> · <a href="tests.html">Tests</a>.</span>
+  <span><strong>Created by:</strong> <a href="https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/">Dan Dyar, MA, ACS, RDCS, FASE</a></span>
+</footer>
+<script type="module">
+  import { VERSION } from "./lib/version.js";
+  const now = new Date();
+  const accessed = now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  const iso = now.toISOString().slice(0, 10);
+  const title = "aoroot: adult aortic root reference values";
+  document.getElementById("citeAma").textContent =
+    `Dyar D. ${title}. Version ${VERSION}. Published 2026. Accessed ${accessed}. https://aoroot.parameterz.com`;
+  document.getElementById("citeBib").textContent =
+`@misc{dyar_aoroot,
+  author       = {Dyar, Dan},
+  title        = {{${title}}},
+  year         = {2026},
+  version      = {${VERSION}},
+  howpublished = {\\url{https://aoroot.parameterz.com}},
+  note         = {Accessed ${iso}}
+}`;
+  for (const b of document.querySelectorAll("button[data-copy]")) b.onclick = async () => {
+    const text = document.getElementById(b.dataset.copy).textContent;
+    const out = document.querySelector(`[data-copied="${b.dataset.copy}"]`);
+    try { await navigator.clipboard.writeText(text); out.textContent = "Copied."; } catch { window.prompt("Copy this text:", text); }
+    setTimeout(() => (out.textContent = ""), 2500);
+  };
+</script>
+</body>
+</html>

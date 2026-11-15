@@ -250,7 +250,33 @@ details.source summary::before { content: "→ "; }
 .review { margin-top: 16px; }
 .review textarea { width: 100%; font: 14px/1.5 var(--f-body); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px; margin-top: 6px; }
 button.small-btn { font-size: 13px; padding: 4px 10px; }
-@media (max-width: 600px) { dl.facts { grid-template-columns: 1fr; } table.models td:nth-child(4), table.models th:nth-child(4) { display: none; } }
+@media (max-width: 600px) {
+  dl.facts { grid-template-columns: 1fr; }
+  /* models and threshold tables: one block per model; source as a labelled line */
+  table.models thead { display: none; }
+  table.models, table.models tbody, table.models tr, table.models td { display: block; }
+  table.models tr { position: relative; border-bottom: 1px solid var(--rule); padding: 10px 12px; }
+  table.models td { border: none; padding: 0; }
+  table.models td + td { margin-top: 8px; }
+  table.models td.chk { position: absolute; top: 10px; right: 12px; width: auto; margin: 0; }
+  table.models tr:has(td.chk) td:nth-child(2) { padding-right: 32px; }
+  /* summary: reference name on top, the rest as labelled pairs */
+  table.stack thead { display: none; }
+  table.stack, table.stack tbody { display: block; }
+  table.stack tr { display: block; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+  table.stack td { display: block; border: none; padding: 1px 0; text-align: left; white-space: normal; }
+  table.stack td.lead { margin-bottom: 4px; }
+  table.stack td[data-label] { position: relative; padding-left: 6.5rem; }
+  table.stack td[data-label]::before { position: absolute; left: 0; top: 4px; }
+}
+/* labels shown only in stacked layouts */
+td[data-label]::before { display: none; }
+@media (max-width: 600px) {
+  table.stack td[data-label]::before, table.models td.srccol::before, table.cmp td[data-label]::before {
+    content: attr(data-label); display: block; font-family: var(--f-body); font-size: 10.5px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  table.models td.srccol::before { margin-bottom: 1px; }
+}
 
 /* Sketched charts (rough.js strokes use currentColor) */
 .g-rule { color: var(--muted); }
@@ -266,3 +292,26 @@ svg text { font-family: var(--f-hand); font-size: 15px; fill: var(--muted); }
   .msg { grid-column: 1 / -1; }
 }
 .legend.chips-key { border-top: none; padding-top: 2px; margin-top: 0; }
+
+/* Results comparison table on phones: reference and model full width, numbers in one labelled row */
+@media (max-width: 600px) {
+  table.cmp thead { display: none; }
+  table.cmp, table.cmp tbody { display: block; }
+  table.cmp tr { display: grid; grid-template-columns: auto auto auto auto auto; justify-content: space-between; gap: 4px 10px;
+    padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+  table.cmp tr.ref-start { border-top: 2px solid var(--rule); }
+  table.cmp td { border: none; padding: 0; }
+  table.cmp tr.ref-start td { border-top: none; }
+  table.cmp td:empty { display: none; }
+  table.cmp td:not([data-label]) { grid-column: 1 / -1; }
+  table.cmp td.num { text-align: left; font-size: 13px; }
+  table.cmp td.rep { text-align: center; }
+}
+
+/* About page */
+main.prose .card { margin-top: 16px; }
+main.prose .card p, main.prose .card ul { max-width: 75ch; margin: 8px 0; }
+main.prose .card ul { padding-left: 20px; }
+main.prose .card li { margin: 6px 0; }
+pre.cite-block { font: 13px/1.5 var(--f-mono); background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px;
+  white-space: pre-wrap; overflow-wrap: anywhere; margin: 8px 0; max-width: 75ch; }

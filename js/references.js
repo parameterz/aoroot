@@ -49,11 +49,11 @@ function renderSummary() {
     const sites = [...new Set(ref.models.map((m) => m.measurement.site))].map((s) => SITE_NAMES[s].replace("Sinus of Valsalva", "SoV").replace("Sinotubular junction", "STJ").replace("Ascending aorta", "AAo").replace("Aortic annulus", "annulus")).join(", ");
     const done = rv(ref.id).checked.filter((id) => ref.models.some((m) => m.id === id)).length;
     const st = ref.verification?.status ?? "draft";
-    return `<tr><td><a class="ref" href="#${ref.id}">${esc(ref.label)}</a></td><td class="num">${ref.population.n != null ? ref.population.n.toLocaleString() : "—"}</td>
-      <td>${esc(sites)}</td><td class="num">${ref.models.length}</td>
-      <td><span class="${pass === tr.length ? "ok" : "bad"}">${pass}/${tr.length} passing</span><div class="model">${kinds.map(([k, n]) => `${n} ${k}`).join(" · ")}</div></td>
-      <td><span class="flag ${st === "draft" ? "draft" : "ok"}">${esc(st)}</span></td>
-      ${REVIEW ? `<td class="num"><span id="prog_${ref.id}">${done}/${ref.models.length}</span> checked</td>` : ""}</tr>`;
+    return `<tr><td class="lead"><a class="ref" href="#${ref.id}">${esc(ref.label)}</a></td><td class="num" data-label="n">${ref.population.n != null ? ref.population.n.toLocaleString() : "—"}</td>
+      <td data-label="Sites">${esc(sites)}</td><td class="num" data-label="Models">${ref.models.length}</td>
+      <td data-label="Tests"><span class="${pass === tr.length ? "ok" : "bad"}">${pass}/${tr.length} passing</span><div class="model">${kinds.map(([k, n]) => `${n} ${k}`).join(" · ")}</div></td>
+      <td data-label="Status"><span class="flag ${st === "draft" ? "draft" : "ok"}">${esc(st)}</span></td>
+      ${REVIEW ? `<td class="num" data-label="Your review"><span id="prog_${ref.id}">${done}/${ref.models.length}</span> checked</td>` : ""}</tr>`;
   }).join("");
 }
 
@@ -72,7 +72,7 @@ function modelRow(ref, m) {
     <td><div><b>${esc(m.label)}</b></div><div class="model mono">${esc(m.id)}</div><div>${tags}</div>
       <div class="model">${esc(SITE_NAMES[m.measurement.site])} · ${esc(convText(m.measurement))}${m.measurement.edgeNote || m.measurement.viewNote ? `<br>${esc(m.measurement.edgeNote ?? m.measurement.viewNote)}` : ""}</div></td>
     <td>${eq}${sp}<div class="model">Valid: ${esc(validityText(m.validity))}</div></td>
-    <td class="model">${esc(sources(m))}</td></tr>`;
+    <td class="model srccol" data-label="Source">${esc(sources(m))}</td></tr>`;
 }
 
 function testRow(t) {
@@ -144,7 +144,7 @@ function renderThresholdSection() {
       ${REVIEW ? `<td class="chk"><input type="checkbox" data-ref="${THR.id}" data-model="${esc(t.id)}" aria-label="Checked ${esc(t.id)}" ${on ? "checked" : ""}></td>` : ""}
       <td><span class="kind ${t.kind}">${t.kind === "normal" ? "CMR normal" : t.kind}</span> <b>${esc(t.label)}</b><div class="model mono">${esc(t.id)}</div>${restrict ? `<div><span class="flag draft">${esc(restrict)}</span></div>` : ""}</td>
       <td><div class="eq">${esc(thrValue(t))}</div><div class="model">${esc(t.detail ?? t.measurement)}</div></td>
-      <td class="model">${esc(t.source)}</td></tr>`;
+      <td class="model srccol" data-label="Source">${esc(t.source)}</td></tr>`;
   }).join("");
   document.getElementById("refs").insertAdjacentHTML("beforeend", `
     <section class="refsec" id="${THR.id}">

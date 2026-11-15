@@ -47,6 +47,8 @@ results.html             comparison tables and cards
 references.html          references page for visitors (equations, sources, notes, tests)
 review.html              curator review page: same content plus ticks, comments,
                          copy-summary; unlinked, noindex (js/references.js, data-mode)
+about.html               about, reference policy, how to cite (version from lib/version.js)
+og.png                   1200×630 link-preview image; source docs/og-card.html
 tests/cases.js           shared test logic
 tests/run.js             node tests/run.js (exit code 1 on failure)
 tests.html               same tests in the browser
