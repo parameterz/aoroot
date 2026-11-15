@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>References and verification · Adult aortic root reference values · aoroot</title>
+<title>References · Adult aortic root reference values · aoroot</title>
 <meta name="description" content="Every reference equation, coefficient and normal limit the aortic root calculator uses, with the table each number came from and live tests, for checking against the original papers.">
 <meta name="author" content="Dan Dyar">
 <meta property="og:type" content="website">
@@ -20,25 +20,23 @@
   <div class="eyebrow">Adult echocardiography · Reference registry</div>
   <h1>The references, <em>as entered</em></h1>
   <p class="lede">Every equation, coefficient and limit the calculator uses, written out from the same registry files it reads, with the
-    table or page each number came from and the tests that check them. Use it to verify each reference against its publication.</p>
+    population behind each reference, the table or page each number came from, the curator's notes, and the tests that check them.</p>
   <p class="small"><a href="index.html">← Calculator</a></p>
 </header>
 
-<section class="card" id="howto">
-  <div class="card-head"><h3>How to review a reference</h3><span class="handnote">tick as you go; your ticks stay in this browser</span></div>
-  <ol class="small" style="margin:8px 0 0;padding-left:20px;max-width:75ch">
-    <li>Open the paper beside this page. For each model, compare the equation, SD and limits with the cited table or page, then tick it.</li>
-    <li>Numbers here are shown as stored, so trailing zeros drop (0.010 shows as 0.01). "Registry file as entered" shows the exact text.</li>
-    <li>Check the tests: <b>paper</b> tests reproduce values printed in the publication; <b>independent</b> ones match another implementation; <b>arithmetic</b> ones are hand calculations.</li>
-    <li>Add any comments, then "Copy review summary" and send it to be recorded. The reference's <span class="flag draft">draft</span> flag is removed once its status is set to reviewed.</li>
-  </ol>
+<section class="card" id="reading">
+  <div class="card-head"><h3>Reading this page</h3></div>
+  <ul class="small" style="margin:8px 0 0;padding-left:20px;max-width:75ch">
+    <li>Each reference lists its population, every model the calculator uses (equation, spread, valid range) and the table or page each number was taken from.</li>
+    <li><b>Status</b>: <span class="flag ok">reviewed</span> means every model was checked by hand against the publication. Numbers are shown as stored, so trailing zeros drop (0.010 shows as 0.01).</li>
+    <li><b>Tests</b> run in your browser as the page loads: <b>paper</b> tests reproduce values printed in the publication; <b>independent</b> ones match another implementation; <b>arithmetic</b> ones are hand calculations.</li>
+  </ul>
 </section>
 
 <h2>Summary</h2>
 <div class="tablewrap"><table id="summary">
-  <thead><tr><th>Reference</th><th class="num">n</th><th>Sites</th><th class="num">Models</th><th>Tests</th><th>Status</th><th>Your review</th></tr></thead>
+  <thead><tr><th>Reference</th><th class="num">n</th><th>Sites</th><th class="num">Models</th><th>Tests</th><th>Status</th></tr></thead>
   <tbody></tbody></table></div>
-<div class="actions"><button type="button" class="secondary" id="copyAll">Copy review summary (all references)</button><span class="small muted" id="copiedAll"></span></div>
 
 <main id="refs"></main>
 

@@ -1,6 +1,8 @@
-// References and verification page: everything is generated from the registry.
-// Review ticks and comments are kept in this browser only (localStorage) and
-// turned into a plain-text summary for the reviewer to send.
+// References page (references.html) and the curator's review page (review.html):
+// both generated from the registry by this one module. On review.html
+// (<body data-mode="review">) it adds the reconciliation tools: per-model ticks
+// and comments kept in this browser only (localStorage), turned into a
+// plain-text summary for the reviewer to send.
 
 import registry from "../registry/index.js";
 import { notesFor } from "../lib/evaluator.js";
@@ -9,6 +11,7 @@ import { THRESHOLDS, CMR_NORMAL } from "../lib/thresholds.js";
 import { meanText, spreadText, isSexKeyed, SITE_NAMES } from "../lib/describe.js";
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const REVIEW = document.body.dataset.mode === "review";
 const STORE = "aoroot.review.v1";
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -50,7 +53,7 @@ function renderSummary() {
       <td>${esc(sites)}</td><td class="num">${ref.models.length}</td>
       <td><span class="${pass === tr.length ? "ok" : "bad"}">${pass}/${tr.length} passing</span><div class="model">${kinds.map(([k, n]) => `${n} ${k}`).join(" · ")}</div></td>
       <td><span class="flag ${st === "draft" ? "draft" : "ok"}">${esc(st)}</span></td>
-      <td class="num"><span id="prog_${ref.id}">${done}/${ref.models.length}</span> checked</td></tr>`;
+      ${REVIEW ? `<td class="num"><span id="prog_${ref.id}">${done}/${ref.models.length}</span> checked</td>` : ""}</tr>`;
   }).join("");
 }
 
@@ -64,8 +67,8 @@ function modelRow(ref, m) {
     m.when ? `<span class="flag draft">${esc(whenText(m.when))}</span>` : "",
   ].join("");
   const isChecked = rv(ref.id).checked.includes(m.id);
-  return `<tr class="${isChecked ? "checked" : ""}">
-    <td><input type="checkbox" data-ref="${esc(ref.id)}" data-model="${esc(m.id)}" aria-label="Checked ${esc(m.id)} against the paper" ${isChecked ? "checked" : ""}></td>
+  return `<tr class="${REVIEW && isChecked ? "checked" : ""}">
+    ${REVIEW ? `<td class="chk"><input type="checkbox" data-ref="${esc(ref.id)}" data-model="${esc(m.id)}" aria-label="Checked ${esc(m.id)} against the paper" ${isChecked ? "checked" : ""}></td>` : ""}
     <td><div><b>${esc(m.label)}</b></div><div class="model mono">${esc(m.id)}</div><div>${tags}</div>
       <div class="model">${esc(SITE_NAMES[m.measurement.site])} · ${esc(convText(m.measurement))}${m.measurement.edgeNote || m.measurement.viewNote ? `<br>${esc(m.measurement.edgeNote ?? m.measurement.viewNote)}` : ""}</div></td>
     <td>${eq}${sp}<div class="model">Valid: ${esc(validityText(m.validity))}</div></td>
@@ -107,19 +110,19 @@ function renderRefs() {
       </div>
       <h3 class="sub3">Models <span class="small muted">(${ref.models.length})</span></h3>
       <div class="tablewrap"><table class="models">
-        <thead><tr><th>✓</th><th>Model</th><th>Equation, spread, valid range</th><th>Source</th></tr></thead>
+        <thead><tr>${REVIEW ? "<th>✓</th>" : ""}<th>Model</th><th>Equation, spread, valid range</th><th>Source</th></tr></thead>
         <tbody>${ref.models.map((m) => modelRow(ref, m)).join("")}</tbody></table></div>
-      <div class="actions"><button type="button" class="secondary small-btn" data-checkall="${esc(ref.id)}">Tick all</button>
-        <button type="button" class="secondary small-btn" data-clearall="${esc(ref.id)}">Clear ticks</button></div>
+      ${REVIEW ? `<div class="actions"><button type="button" class="secondary small-btn" data-checkall="${esc(ref.id)}">Tick all</button>
+        <button type="button" class="secondary small-btn" data-clearall="${esc(ref.id)}">Clear ticks</button></div>` : ""}
       <h3 class="sub3">Tests <span class="small muted">(${tr.filter((t) => t.pass).length}/${tr.length} passing, run in your browser just now)</span></h3>
       <div class="tablewrap"><table class="tests"><tbody>${tr.map(testRow).join("")}</tbody></table></div>
       <h3 class="sub3">Curator's notes</h3>
       <ul class="notelist">${notes}</ul>
       <details class="notes source"><summary>Registry file as entered (registry/${esc(ref.id)}.js)</summary><pre class="src" data-src="${esc(ref.id)}">Loading…</pre></details>
-      <div class="card review">
+      ${REVIEW ? `<div class="card review">
         <label>Your comments on ${esc(ref.label)}<textarea data-comments="${esc(ref.id)}" rows="3" placeholder="e.g. Table 2 checked; annulus SEE note agreed">${esc(rv(ref.id).comments)}</textarea></label>
         <div class="actions"><button type="button" class="primary" data-copy="${esc(ref.id)}">Copy review summary</button><span class="small muted" data-copied="${esc(ref.id)}"></span></div>
-      </div>
+      </div>` : ""}
     </section>`;
   }).join("");
 }
@@ -137,8 +140,8 @@ function renderThresholdSection() {
   const rows = thrItems.map((t) => {
     const on = r.checked.includes(t.id);
     const restrict = t.when ? (t.when.sex ? `${t.when.sex === "female" ? "women" : "men"} only` : `height < ${t.when.height_cm[1]} cm`) : t.validity ? `age ${t.validity.age[0]}–${t.validity.age[1]} (fades outside)` : "";
-    return `<tr class="${on ? "checked" : ""}">
-      <td><input type="checkbox" data-ref="${THR.id}" data-model="${esc(t.id)}" aria-label="Checked ${esc(t.id)}" ${on ? "checked" : ""}></td>
+    return `<tr class="${REVIEW && on ? "checked" : ""}">
+      ${REVIEW ? `<td class="chk"><input type="checkbox" data-ref="${THR.id}" data-model="${esc(t.id)}" aria-label="Checked ${esc(t.id)}" ${on ? "checked" : ""}></td>` : ""}
       <td><span class="kind ${t.kind}">${t.kind === "normal" ? "CMR normal" : t.kind}</span> <b>${esc(t.label)}</b><div class="model mono">${esc(t.id)}</div>${restrict ? `<div><span class="flag draft">${esc(restrict)}</span></div>` : ""}</td>
       <td><div class="eq">${esc(thrValue(t))}</div><div class="model">${esc(t.detail ?? t.measurement)}</div></td>
       <td class="model">${esc(t.source)}</td></tr>`;
@@ -155,14 +158,14 @@ function renderThresholdSection() {
       </dl></div>
       <h3 class="sub3">Thresholds <span class="small muted">(${thrItems.length})</span></h3>
       <div class="tablewrap"><table class="models">
-        <thead><tr><th>✓</th><th>Threshold</th><th>Value, detail</th><th>Source</th></tr></thead>
+        <thead><tr>${REVIEW ? "<th>✓</th>" : ""}<th>Threshold</th><th>Value, detail</th><th>Source</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
       <h3 class="sub3">Tests <span class="small muted">(${thrTests.filter((t) => t.pass).length}/${thrTests.length} passing, run in your browser just now)</span></h3>
       <div class="tablewrap"><table class="tests"><tbody>${thrTests.map((t) => `<tr><td class="${t.pass ? "ok" : "bad"}">${t.pass ? "✓" : "✗"}</td><td><span class="kind">arithmetic</span></td><td>${esc(t.name)}${t.detail !== "" ? `<div class="model mono">got ${esc(t.detail)}</div>` : ""}</td></tr>`).join("")}</tbody></table></div>
-      <div class="card review">
+      ${REVIEW ? `<div class="card review">
         <label>Your comments on the thresholds<textarea data-comments="${THR.id}" rows="3">${esc(r.comments)}</textarea></label>
         <div class="actions"><button type="button" class="primary" data-copythr="1">Copy review summary</button><span class="small muted" data-copied="${THR.id}"></span></div>
-      </div>
+      </div>` : ""}
     </section>`);
 }
 function thrSummaryText() {
@@ -200,7 +203,17 @@ async function copy(text, statusEl) {
 }
 
 // ── Wire up ─────────────────────────────────────────────────────────────────
-function wire() {
+function wireSource() {
+  // Raw registry file, fetched when opened (both pages).
+  document.getElementById("refs").addEventListener("toggle", async (e) => {
+    const pre = e.target.querySelector?.("pre[data-src]");
+    if (!e.target.open || !pre || pre.dataset.loaded) return;
+    try { pre.textContent = await (await fetch(`registry/${pre.dataset.src}.js`)).text(); pre.dataset.loaded = "1"; }
+    catch { pre.textContent = "Could not load the file."; }
+  }, true);
+}
+
+function wireReview() {
   const main = document.getElementById("refs");
   main.addEventListener("change", (e) => {
     const c = e.target;
@@ -226,13 +239,6 @@ function wire() {
       for (const c of main.querySelectorAll(`input[data-ref="${ref.id}"]`)) { c.checked = !!b.dataset.checkall; c.closest("tr").classList.toggle("checked", c.checked); }
     }
   });
-  // Raw registry file, fetched when opened.
-  main.addEventListener("toggle", async (e) => {
-    const pre = e.target.querySelector?.("pre[data-src]");
-    if (!e.target.open || !pre || pre.dataset.loaded) return;
-    try { pre.textContent = await (await fetch(`registry/${pre.dataset.src}.js`)).text(); pre.dataset.loaded = "1"; }
-    catch { pre.textContent = "Could not load the file."; }
-  }, true);
   document.getElementById("copyAll").onclick = () =>
     copy([...registry.map(summaryText), thrSummaryText()].join("\n\n"), document.getElementById("copiedAll"));
 }
@@ -240,5 +246,6 @@ function wire() {
 renderSummary();
 renderRefs();
 renderThresholdSection();
-wire();
+wireSource();
+if (REVIEW) wireReview();
 if (location.hash) document.querySelector(location.hash)?.scrollIntoView();

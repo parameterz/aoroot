@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curator review · Adult aortic root reference values · aoroot</title>
+<meta name="description" content="Every reference equation, coefficient and normal limit the aortic root calculator uses, with the table each number came from and live tests, for checking against the original papers.">
+<meta name="author" content="Dan Dyar">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="aoroot">
+<meta property="og:title" content="Adult aortic root reference values: references and verification">
+<meta property="og:description" content="Every reference equation, coefficient and normal limit the aortic root calculator uses, with the table each number came from and live tests, for checking against the original papers.">
+<link rel="preload" href="fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/newsreader-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-mode="review">
+<header>
+  <div class="eyebrow">Curator tools · Not linked from the site</div>
+  <h1>Reconcile a reference, <em>against the paper</em></h1>
+  <p class="lede">The references page plus review tools: tick each model as you check it against the publication, add comments, and copy a
+    summary to record. Use this when a reference is added or changed. Visitors see <a href="references.html">references.html</a>.</p>
+  <p class="small"><a href="index.html">← Calculator</a> · <a href="references.html">Public references page</a></p>
+</header>
+
+<section class="card" id="howto">
+  <div class="card-head"><h3>How to review a reference</h3><span class="handnote">tick as you go; your ticks stay in this browser</span></div>
+  <ol class="small" style="margin:8px 0 0;padding-left:20px;max-width:75ch">
+    <li>Open the paper beside this page. For each model, compare the equation, SD and limits with the cited table or page, then tick it.</li>
+    <li>Numbers here are shown as stored, so trailing zeros drop (0.010 shows as 0.01). "Registry file as entered" shows the exact text.</li>
+    <li>Check the tests: <b>paper</b> tests reproduce values printed in the publication; <b>independent</b> ones match another implementation; <b>arithmetic</b> ones are hand calculations.</li>
+    <li>Add any comments, then "Copy review summary" and send it to be recorded. The reference's <span class="flag draft">draft</span> flag is removed once its status is set to reviewed.</li>
+  </ol>
+</section>
+
+<h2>Summary</h2>
+<div class="tablewrap"><table id="summary">
+  <thead><tr><th>Reference</th><th class="num">n</th><th>Sites</th><th class="num">Models</th><th>Tests</th><th>Status</th><th>Your review</th></tr></thead>
+  <tbody></tbody></table></div>
+<div class="actions"><button type="button" class="secondary" id="copyAll">Copy review summary (all references)</button><span class="small muted" id="copiedAll"></span></div>
+
+<main id="refs"></main>
+
+<footer>
+  <span>Generated from the registry files in this site (<code>registry/*.js</code>); nothing here is typed separately.</span>
+  <span><strong>Created by:</strong> <a href="https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/">Dan Dyar, MA, ACS, RDCS, FASE</a></span>
+</footer>
+<script type="module" src="js/references.js"></script>
+</body>
+</html>

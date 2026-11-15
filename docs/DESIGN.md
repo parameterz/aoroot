@@ -44,7 +44,9 @@ css/site.css             hand-written CSS, @font-face
 fonts/                   self-hosted woff2 + SIL OFL licenses
 index.html               input form
 results.html             comparison tables and cards
-references.html          references and verification page
+references.html          references page for visitors (equations, sources, notes, tests)
+review.html              curator review page: same content plus ticks, comments,
+                         copy-summary; unlinked, noindex (js/references.js, data-mode)
 tests/cases.js           shared test logic
 tests/run.js             node tests/run.js (exit code 1 on failure)
 tests.html               same tests in the browser
@@ -160,7 +162,7 @@ was checked to fail on a deliberate coefficient typo.
 3. Add tests: `paper` values wherever the paper prints any, then `independent`
    and `arithmetic`.
 4. Add the file to `registry/index.js`; run `node tests/run.js`.
-5. Review on `references.html`: tick each model checked against the paper, add
+5. Review on `review.html` (not linked from the site): tick each model checked against the paper, add
    comments, "Copy review summary". Then set `verification.status: "reviewed"`,
    `reviewedBy`, date, a changelog line and a minor version bump.
 
