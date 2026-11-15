@@ -110,6 +110,14 @@ export function drawPctCard(svg, rows) {
     put(svg, "g-rule", R.line(X(100), top - 4, X(100), plotBottom + 2,
       { stroke: "currentColor", strokeWidth: 0.9, roughness: 0.5, strokeLineDash: [5, 5], seed: 3 }));
 
+  // A reference name dims only when every one of its rows is filtered out.
+  const groupDim = [];
+  rows.forEach((r, i) => { groupDim[i] = r.groupStart || i === 0 ? true : groupDim[i - 1]; });
+  for (let i = 0, start = 0; i < rows.length; i++) {
+    if (rows[i].groupStart) start = i;
+    if (!rows[i].dim) groupDim[start] = false;
+  }
+
   let y = top;
   rows.forEach((r, i) => {
     if (r.groupStart && i > 0) {
@@ -123,15 +131,21 @@ export function drawPctCard(svg, rows) {
     const g = el("g", { class: "prow" + (r.dim ? " dim" : "") });
     svg.appendChild(g);
     if (r.title) g.appendChild(el("title", {}, r.title));
+    // The reference name sits outside the row's group so it follows the whole group, not this row.
+    const refLabel = (x, ty) => {
+      const rg = el("g", { class: "prow" + (groupDim[i] ? " dim" : "") });
+      rg.appendChild(el("text", { x, y: ty, class: "lbl ref" }, r.ref));
+      svg.appendChild(rg);
+    };
     // Invisible hit area so the whole row shows the tooltip.
     g.appendChild(el("rect", { x: 0, y: cy - rowH / 2, width: W, height: rowH, class: "hit" }));
 
     if (narrow) {
       let x = labelW;
-      if (r.ref) { g.appendChild(el("text", { x, y: cy - 14, class: "lbl ref" }, r.ref)); x += textWidth(svg, r.ref, "lbl ref") + 8; }
+      if (r.ref) { refLabel(x, cy - 14); x += textWidth(svg, r.ref, "lbl ref") + 8; }
       drawChips(svg, g, x, cy - 18, r.comps, r.extrap);
     } else {
-      if (r.ref) g.appendChild(el("text", { x: 0, y: cy + 4.5, class: "lbl ref" }, r.ref));
+      if (r.ref) refLabel(0, cy + 4.5);
       drawChips(svg, g, chipX, cy, r.comps, r.extrap);
     }
 
