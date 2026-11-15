@@ -22,10 +22,11 @@ export default {
   schema: 1,
   id: "muraru2014",
   label: "Muraru 2014",
-  entryVersion: "0.2.0",
+  entryVersion: "0.3.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Tables 2 and 4)" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Removed the 6 Table 4 regressions: no published SD (site rule 7, no range, no model). Added the normality check and 95th-percentile paper tests. Table 2 models unchanged." },
+    { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 12 of 12 models, all tests passing; agrees with values and notes" },
   ],
 
   citation: {
@@ -262,9 +263,10 @@ export default {
   ],
 
   verification: {
-    status: "draft",
-    reviewedBy: null,
-    date: null,
+    status: "reviewed",
+    reviewedBy: "Dan Dyar",
+    date: "2026-11-15",
     against: "Eur Heart J Cardiovasc Imaging 2014;15:415-422 (online 4 October 2013): Tables 1, 2, 3 and 5",
+    summary: "12 of 12 models checked against the paper; 6/6 tests passing (4 paper, 2 arithmetic). Agrees with values and notes.",
   },
 };
