@@ -67,6 +67,12 @@ export function runAll() {
     ["campens2014", "annulus", undefined, []],
     ["yao2026", "annulus", { edge: "leading", phase: "end-diastole", view: "parasternal long axis" }, ["annulus-combined", "annulus-chinese", "annulus-italian"]],
     ["yao2026", "sov", undefined, ["sov-combined", "sov-chinese", "sov-italian"]],
+    ["muraru2014", "sov", undefined, ["sov-ll-ed-ht", "sov-ll-ed-bsa", "sov-ll-ed-bsa-reg"]],
+    ["muraru2014", "stj", II_ED, ["stj-ii-ed-ht", "stj-ii-ed-bsa-reg"]],  // stj-ii-ed-bsa suppressed
+    ["muraru2014", "annulus", undefined, []],
+    ["mirea2013", "sov", undefined, []],
+    ["mirea2013", "aao", II_ED, ["aao-bsa-40to49", "aao-agwhr", "aao-agwha"]],
+    ["mirea2013", "annulus", II_ED, ["annulus-bsa-40to49", "annulus-agwhr", "annulus-agwha"]],
     ["patel2022", "sov", undefined, ["sov-abs-18to40", "sov-bsa-18to40", "sov-ht-18to40", "sov-fig-bsa-18to40", "sov-fig-ht-18to40"]],
   ];
   for (const [refId, site, conv, want] of expectations) {
@@ -83,6 +89,8 @@ export function runAll() {
     check("choices: Yao SoV default = combined", ids(applyChoices(modelsForSite(yao, P, "sov"))) === "sov-combined");
     check("choices: Yao SoV pick = chinese", ids(applyChoices(modelsForSite(yao, P, "sov"), { "sov-population": "sov-chinese" })) === "sov-chinese");
     check("choices: Campens AAo default = DuBois", ids(applyChoices(modelsForSite(cam, P, "aao"))) === "aao-dubois");
+    const mir = registry.find((r) => r.id === "mirea2013");
+    check("choices: Mirea SoV default = AGWHr", ids(applyChoices(modelsForSite(mir, P, "sov", II_ED))) === "sov-agwhr,sov-bsa-40to49");
     check("choices: bad pick falls back to default", ids(applyChoices(modelsForSite(cam, P, "sov"), { "sov-bsa": "nonsense" })) === "sov-dubois");
   }
 
