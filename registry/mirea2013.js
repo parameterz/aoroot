@@ -19,10 +19,11 @@ export default {
   schema: 1,
   id: "mirea2013",
   label: "Mirea 2013",
-  entryVersion: "0.2.0",
+  entryVersion: "0.3.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Tables 2 and 4)" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Removed the 8 Table 4 regressions (AGWHr, AGWHa): no published SD (site rule 7, no range, no model). Table 2 models unchanged." },
+    { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 24 of 24 models, all tests passing; agrees with values and notes" },
   ],
 
   citation: {
@@ -341,9 +342,10 @@ export default {
   ],
 
   verification: {
-    status: "draft",
-    reviewedBy: null,
-    date: null,
+    status: "reviewed",
+    reviewedBy: "Dan Dyar",
+    date: "2026-11-15",
     against: "J Am Soc Echocardiogr 2013;26:419-427 (April 2013): Tables 1 and 2; Figure 2",
+    summary: "24 of 24 models checked against the paper; 3/3 tests passing (3 arithmetic). Agrees with values and notes.",
   },
 };
