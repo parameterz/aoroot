@@ -23,10 +23,11 @@ export default {
   schema: 1,
   id: "lang2015",
   label: "ASE/EACVI 2015",
-  entryVersion: "0.2.0",
+  entryVersion: "0.3.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-15", by: "Claude", change: "Initial draft from PDF (Table 14)" },
     { version: "0.2.0", date: "2026-11-15", by: "Claude", change: "Removed the 4 absolute (sex-only) models at Dan's request: the site moves beyond absolute values. BSA-indexed models unchanged." },
+    { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 4 of 4 models, all tests passing; agrees with values and notes" },
   ],
 
   citation: {
@@ -167,9 +168,10 @@ export default {
   ],
 
   verification: {
-    status: "draft",
-    reviewedBy: null,
-    date: null,
+    status: "reviewed",
+    reviewedBy: "Dan Dyar",
+    date: "2026-11-15",
     against: "J Am Soc Echocardiogr 2015;28:1-39.e14: Table 14; Figure 10; section IV (aortic root)",
+    summary: "4 of 4 models checked against the paper; 4/4 tests passing (2 paper, 2 arithmetic). Agrees with values and notes.",
   },
 };
