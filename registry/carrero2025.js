@@ -20,9 +20,10 @@ export default {
   schema: 1,
   id: "carrero2025",
   label: "MATEAR (Carrero 2025)",
-  entryVersion: "0.1.0",
+  entryVersion: "0.2.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-15", by: "Claude", change: "Initial draft from PDF (Table 2; Methods; Results)" },
+    { version: "0.2.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 12 of 12 models, all tests passing; agrees with values and notes" },
   ],
 
   citation: {
@@ -263,9 +264,10 @@ export default {
   ],
 
   verification: {
-    status: "draft",
-    reviewedBy: null,
-    date: null,
+    status: "reviewed",
+    reviewedBy: "Dan Dyar",
+    date: "2026-11-15",
     against: "Arch Cardiol Mex 2025;95(2):171-177: Table 2; Table 1; Materials and methods; Statistical analysis; Results",
+    summary: "12 of 12 models checked against the paper; 5/5 tests passing (3 paper, 2 arithmetic). Agrees with values and notes.",
   },
 };
