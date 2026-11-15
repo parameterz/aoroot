@@ -19,11 +19,12 @@ export default {
   schema: 1,
   id: "mirea2013",
   label: "Mirea 2013",
-  entryVersion: "0.3.0",
+  entryVersion: "0.3.1",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Tables 2 and 4)" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Removed the 8 Table 4 regressions (AGWHr, AGWHa): no published SD (site rule 7, no range, no model). Table 2 models unchanged." },
     { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 24 of 24 models, all tests passing; agrees with values and notes" },
+    { version: "0.3.1", date: "2026-11-15", by: "Claude", change: "Notes only: BSA-overcorrection note now says the paper's height-and-weight models are better by its own Table 5 but publish no residual SD; minor-inconsistencies note adds the Table 4 allometric footnote (sum printed, product intended). No values changed." },
   ],
 
   citation: {
@@ -283,7 +284,7 @@ export default {
       id: "bsa-overcorrects",
       appliesTo: { match: "-bsa-" },
       severity: "important",
-      text: "The paper's own Table 5 shows that dividing by BSA overcorrects for body size: the BSA-indexed values still correlate with BSA, height and weight (r −0.30 to −0.48), so these z-scores run low in large and high in small patients. The paper's height-and-weight regressions (Table 4) remove that correlation (|r| ≤ 0.03) but publish no SD, so they are not used here.",
+      text: "The paper's own Table 5 shows that dividing by BSA overcorrects for body size: the BSA-indexed values still correlate with BSA, height and weight (r −0.30 to −0.48), so these z-scores run low in large and high in small patients. The paper's own regressions on age, sex, height and weight (Table 4, ratiometric and allometric) remove that correlation (|r| ≤ 0.03), and the authors conclude that scaling to height and weight would better separate normal from abnormal. Yet the reference ranges they publish are the BSA-indexed ones, and Table 4 reports coefficients and R² but no residual SD. Without that SD there is no normal range, so the better models cannot be used here.",
     },
     {
       id: "ratio-assumption",
@@ -313,7 +314,7 @@ export default {
       id: "errata",
       appliesTo: "all",
       severity: "info",
-      text: "Minor inconsistencies not affecting the values used: Table 2 labels the oldest group '>70' where Figure 2 uses '≥70' (age 70 is placed in the oldest group here). In Table 4 (not used) the AGWHr SoV female constant 9.0 is printed with a 95% CI of 12.1 to 23.7, which excludes it.",
+      text: "Minor inconsistencies not affecting the values used: Table 2 labels the oldest group '>70' where Figure 2 uses '≥70' (age 70 is placed in the oldest group here). In Table 4 (not used) the AGWHr SoV female constant 9.0 is printed with a 95% CI of 12.1 to 23.7, which excludes it. The Table 4 footnote prints the allometric model as a sum (constant·age^b + weight^b + height^b); the coefficients only reproduce the observed diameters as a product (constant × age^b × weight^b × height^b, height in cm).",
     },
   ],
 
