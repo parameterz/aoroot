@@ -18,9 +18,10 @@ export default {
   schema: 1,
   id: "patel2022",
   label: "WASE (Patel 2022)",
-  entryVersion: "0.1.0",
+  entryVersion: "0.2.0",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Table 3; Figures 2 and 3)" },
+    { version: "0.2.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 33 of 33 models, all tests passing; agrees with values and notes" },
   ],
 
   citation: {
@@ -425,9 +426,10 @@ export default {
   ],
 
   verification: {
-    status: "draft",
-    reviewedBy: null,
-    date: null,
+    status: "reviewed",
+    reviewedBy: "Dan Dyar",
+    date: "2026-11-15",
     against: "J Am Soc Echocardiogr 2022;35:267-274: Table 3; Figures 2 and 3 (equations read from the rendered page)",
+    summary: "33 of 33 models checked against the paper; 5/5 tests passing (2 paper, 2 independent, 1 arithmetic). Agrees with values and notes.",
   },
 };
