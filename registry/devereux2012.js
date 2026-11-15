@@ -7,12 +7,13 @@ export default {
   schema: 1,
   id: "devereux2012",
   label: "Devereux 2012",
-  entryVersion: "0.3.1",
+  entryVersion: "0.3.2",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Ported to schema 1; annulus status caution; height SEE variant 'consistency-corrected'" },
     { version: "0.3.0", date: "2026-11-14", by: "Claude", change: "Convention fields as enums (annulus inner edge, mid-systole); legacy-site independent tests; annulus notes" },
     { version: "0.3.1", date: "2026-11-14", by: "Claude", change: "Age coefficients entered per decade as printed in Tables 1 and 2 (was per year, from the abstract); results unchanged. Raised in Dan's review." },
+    { version: "0.3.2", date: "2026-11-14", by: "Claude", change: "Annulus SEEs from Table 2 (BSA 0.070, height 0.113) instead of the text, per Dan's review; legacy-code tests now compare the annulus ULN too" },
   ],
 
   citation: {
@@ -108,7 +109,7 @@ export default {
         ],
         source: "Table 2",
       },
-      sd: { type: "constant", value: 0.113, source: "Text (Table 2 places 0.070 here)" },
+      sd: { type: "constant", value: 0.070, source: "Table 2, SE column of the intercept row (text gives 0.113)" },
       dist: "normal",
       validity: { age: [15, 86], bsa_dubois: [1.13, 2.41] },
       stats: { r: 0.64 },
@@ -129,7 +130,7 @@ export default {
         ],
         source: "Table 2",
       },
-      sd: { type: "constant", value: 0.070, source: "Text (Table 2 places 0.113 here)" },
+      sd: { type: "constant", value: 0.113, source: "Table 2, SE column of the intercept row (text gives 0.070)" },
       dist: "normal",
       validity: { age: [15, 86], height_cm: [143, 206] },
       stats: { r: 0.63 },
@@ -158,7 +159,7 @@ export default {
       id: "see-annulus",
       appliesTo: ["annulus-bsa", "annulus-height"],
       severity: "important",
-      text: "The text gives annulus SEEs of 0.113 cm (BSA) and 0.070 cm (height); Table 2 places these values the other way around, in the intercept SE column. SEEs of 0.7 to 1.1 mm are implausibly small for the annulus, so annulus z-scores from this paper are unreliable. Percent of predicted is unaffected.",
+      text: "Annulus SEEs are taken from Table 2 (0.070 cm BSA model, 0.113 cm height model), on the reasoning that the table is the statistics output and the text was transcribed from it; the text gives them the other way around. In Table 2 both sit in the SE column of the intercept row, beside a p-value, so they are most likely standard errors of the intercept, not SEEs. Either way they are implausibly small: the paper's own age coefficient and its standardized beta imply an annulus SD of about 2.3 mm, and with R = 0.64 an SEE of about 1.8 mm (0.18 cm), consistent with annulus SDs of 1.9 to 2.4 mm in WASE, NORRE and Campens. Annulus z-scores from this paper are therefore about 1.6 to 2.5 times too large. Percent of predicted is unaffected.",
     },
     {
       id: "annulus-convention",
@@ -170,7 +171,7 @@ export default {
       id: "annulus-legacy-see",
       appliesTo: ["annulus-bsa", "annulus-height"],
       severity: "info",
-      text: "The original aoroot.parameterz.com calculator (2013) used the Table 2 placement of the annulus SEEs (0.070 cm BSA model, 0.113 cm height model); this version follows the text (0.113 and 0.070). Both are implausibly small; see the SEE note.",
+      text: "The original aoroot.parameterz.com calculator (2013) also used the Table 2 placement of the annulus SEEs (0.070 cm BSA model, 0.113 cm height model).",
     },
     {
       id: "population",
@@ -236,13 +237,13 @@ export default {
       kind: "independent", source: "aoroot.parameterz.com devereux.py (2013): mean, mean + 2 SE",
       input: { sex: "male", age: 40, height_cm: 175, weight_kg: 70 },
       ulnZ: 2,
-      expect: { "annulus-bsa": { pred: 2.2426 } },  // ULN not compared: legacy used the Table 2 SEE placement
+      expect: { "annulus-bsa": { pred: 2.2426, uln: 2.3826 } },
     },
     {
       kind: "independent", source: "aoroot.parameterz.com devereux.py (2013): mean, mean + 2 SE",
       input: { sex: "female", age: 65, height_cm: 160, weight_kg: 60 },
       ulnZ: 2,
-      expect: { "annulus-height": { pred: 1.9360 } },  // ULN not compared: legacy used the Table 2 SEE placement
+      expect: { "annulus-height": { pred: 1.9360, uln: 2.1620 } },
     },
     {
       kind: "arithmetic", source: "Hand calculation, 2026-11-14",
