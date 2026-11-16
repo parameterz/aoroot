@@ -372,9 +372,11 @@ details on demand.**
   only; nothing the visitor enters is stored). Borrowed from dilated-af.
 - **One line per site, the site and measurement named once** (issue #5). Each
   ticked reference adds a clause, then the AHI/CSAH clause: *Sinus of Valsalva
-  38 mm: z = +1.53; 109% of predicted for age, sex and height (Devereux 2012,
-  height model). AHI 2.30 cm/m, CSAH 6.9 cm2/m; below Desai 2026 risk
+  38 mm: z = +1.53; 109% of predicted for age, sex and height (Devereux 2012). AHI 2.30 cm/m, CSAH 6.9 cm2/m; below Desai 2026 risk
   thresholds (AHI 2.5, CSAH 9).*
+- References are named by first author and year ("Saura 2017"); the site
+  heading already says what was measured. Two models from the same reference
+  in one line also carry their model label.
 - A site with more than one reference ticked always names them; the reference
   chip is locked on, since unnamed clauses would be ambiguous.
 - **Verdict** ("dilated", "small", "within normal limits") is off by default

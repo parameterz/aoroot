@@ -32,7 +32,8 @@ Each reference also keeps its own history in its registry file
 
 - Copy for report names each site and its measurement once instead of on
   every line; ticked references and the AHI/CSAH line follow as clauses (#5).
-  A site with more than one reference always names them. No numbers change.
+  A site with more than one reference always names them. References are named
+  by first author and year ("Saura 2017"). No numbers change.
 
 ## [1.2.1] - 2026-11-16
 
