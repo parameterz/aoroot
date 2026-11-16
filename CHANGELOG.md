@@ -17,6 +17,23 @@ clinical calculator:
 Each reference also keeps its own history in its registry file
 (`registry/*.js`); entries here name the reference version a release includes.
 
+## [1.3.0] - 2026-11-16
+
+### Added
+
+- Copy for report: chips choose which pieces each sentence carries (verdict,
+  z-score, % predicted, normal limit, reference, risk thresholds). Choices
+  are remembered in the browser as display settings; nothing you enter is
+  stored.
+- Copy for report: the text can be edited by hand before copying, with an
+  "edited" marker and a Reset.
+
+### Changed
+
+- Copy for report names each site and its measurement once instead of on
+  every line; ticked references and the AHI/CSAH line follow as clauses (#5).
+  A site with more than one reference always names them. No numbers change.
+
 ## [1.2.1] - 2026-11-16
 
 ### Fixed

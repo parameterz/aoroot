@@ -7,7 +7,7 @@ import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
 import { modelsForSite, applyChoices } from "../lib/conventions.js";
 import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight, cmrThreshold } from "../lib/thresholds.js";
-import { scalingOf, adjustsFor, reportLine, shortLabel, indexedReportLine, componentsOf, passesFilter, ageBandText } from "../lib/describe.js";
+import { scalingOf, adjustsFor, refClause, buildReport, defaultReportChips, shortLabel, indexedReportLine, componentsOf, passesFilter, ageBandText } from "../lib/describe.js";
 import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor } from "../lib/state.js";
 import { bmiNote } from "../lib/body.js";
 
@@ -157,8 +157,26 @@ export function runAll() {
     check("hash: bad selection dropped and reported", sb.state.view.sel === null && sb.errors.length === 1, JSON.stringify(sb));
     const [ref, model] = get("saura2017", "sov-ll-ed-ht");
     const p = { sex: "female", age: 70, height_cm: 155, weight_kg: 55 };
-    const line = reportLine("sov", 36, score(ref, model, p, 36), ref, model, "mm");
-    check("report line", line === "Sinus of Valsalva 36 mm (z = +2.56; 128% of predicted for sex and height; NORRE (Saura 2017), SV L–L end-diastole, height-indexed).", line);
+    const r = score(ref, model, p, 36);
+    const one = buildReport([{ site: "sov", y_mm: 36, refs: [{ result: r, ref, model }] }], "mm");
+    check("report: one reference", one.length === 1 && one[0] === "Sinus of Valsalva 36 mm: z = +2.56; 128% of predicted for sex and height (NORRE, Saura 2017, SV L–L end-diastole, height-indexed).", one[0]);
+    // Issue #5: the site and measurement are named once, however many rows are ticked.
+    const F = { sex: "female", age: 62, height_cm: 158, weight_kg: 60 };
+    const [d, dm] = get("devereux2012", "sov-height");
+    const refs = [{ result: score(d, dm, F, 38), ref: d, model: dm }, { result: score(ref, model, F, 38), ref, model }];
+    const all = buildReport([{ site: "sov", y_mm: 38, refs, indexed: F }], "mm");
+    check("report: site named once for two references and AHI/CSAH", all.length === 1 && all[0].match(/Sinus of Valsalva/g).length === 1 && all[0].match(/38 mm/g).length === 1 &&
+      all[0].includes("(Devereux 2012, height model). z = ") && all[0].endsWith(". AHI 2.41 cm/m, CSAH 7.2 cm2/m; below Desai 2026 risk thresholds (AHI 2.5, CSAH 9)."), all[0]);
+    const off = { ...defaultReportChips(), ref: false };
+    check("report: reference chip off drops the name for a single reference", buildReport([{ site: "sov", y_mm: 36, refs: [{ result: r, ref, model }] }], "mm", off)[0] === "Sinus of Valsalva 36 mm: z = +2.56; 128% of predicted for sex and height.");
+    check("report: two references are always named", buildReport([{ site: "sov", y_mm: 38, refs }], "mm", off)[0].includes("(Devereux 2012, height model)"));
+    const full = { verdict: true, z: true, pct: false, limit: true, ref: false, thr: false };
+    const cl = refClause(r, ref, model, "mm", full);
+    check("report: verdict and limit chips", cl === `dilated; z = +2.56; upper limit of normal ${r.uln.toFixed(1)} mm`, cl);
+    check("report: limit in cm", refClause(r, ref, model, "cm", { ...full, verdict: false, z: false }) === `upper limit of normal ${(r.uln / 10).toFixed(2)} cm`);
+    const none = { verdict: false, z: false, pct: false, limit: false, ref: false, thr: true };
+    check("report: every piece off leaves the measurement", buildReport([{ site: "sov", y_mm: 36, refs: [{ result: r, ref, model }] }], "mm", none)[0] === "Sinus of Valsalva 36 mm.");
+    check("report: thresholds chip off", indexedReportLine("aao", 41, F, "mm", full) === "Ascending aorta 41 mm: AHI 2.59 cm/m, CSAH 8.4 cm2/m; above Desai 2026 AHI threshold, below CSAH.", indexedReportLine("aao", 41, F, "mm", full));
     const [dref, dmodel] = get("devereux2012", "sov-height");
     check("short label", shortLabel(dref, dmodel) === "height model", shortLabel(dref, dmodel));
   }
