@@ -17,7 +17,7 @@ clinical calculator:
 Each reference also keeps its own history in its registry file
 (`registry/*.js`); entries here name the reference version a release includes.
 
-## [Unreleased]
+## [1.1.0]
 
 ### Changed
 
