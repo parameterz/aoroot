@@ -1,15 +1,21 @@
-# Staging site for dev branches (not set up yet)
+# Staging site for dev branches (not set up)
 
 GitHub Pages publishes one branch per repo. Production comes from `main` at
 https://aoroot.parameterz.com, so a dev branch has no live URL to test on
 phones and other devices. These notes describe a fix: deploy dev branches to a
 second repo that has its own Pages site.
 
-Status: **parked**. The workflow file is already written:
-[`.github/workflows/staging.yml`](../.github/workflows/staging.yml).
-It does nothing until the setup below is done. Until then, every push to a
-non-main branch fails at the deploy step because the secret is missing.
-You can delete the file or ignore those failures.
+Status: **not set up, and not planned** (decided 2026-11-16). The site is close
+to a full release and changes are now small fixes, so a second repo and a
+deploy key aren't worth it. To check a change on a phone first, run
+`python3 -m http.server` in the repo folder and open the computer's local IP
+address from the phone on the same Wi-Fi.
+
+The workflow was never added to the repo. The proposed
+`.github/workflows/staging.yml` is at the end of these notes; to revive the
+idea, save it at that path and do the setup below. Without the setup, every
+push to a non-main branch would fail at the deploy step because the secret is
+missing.
 
 ## How it works
 
@@ -67,8 +73,9 @@ custom domain, such as `staging.parameterz.com`:
 - **Pointing Pages at the dev branch for a while**: avoid it, because the live
   site would show unfinished work.
 
+## Proposed staging.yml
 
-Proposed staging.yml:
+```yaml
 # Deploy any non-main branch to the staging site (parameterz/aoroot-staging).
 # The last branch pushed wins: staging always shows the most recent push.
 name: Deploy to staging
@@ -105,3 +112,4 @@ jobs:
           force_orphan: true
           enable_jekyll: true   # match production, which GitHub Pages builds with Jekyll
           full_commit_message: "Staging: ${{ github.ref_name }} @ ${{ github.sha }}"
+```
