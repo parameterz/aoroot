@@ -150,6 +150,10 @@ export function runAll() {
     const fh = decodeHash("#sex=m&f=age,ratio,eq,zz");
     check("hash: filter decoded, one kind only, bad token reported", JSON.stringify(fh.state.view.filter) === '["age","ratio"]' && fh.errors.length === 1, JSON.stringify(fh));
     check("hash: filter encoded", encodeHash(fh.state).endsWith("&f=age,ratio"), encodeHash(fh.state));
+    const sh = decodeHash("#sex=m&sel=sov.muraru2014");
+    check("hash: selected reference round trip", sh.state.view.sel === "sov.muraru2014" && encodeHash(sh.state) === "#sex=m&sel=sov.muraru2014", encodeHash(sh.state));
+    const sb = decodeHash("#sex=m&sel=root.x%20y");
+    check("hash: bad selection dropped and reported", sb.state.view.sel === null && sb.errors.length === 1, JSON.stringify(sb));
     const [ref, model] = get("saura2017", "sov-ll-ed-ht");
     const p = { sex: "female", age: 70, height_cm: 155, weight_kg: 55 };
     const line = reportLine("sov", 36, score(ref, model, p, 36), ref, model, "mm");

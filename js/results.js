@@ -1,6 +1,8 @@
-// Results page: reads the hash, scores every reference for every entered site,
-// and renders one comparison table per site. All state lives in the hash, so
-// switching units, alternatives or SD variants just rewrites the hash.
+// Results page: reads the hash, scores every reference for every entered site, and
+// renders each site charts first (percent of predicted, curves, thresholds), then the
+// comparison table. All state lives in the hash, so switching units, alternatives or SD
+// variants just rewrites the hash. Tapping a percent-of-predicted row opens that
+// reference in a bottom sheet (js/sheet.js); the selection is in the hash too (sel=).
 
 import registry from "../registry/index.js";
 import { score, notesFor } from "../lib/evaluator.js";
@@ -10,6 +12,7 @@ import { decodeHash, encodeHash, convFromCode, picksFor, sdVariantFor, DEFAULT_C
 import { drawPctCard, drawLegend, drawCurveCard, drawThresholdCard } from "./cards.js";
 import { THRESHOLDS, CMR_NORMAL, cmrThreshold, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
 import { curveSeries, SWEEP } from "./curve.js";
+import { initSheet, renderSheet, beforeNav } from "./sheet.js";
 import { SITE_NAMES, scalingOf, adjustsFor, componentsOf, passesFilter, CHIP_OF, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine, indexedReportLine } from "../lib/describe.js";
 
 import { VERSION } from "../lib/version.js";
@@ -20,12 +23,16 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 
 let state;
 const checked = new Set(); // report rows ticked (survives re-render, not saved in the link)
-const curveView = { xVar: "height_cm", hidden: new Set() }; // curve card display choices (this visit only)
+const curveView = { xVar: "height_cm", hidden: new Set(), open: false, printing: false }; // curve card display choices (this visit only)
+const SITE_SHORT = { annulus: "Annulus", sov: "SoV", stj: "STJ", aao: "AAo" };
+// Built by render() for the details sheet: per site, each reference's scored models and curve.
+const sheetData = {};
 const thrView = { hidden: new Set() }; // thresholds chart: hidden groups (risk, surgery, normal, band); this visit only
 
 function setHash(mutate) {
   mutate(state);
-  history.replaceState(null, "", encodeHash(state));
+  history.replaceState(history.state, "", encodeHash(state)); // keep the sheet's history marker
+  lastHash = location.hash;
   render();
 }
 
@@ -39,11 +46,15 @@ function render() {
   // Summary bar
   const cov = p.sex && p.height_cm ? covariates(p) : {};
   const bsa = cov.bsa_dubois ? ` · BSA ${cov.bsa_dubois.toFixed(2)} m²` : "";
+  // Sticky one-line summary: the measurements, then the patient; tapping it goes to Edit.
+  const meas = SITES.filter((s) => state.y[s] != null).map((s) => `${SITE_SHORT[s]} ${fmtObserved(state.y[s], units)}`).join(" · ");
+  const editHref = `index.html${esc(encodeHash({ ...state, view: { ...view, sel: null } }))}`;
   document.getElementById("summary").innerHTML = p.sex
-    ? `<span><b>${p.sex === "male" ? "Male" : "Female"}</b> · ${p.age} y · ${Math.round(p.height_cm * 10) / 10} cm` +
-      `${p.weight_kg != null ? ` · ${Math.round(p.weight_kg * 10) / 10} kg` : " · no weight"}${bsa}</span>` +
-      `<a href="index.html${esc(location.hash)}">Edit</a>` +
-      `<span class="seg" style="margin-left:auto"><label><input type="radio" name="u" value="mm" ${units === "mm" ? "checked" : ""}> mm</label>` +
+    ? `<a class="sum-info" href="${editHref}" title="Edit the entered values">${meas ? `<b>${esc(meas)}</b> · ` : ""}` +
+      `${p.sex === "male" ? "M" : "F"} · ${p.age} y · ${Math.round(p.height_cm * 10) / 10} cm` +
+      `${p.weight_kg != null ? ` · ${Math.round(p.weight_kg * 10) / 10} kg` : " · no weight"}<span class="sum-bsa">${bsa}</span></a>` +
+      `<a class="sum-edit" href="${editHref}">Edit</a>` +
+      `<span class="seg small-seg"><label><input type="radio" name="u" value="mm" ${units === "mm" ? "checked" : ""}> mm</label>` +
       `<label><input type="radio" name="u" value="cm" ${units === "cm" ? "checked" : ""}> cm</label></span>`
     : `Nothing entered yet. <a href="index.html">Enter a patient</a>.`;
   for (const r of document.querySelectorAll("[name=u]")) r.onchange = () => setHash((s) => { s.view.units = r.value; });
@@ -62,6 +73,7 @@ function render() {
     const conv = convFromCode(convCode);
     let rows = "";
     const pctRows = [];
+    const refsHere = (sheetData[site] = {});
 
     for (const ref of registry) {
       if (!ref.models.some((m) => m.measurement.site === site && !m.measurement.sinus)) continue; // reference doesn't cover this site
@@ -107,8 +119,10 @@ function render() {
             `<li>${esc(ref.citation.authors.split(",")[0])} et al. ${esc(ref.citation.journal)} ${ref.citation.year}. <a href="https://doi.org/${esc(ref.citation.doi)}">doi:${esc(ref.citation.doi)}</a> · <a href="references.html#${esc(ref.id)}">equations and sources</a></li></ul></details>`
           : "";
         const comps = componentsOf(model);
+        (refsHere[ref.id] ??= { ref, site, y, models: [] }).models.push({ model, r, notes, flags, choice, variant });
         pctRows.push({
-          ref: i === 0 ? ref.label : "", groupStart: i === 0, comps,
+          ref: i === 0 ? ref.label : "", refId: ref.id, groupStart: i === 0, comps,
+          aria: `${ref.label}, ${shortLabel(ref, model)}: ${r.pctPred == null ? "no percent of predicted" : `${fmtPct(r.pctPred)} of predicted`}${r.outside ? ", outside the normal range" : ""}. Show details`,
           extrap: [...new Set(r.extrapolated.map(CHIP_OF).filter(Boolean))],
           title: `${ref.label} · ${shortLabel(ref, model)}\n${scalingOf(model)}; adjusts for ${adjustsFor(model)}` +
             (r.pctPred == null ? "" : `\n${fmtPct(r.pctPred)} of predicted` + (r.llnPct == null ? "" : ` (normal ${fmtPct(r.llnPct)}–${fmtPct(r.ulnPct)})`)),
@@ -119,7 +133,7 @@ function render() {
         const line = reportLine(site, y, r, ref, model, units);
         reportRows.push({ key, line });
         const zHi = r.outside ? " hi" : "";
-        rows += `<tr class="${first.trim()}">
+        rows += `<tr class="${first.trim()}"${i === 0 ? ` id="t_${site}_${esc(ref.id)}"` : ""}>
           <td>${refCell}</td>
           <td><div>${esc(shortLabel(ref, model))}</div>
               <div class="model">${esc(scalingOf(model))}</div>${choice}${variant}${flags ? "<div>" + flags + "</div>" : ""}${notesHtml}</td>
@@ -133,22 +147,19 @@ function render() {
     }
 
     const convNote = convCode === DEFAULT_CONV[site] ? "" : ` <span class="flag">non-default</span>`;
+    const hasExtrap = pctRows.some((r) => r.extrap.length);
     main.insertAdjacentHTML("beforeend", `
-      <h2>${SITE_NAMES[site]} ${fmtObserved(y, units)} <span class="muted small">(${CONV_LABEL[convCode]})</span>${convNote}</h2>
-      <div class="tablewrap"><table class="cmp">
-        <thead><tr><th>Reference</th><th>Model</th><th class="num">Predicted</th><th class="num">Normal range</th>
-          <th class="num">z</th><th class="num">% pred</th><th>Report</th></tr></thead>
-        <tbody>${rows}</tbody></table></div>
+      <h2 id="site_${site}">${SITE_NAMES[site]} ${fmtObserved(y, units)} <span class="muted small">(${CONV_LABEL[convCode]})</span>${convNote}</h2>
       <section class="card" aria-label="${SITE_NAMES[site]}: percent of predicted">
         <div class="card-head"><h3>Percent of predicted</h3>
           <span class="handnote">same ${fmtObserved(y, units)}, as a share of what each reference expects</span></div>
-        <svg class="pct" id="pct_${site}" role="img" aria-label="Percent of predicted for each reference; values are in the table above"></svg>
-        <div class="legend"><span><span data-lg="band"></span> normal range</span><span><span data-lg="dot"></span> this patient</span>
-          <span><span data-lg="out"></span> outside the normal range</span>${pctRows.some((r) => r.extrap.length) ? `<span><span data-lg="hollow"></span> outside the study's range</span>` : ""}
+        <svg class="pct" id="pct_${site}" role="group" aria-label="Percent of predicted for each reference. Each row opens that reference's details; all values are also in the table below."></svg>
+        <div class="legend"><span class="tap-hint">tap a row for details</span><span><span data-lg="band"></span> normal range</span><span><span data-lg="dot"></span> this patient</span>
+          <span><span data-lg="out"></span> outside the normal range</span>${hasExtrap ? `<span><span data-lg="hollow"></span> outside the study's range</span>` : ""}
           <span class="muted">dashed line: 100% of predicted</span></div>
         <div class="legend chips-key"><span><span class="chipkey">BSA</span> in the equation</span><span><span class="chipkey">÷BSA</span> simple ratio</span>
           <span><span class="chipkey age">age</span> age in the equation</span><span><span class="chipkey band">age 41–65</span> age group used</span>
-          ${pctRows.some((r) => r.extrap.length) ? `<span><span class="chipkey warn">ht</span> patient outside the study's range</span>` : ""}<span class="muted">no age chip: age ignored · sex not shown (nearly all are sex-specific)</span></div>
+          ${hasExtrap ? `<span><span class="chipkey warn">ht</span> patient outside the study's range</span>` : ""}<span class="muted">no age chip: age ignored · sex not shown (nearly all are sex-specific)</span></div>
         <div class="pfilter"><span>Show only references using</span>
           ${[["age", "age"], ["ht", "ht"], ["wt", "wt"], ["bsa", "BSA"]].map(([k, t]) => `<button type="button" class="pf" data-pf="${k}" aria-pressed="${view.filter.includes(k)}">${t}</button>`).join("")}
           <span class="sep"></span>
@@ -158,33 +169,49 @@ function render() {
     const svg = document.getElementById(`pct_${site}`);
     if (pctRows.length) { drawPctCard(svg, pctRows); drawLegend(svg.parentElement); }
     else svg.closest(".card").hidden = true;
+    // A reference whose rows are all filtered out can't stay open in the sheet.
+    for (const id of Object.keys(refsHere)) refsHere[id].dim = pctRows.filter((r) => r.refId === id).every((r) => r.dim);
 
-    // Card 2: patient on the curve.
-    const series = curveSeries(registry, state, site, curveView.xVar).map((s) => ({
+    // Card 2: patient on the curve, collapsed by default (every reference at once is a lot;
+    // the sheet shows one reference's curve). Drawn only while open: an SVG inside a closed
+    // <details> has no width to draw at.
+    const xv = curveView.xVar;
+    const series = curveSeries(registry, state, site, xv).map((s) => ({
       ...s, colorIndex: registry.indexOf(s.ref), hidden: curveView.hidden.has(s.ref.id),
     }));
+    for (const s of series) if (refsHere[s.ref.id]) refsHere[s.ref.id].curve = s;
     if (series.some((s) => s.pts.some(Boolean))) {
-      const xv = curveView.xVar;
+      const open = curveView.open || curveView.printing;
       main.insertAdjacentHTML("beforeend", `
-        <section class="card" aria-label="${SITE_NAMES[site]}: patient on the curve">
-          <div class="card-head"><h3>Patient on the curve</h3>
-            <span class="handnote">${xv === "age" ? "same person, any age" : "same person, any height"}: what each reference expects</span>
-            <span class="seg small-seg" style="margin-left:auto">
+        <details class="card curvecard" data-site="${site}" ${open ? "open" : ""}>
+          <summary class="card-head"><h3>Patient on the curve</h3>
+            <span class="handnote">${xv === "age" ? "same person, any age" : "same person, any height"}: every reference at once</span>
+            <span class="muted small sum-hint">${open ? "close" : "open to compare"}</span></summary>
+          <div class="curve-ctl"><span class="seg small-seg">
               <label><input type="radio" name="cx_${site}" value="height_cm" ${xv === "height_cm" ? "checked" : ""}> vs height</label>
               <label><input type="radio" name="cx_${site}" value="age" ${xv === "age" ? "checked" : ""}> vs age</label></span></div>
-          <svg class="curve" id="curve_${site}" role="img" aria-label="Predicted diameter and upper limit of normal for each reference against ${xv === "age" ? "age" : "height"}; values for this patient are in the table above"></svg>
+          <svg class="curve" id="curve_${site}" role="img" aria-label="Predicted diameter and upper limit of normal for each reference against ${xv === "age" ? "age" : "height"}; values for this patient are in the table below"></svg>
           <div class="legend keys">${series.map((s) => `<button type="button" class="key c${s.colorIndex}" data-ref="${esc(s.ref.id)}" aria-pressed="${!s.hidden}" title="${esc(s.sub)}">${esc(s.label)}</button>`).join("")}
             <span class="muted">solid: predicted · dashed: upper limit of normal · faded: outside the study's range · ${xv === "age" ? "height and weight" : "age, sex and weight"} held at this patient's values</span></div>
-        </section>`);
-      const csvg = document.getElementById(`curve_${site}`);
-      const px = xv === "age" ? p.age : p.height_cm;
-      drawCurveCard(csvg, series, { x: Math.min(Math.max(px, SWEEP[xv].min), SWEEP[xv].max), y, label: fmtObserved(y, units) },
-        SWEEP[xv].label, (v) => (units === "cm" ? (v / 10).toFixed(1) : `${v}`));
+        </details>`);
+      if (open) {
+        const csvg = document.getElementById(`curve_${site}`);
+        const px = xv === "age" ? p.age : p.height_cm;
+        drawCurveCard(csvg, series, { x: Math.min(Math.max(px, SWEEP[xv].min), SWEEP[xv].max), y, label: fmtObserved(y, units) },
+          SWEEP[xv].label, (v) => (units === "cm" ? (v / 10).toFixed(1) : `${v}`));
+      }
     }
-  }
-  for (const site of ["sov", "aao"]) {
-    if (state.y[site] == null || !p.sex) continue;
-    renderThresholds(main, site, state.y[site], units, p, reportRows);
+
+    // Card 3: risk thresholds (sinuses and ascending aorta only).
+    if (site === "sov" || site === "aao") renderThresholds(main, site, y, units, p, reportRows);
+
+    // The full record: every model, with alternatives, SD variants, "Why?" notes and report ticks.
+    main.insertAdjacentHTML("beforeend", `
+      <h3 class="tablehead">Every reference, in detail <span class="muted small">equations' alternatives, "Why?" notes and report ticks</span></h3>
+      <div class="tablewrap"><table class="cmp">
+        <thead><tr><th>Reference</th><th>Model</th><th class="num">Predicted</th><th class="num">Normal range</th>
+          <th class="num">z</th><th class="num">% pred</th><th>Report</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>`);
   }
   for (const b of main.querySelectorAll("button[data-pf]"))
     b.onclick = () => setHash((st) => {
@@ -194,6 +221,8 @@ function render() {
     });
   for (const r of main.querySelectorAll("input[name^=cx_]"))
     r.onchange = () => { curveView.xVar = r.value; render(); };
+  for (const d of main.querySelectorAll("details.curvecard"))
+    d.ontoggle = () => { if (d.open !== curveView.open && !curveView.printing) { curveView.open = d.open; render(); } };
   for (const b of main.querySelectorAll("button.key"))
     b.onclick = () => { const id = b.dataset.ref; curveView.hidden.has(id) ? curveView.hidden.delete(id) : curveView.hidden.add(id); render(); };
 
@@ -205,6 +234,7 @@ function render() {
   for (const c of main.querySelectorAll("input[data-report]"))
     c.onchange = () => { c.checked ? checked.add(c.dataset.report) : checked.delete(c.dataset.report); updateReport(reportRows); };
   updateReport(reportRows);
+  renderSheet();
 }
 
 /** Card 3: risk thresholds (AHI / CSAH / diameter) for the SoV and ascending aorta. */
@@ -260,17 +290,17 @@ function renderThresholds(main, site, y, units, p, reportRows) {
     <section class="card thresholds" aria-label="${SITE_NAMES[site]}: risk thresholds">
       <div class="card-head"><h3>Risk thresholds</h3>
         <span class="handnote">"abnormal for you" and "at risk" are different questions</span></div>
-      <p class="small" style="margin:6px 0 10px">${SITE_NAMES[site]} ${fmtObserved(y, units)} at ${Math.round(h)} cm:
+      <svg class="curve" id="thr_${site}" role="img" aria-label="Threshold diameters against height with this patient; values are in the table below"></svg>
+      <div class="legend">${tk("risk", `<span class="sw risk"></span>`, "risk association (Desai 2026)")}${tk("surgery", `<span class="sw surg"></span>`, "guideline surgical threshold")}${cmr ? tk("normal", `<span class="sw norm"></span>`, "CMR upper normal for age and sex (Tavolinejad 2025)") : ""}
+        ${tk("band", `<span data-lg="band"></span>`, "upper limits of normal across the references")}<span><span data-lg="dot"></span> this patient</span>
+        <span class="small muted handnote">tap to hide or show</span></div>
+      <p class="small" style="margin:12px 0 10px">${SITE_NAMES[site]} ${fmtObserved(y, units)} at ${Math.round(h)} cm:
         <b class="mono">AHI ${ahi.toFixed(2)} cm/m</b> (diameter ÷ height) ·
         <b class="mono">CSAH ${csah.toFixed(1)} cm²/m</b> (π·(D/2)² ÷ height, assuming a circular cross-section)
         <label class="inline-report"><input type="checkbox" data-report="${key}" ${checked.has(key) ? "checked" : ""}> add AHI and CSAH to the report</label></p>
       <div class="tablewrap"><table>
         <thead><tr><th>Threshold</th><th class="num">As diameter at this height</th><th class="num">This patient</th><th>Status</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
-      <svg class="curve" id="thr_${site}" role="img" aria-label="Threshold diameters against height with this patient; values are in the table above"></svg>
-      <div class="legend">${tk("risk", `<span class="sw risk"></span>`, "risk association (Desai 2026)")}${tk("surgery", `<span class="sw surg"></span>`, "guideline surgical threshold")}${cmr ? tk("normal", `<span class="sw norm"></span>`, "CMR upper normal for age and sex (Tavolinejad 2025)") : ""}
-        ${tk("band", `<span data-lg="band"></span>`, "upper limits of normal across the references")}<span><span data-lg="dot"></span> this patient</span>
-        <span class="small muted handnote">tap to hide or show</span></div>
       <details class="notes"><summary>About these thresholds</summary><ul>
         <li class="important">These are not normal ranges. Desai 2026 studied 8,887 unoperated patients with a 4–5 cm ascending aorta (mean age 68, 79% men, echo L–L end-diastole) and all-cause death; AHI and CSAH separated risk only modestly (AUC 0.56 and 0.54).</li>
         <li>Desai used the larger of the root and ascending aorta for every index. The site applies each threshold to whichever level you entered.</li>
@@ -294,8 +324,8 @@ function renderThresholds(main, site, y, units, p, reportRows) {
 function updateReport(rows) {
   // Report order: by site, then as the rows appear (indexed line after that site's references).
   const lines = rows.filter((r) => checked.has(r.key))
-    .map((r, i) => ({ ...r, i, s: SITES.indexOf(r.key.split("|")[0]) }))
-    .sort((a, b) => a.s - b.s || a.i - b.i).map((r) => r.line);
+    .map((r, i) => ({ ...r, i, s: SITES.indexOf(r.key.split("|")[0]), ix: r.key.endsWith("|indexed") ? 1 : 0 }))
+    .sort((a, b) => a.s - b.s || a.ix - b.ix || a.i - b.i).map((r) => r.line);
   document.getElementById("report").hidden = rows.length === 0;
   document.getElementById("reportText").value = lines.length ? [...lines, `aoroot.parameterz.com v${VERSION}`].join("\n") : "";
   document.getElementById("copy").disabled = !lines.length;
@@ -308,11 +338,45 @@ document.getElementById("copy").onclick = async () => {
   setTimeout(() => (document.getElementById("copied").textContent = ""), 2500);
 };
 
-window.addEventListener("hashchange", render);
+// Back/forward and hand-edited links. When only the selection changed, update the sheet
+// and leave the page (and its sketches) alone. Both events can fire for one change.
+let lastHash = null;
+function baseOf(hash) {
+  const s = decodeHash(hash).state;
+  return encodeHash({ ...s, view: { ...s.view, sel: null } });
+}
+function onNav() {
+  beforeNav();
+  if (location.hash === lastHash) return;
+  const prevBase = baseOf(lastHash ?? "");
+  lastHash = location.hash;
+  if (prevBase === baseOf(location.hash)) { state = decodeHash(location.hash).state; renderSheet(); }
+  else render();
+}
+window.addEventListener("hashchange", onNav);
+window.addEventListener("popstate", onNav);
+if ("scrollRestoration" in history) history.scrollRestoration = "manual"; // closing the sheet must not move the page
+// Print: draw the collapsed curve cards too (the sheet is hidden by the print styles).
+window.addEventListener("beforeprint", () => { curveView.printing = true; render(); });
+window.addEventListener("afterprint", () => { curveView.printing = false; render(); });
 // Redraw the sketches when the width changes (text in the cards stays a fixed size).
 let lastW = window.innerWidth, resizeTimer;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => { if (Math.abs(window.innerWidth - lastW) > 40) { lastW = window.innerWidth; render(); } }, 150);
 });
+initSheet({
+  getState: () => state,
+  setHashFromSheet: (st, push) => {
+    state = st;
+    if (push) history.pushState({ sheet: true }, "", encodeHash(st));
+    else history.replaceState(history.state, "", encodeHash(st));
+    lastHash = location.hash;
+  },
+  data: sheetData,
+  curveView,
+  rerender: render,
+});
+lastHash = location.hash;
 render();
+if (state.view.sel) renderSheet({ scroll: true }); // a shared link opened with a reference selected

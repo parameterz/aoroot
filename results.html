@@ -35,7 +35,7 @@
 
 <section class="report" id="report" hidden>
   <h2>Copy for report</h2>
-  <p class="small muted">Tick the rows you want in the report column above, and "add AHI and CSAH" in a risk-thresholds card. Plain text; the reference is named on every line.</p>
+  <p class="small muted">Tick the rows you want in the report column of the tables above, and "add AHI and CSAH" in a risk-thresholds card. Plain text; the reference is named on every line.</p>
   <textarea id="reportText" readonly aria-label="Report text"></textarea>
   <div class="actions"><button type="button" class="primary" id="copy">Copy</button><span id="copied" class="small muted"></span></div>
 </section>
@@ -46,6 +46,11 @@
   <span><strong>Created by:</strong> <a href="https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/">Dan Dyar, MA, ACS, RDCS, FASE</a></span>
   <span>aoroot.parameterz.com <span id="version"></span></span>
 </footer>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="false" aria-labelledby="sheetTitle" hidden>
+  <div class="sheet-grab" aria-hidden="true"></div>
+  <div class="sheet-head" id="sheetHead"></div>
+  <div class="sheet-body" id="sheetBody"></div>
+</aside>
 <script type="module" src="js/results.js"></script>
 </body>
 </html>
