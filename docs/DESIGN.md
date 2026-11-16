@@ -387,8 +387,13 @@ details on demand.**
   data: `validity.bmi` in the registry (Yao, Mirea, Muraru). Devereux's
   cohort was "nonobese" with no cutoff, so it gets a note, not a range.
   Underweight (BMI < 18.5, where BSA-based z-scores run high) has no banner
-  yet. Ideal-weight BSA is still open (see the discussion of statements
-  alongside the published results, not a toggle that replaces them).
+  yet.
+- Ideal-weight BSA: decided against (Nov 2026). At a fixed BMI, ideal weight
+  depends only on height, so ideal BSA is a height power (DuBois: about
+  height^1.575) and a BSA model fed it becomes a height model with an exponent
+  nobody fitted. Its only use would be as a fallback where no height-based
+  range exists, and every site and convention here has at least one
+  height-only reference (NORRE covers all of them).
 - Candidate pearls:
   - Muraru 2014: leading vs inner edge differ by about 2 mm in the same people
     (the aortic wall); end-systole about 1 mm larger than end-diastole.
