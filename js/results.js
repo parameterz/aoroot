@@ -15,6 +15,7 @@ import { curveSeries, SWEEP } from "./curve.js";
 import { initSheet, renderSheet, beforeNav } from "./sheet.js";
 import { SITE_NAMES, scalingOf, adjustsFor, componentsOf, passesFilter, CHIP_OF, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine, indexedReportLine } from "../lib/describe.js";
 
+import { bmiNote } from "../lib/body.js";
 import { VERSION } from "../lib/version.js";
 export { VERSION };
 const CONV_LABEL = { "ll-ed": "leading edge, end-diastole", "ll-ms": "leading edge, mid-systole",
@@ -45,7 +46,7 @@ function render() {
 
   // Summary bar
   const cov = p.sex && p.height_cm ? covariates(p) : {};
-  const bsa = cov.bsa_dubois ? ` · BSA ${cov.bsa_dubois.toFixed(2)} m²` : "";
+  const bsa = cov.bsa_dubois ? ` · BSA ${cov.bsa_dubois.toFixed(2)} m² · BMI ${cov.bmi.toFixed(1)}` : "";
   // Sticky one-line summary: the measurements, then the patient; tapping it goes to Edit.
   const meas = SITES.filter((s) => state.y[s] != null).map((s) => `${SITE_SHORT[s]} ${fmtObserved(state.y[s], units)}`).join(" · ");
   const editHref = `index.html${esc(encodeHash({ ...state, view: { ...view, sel: null } }))}`;
@@ -61,6 +62,8 @@ function render() {
 
   document.getElementById("errors").innerHTML = decoded.errors.length
     ? `<p class="errors">Some values in the link were ignored: ${esc(decoded.errors.join("; "))}.</p>` : "";
+
+  renderBodyNote(cov, view);
 
   const main = document.getElementById("sites");
   main.innerHTML = "";
@@ -109,7 +112,7 @@ function render() {
         // Flags and notes
         const flags = [
           ...(model.status === "caution" ? ['<span class="flag">caution</span>'] : []),
-          ...(r.extrapolated.length ? [`<span class="flag">outside study ${esc(r.extrapolated.join(", ").replace(/_cm|_kg|_dubois|_haycock/g, ""))}</span>`] : []),
+          ...(r.extrapolated.length ? [`<span class="flag">outside study ${esc(r.extrapolated.join(", ").replace(/_cm|_kg|_dubois|_haycock/g, "").replace(/\bbmi\b/, "BMI"))}</span>`] : []),
           ...(ref.verification?.status === "draft" ? ['<span class="flag draft">draft</span>'] : []),
         ].join("");
         const notes = notesFor(ref, model);
@@ -235,6 +238,28 @@ function render() {
     c.onchange = () => { c.checked ? checked.add(c.dataset.report) : checked.delete(c.dataset.report); updateReport(reportRows); };
   updateReport(reportRows);
   renderSheet();
+}
+
+/**
+ * Body-build banner, once above the sites, when BMI is in the obese range. Generic on
+ * purpose: the per-reference part is the "outside study" flag (BMI? chip) that each
+ * registry entry with a BMI validity range raises on its own rows.
+ */
+function renderBodyNote(cov, view) {
+  const box = document.getElementById("bodynote");
+  const note = bmiNote(cov.bmi);
+  if (!note.obese || !SITES.some((s) => state.y[s] != null)) { box.innerHTML = ""; return; }
+  const on = view.filter.includes("ht");
+  box.innerHTML = `<aside class="bodynote" aria-label="Body build">
+    <p><b>BMI ${cov.bmi.toFixed(1)}: obese.</b> BSA keeps rising with weight; aortic size doesn't. References that use BSA
+    predict a larger aorta for this patient, so their z-scores and percent of predicted run <em>low</em>.
+    Rows marked <span class="chipkey warn">BMI?</span> come from cohorts that excluded obesity.
+    Height-indexed references and the AHI and CSAH thresholds don't use weight.</p>
+    <button type="button" class="secondary" id="bodyfilter" aria-pressed="${on}">${on ? "Show all references" : "Show only references using height"}</button>
+  </aside>`;
+  document.getElementById("bodyfilter").onclick = () => setHash((st) => {
+    st.view.filter = on ? st.view.filter.filter((x) => x !== "ht") : [...st.view.filter.filter((x) => x !== "ht"), "ht"];
+  });
 }
 
 /** Card 3: risk thresholds (AHI / CSAH / diameter) for the SoV and ascending aorta. */

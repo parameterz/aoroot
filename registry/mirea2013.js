@@ -19,12 +19,13 @@ export default {
   schema: 1,
   id: "mirea2013",
   label: "Mirea 2013",
-  entryVersion: "0.3.1",
+  entryVersion: "0.3.2",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Tables 2 and 4)" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Removed the 8 Table 4 regressions (AGWHr, AGWHa): no published SD (site rule 7, no range, no model). Table 2 models unchanged." },
     { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 24 of 24 models, all tests passing; agrees with values and notes" },
     { version: "0.3.1", date: "2026-11-15", by: "Claude", change: "Notes only: BSA-overcorrection note now says the paper's height-and-weight models are better by its own Table 5 but publish no residual SD; minor-inconsistencies note adds the Table 4 allometric footnote (sum printed, product intended). No values changed." },
+    { version: "0.3.2", date: "2026-11-16", by: "Claude", change: "Validity: BMI up to 30 on every model (Methods exclude BMI ≥ 30), so obese patients get the 'outside study' flag. No values changed." },
   ],
 
   citation: {
@@ -60,7 +61,7 @@ export default {
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", edgeNote: "Hinge points of the right and noncoronary leaflets" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 11.4, female: 11.4 } }], source: "Table 2 (aortic annulus, <30)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.2, female: 1.1 } }], source: "Table 2 (aortic annulus, <30)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "annulus-bsa-30to39", label: "Mirea 2013 annulus, BSA-indexed, 30–39 y", status: "ok",
@@ -68,7 +69,7 @@ export default {
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", edgeNote: "Hinge points of the right and noncoronary leaflets" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 11.4, female: 11.7 } }], source: "Table 2 (aortic annulus, 30–39)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.1, female: 1.0 } }], source: "Table 2 (aortic annulus, 30–39)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "annulus-bsa-40to49", label: "Mirea 2013 annulus, BSA-indexed, 40–49 y", status: "ok",
@@ -76,7 +77,7 @@ export default {
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", edgeNote: "Hinge points of the right and noncoronary leaflets" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 11.5, female: 11.7 } }], source: "Table 2 (aortic annulus, 40–49)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 0.9, female: 1.0 } }], source: "Table 2 (aortic annulus, 40–49)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "annulus-bsa-50to59", label: "Mirea 2013 annulus, BSA-indexed, 50–59 y", status: "ok",
@@ -84,7 +85,7 @@ export default {
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", edgeNote: "Hinge points of the right and noncoronary leaflets" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 11.5, female: 12.0 } }], source: "Table 2 (aortic annulus, 50–59)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 0.9, female: 0.9 } }], source: "Table 2 (aortic annulus, 50–59)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "annulus-bsa-60to69", label: "Mirea 2013 annulus, BSA-indexed, 60–69 y", status: "ok",
@@ -92,7 +93,7 @@ export default {
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", edgeNote: "Hinge points of the right and noncoronary leaflets" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 12.1, female: 11.7 } }], source: "Table 2 (aortic annulus, 60–69)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.0, female: 1.1 } }], source: "Table 2 (aortic annulus, 60–69)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "annulus-bsa-70plus", label: "Mirea 2013 annulus, BSA-indexed, ≥70 y", status: "ok",
@@ -100,7 +101,7 @@ export default {
       measurement: { site: "annulus", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", edgeNote: "Hinge points of the right and noncoronary leaflets" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 12.0, female: 11.6 } }], source: "Table 2 (aortic annulus, >70)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.0, female: 1.1 } }], source: "Table 2 (aortic annulus, >70)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
 
     // ── Table 2: SoV/BSA (mm/m²) ──
@@ -110,7 +111,7 @@ export default {
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 15.3, female: 15.5 } }], source: "Table 2 (SoV, <30)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.8, female: 1.5 } }], source: "Table 2 (SoV, <30)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "sov-bsa-30to39", label: "Mirea 2013 SoV, BSA-indexed, 30–39 y", status: "ok",
@@ -118,7 +119,7 @@ export default {
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 15.7, female: 16.5 } }], source: "Table 2 (SoV, 30–39)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.3, female: 1.6 } }], source: "Table 2 (SoV, 30–39)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "sov-bsa-40to49", label: "Mirea 2013 SoV, BSA-indexed, 40–49 y", status: "ok",
@@ -126,7 +127,7 @@ export default {
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 16.6, female: 16.8 } }], source: "Table 2 (SoV, 40–49)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.5, female: 1.4 } }], source: "Table 2 (SoV, 40–49)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "sov-bsa-50to59", label: "Mirea 2013 SoV, BSA-indexed, 50–59 y", status: "ok",
@@ -134,7 +135,7 @@ export default {
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 16.8, female: 17.9 } }], source: "Table 2 (SoV, 50–59)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.7, female: 1.6 } }], source: "Table 2 (SoV, 50–59)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "sov-bsa-60to69", label: "Mirea 2013 SoV, BSA-indexed, 60–69 y", status: "ok",
@@ -142,7 +143,7 @@ export default {
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 17.8, female: 17.5 } }], source: "Table 2 (SoV, 60–69)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.6, female: 1.7 } }], source: "Table 2 (SoV, 60–69)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "sov-bsa-70plus", label: "Mirea 2013 SoV, BSA-indexed, ≥70 y", status: "ok",
@@ -150,7 +151,7 @@ export default {
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 18.1, female: 18.2 } }], source: "Table 2 (SoV, >70)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.7, female: 1.9 } }], source: "Table 2 (SoV, >70)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
 
     // ── Table 2: STJ/BSA (mm/m²) ──
@@ -160,7 +161,7 @@ export default {
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 12.7, female: 13.5 } }], source: "Table 2 (STJ, <30)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 2.3, female: 1.4 } }], source: "Table 2 (STJ, <30)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "stj-bsa-30to39", label: "Mirea 2013 STJ, BSA-indexed, 30–39 y", status: "ok",
@@ -168,7 +169,7 @@ export default {
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 13.3, female: 14.3 } }], source: "Table 2 (STJ, 30–39)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.3, female: 1.5 } }], source: "Table 2 (STJ, 30–39)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "stj-bsa-40to49", label: "Mirea 2013 STJ, BSA-indexed, 40–49 y", status: "ok",
@@ -176,7 +177,7 @@ export default {
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 14.1, female: 14.6 } }], source: "Table 2 (STJ, 40–49)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.5, female: 1.2 } }], source: "Table 2 (STJ, 40–49)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "stj-bsa-50to59", label: "Mirea 2013 STJ, BSA-indexed, 50–59 y", status: "ok",
@@ -184,7 +185,7 @@ export default {
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 14.1, female: 15.7 } }], source: "Table 2 (STJ, 50–59)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.5, female: 1.3 } }], source: "Table 2 (STJ, 50–59)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "stj-bsa-60to69", label: "Mirea 2013 STJ, BSA-indexed, 60–69 y", status: "ok",
@@ -192,7 +193,7 @@ export default {
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 15.1, female: 14.7 } }], source: "Table 2 (STJ, 60–69)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.6, female: 1.6 } }], source: "Table 2 (STJ, 60–69)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "stj-bsa-70plus", label: "Mirea 2013 STJ, BSA-indexed, ≥70 y", status: "ok",
@@ -200,7 +201,7 @@ export default {
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 14.7, female: 15.5 } }], source: "Table 2 (STJ, >70)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.6, female: 2.0 } }], source: "Table 2 (STJ, >70)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
 
     // ── Table 2: ascending aorta/BSA (mm/m²), maximum diameter visualized ──
@@ -210,7 +211,7 @@ export default {
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", viewNote: "Maximum diameter visualized; modified view one intercostal space higher if needed" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 14.3, female: 15.1 } }], source: "Table 2 (ascending aorta, <30)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.6, female: 1.6 } }], source: "Table 2 (ascending aorta, <30)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "aao-bsa-30to39", label: "Mirea 2013 ascending aorta, BSA-indexed, 30–39 y", status: "ok",
@@ -218,7 +219,7 @@ export default {
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", viewNote: "Maximum diameter visualized; modified view one intercostal space higher if needed" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 14.5, female: 16.4 } }], source: "Table 2 (ascending aorta, 30–39)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.4, female: 1.8 } }], source: "Table 2 (ascending aorta, 30–39)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "aao-bsa-40to49", label: "Mirea 2013 ascending aorta, BSA-indexed, 40–49 y", status: "ok",
@@ -226,7 +227,7 @@ export default {
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", viewNote: "Maximum diameter visualized; modified view one intercostal space higher if needed" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 15.5, female: 16.4 } }], source: "Table 2 (ascending aorta, 40–49)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.5, female: 1.4 } }], source: "Table 2 (ascending aorta, 40–49)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "aao-bsa-50to59", label: "Mirea 2013 ascending aorta, BSA-indexed, 50–59 y", status: "ok",
@@ -234,7 +235,7 @@ export default {
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", viewNote: "Maximum diameter visualized; modified view one intercostal space higher if needed" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 16.2, female: 18.0 } }], source: "Table 2 (ascending aorta, 50–59)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.6, female: 1.4 } }], source: "Table 2 (ascending aorta, 50–59)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "aao-bsa-60to69", label: "Mirea 2013 ascending aorta, BSA-indexed, 60–69 y", status: "ok",
@@ -242,7 +243,7 @@ export default {
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", viewNote: "Maximum diameter visualized; modified view one intercostal space higher if needed" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 17.3, female: 17.6 } }], source: "Table 2 (ascending aorta, 60–69)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.7, female: 1.7 } }], source: "Table 2 (ascending aorta, 60–69)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
     {
       id: "aao-bsa-70plus", label: "Mirea 2013 ascending aorta, BSA-indexed, ≥70 y", status: "ok",
@@ -250,7 +251,7 @@ export default {
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", viewNote: "Maximum diameter visualized; modified view one intercostal space higher if needed" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 17.5, female: 18.2 } }], source: "Table 2 (ascending aorta, >70)" },
       sd:   { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 1.4, female: 3.3 } }], source: "Table 2 (ascending aorta, >70)" },
-      dist: "normal", validity: {},
+      dist: "normal", validity: { bmi: [null, 30] },
     },
 
   ],

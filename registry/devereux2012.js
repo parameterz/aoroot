@@ -7,7 +7,7 @@ export default {
   schema: 1,
   id: "devereux2012",
   label: "Devereux 2012",
-  entryVersion: "0.4.0",
+  entryVersion: "0.4.1",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Ported to schema 1; annulus status caution; height SEE variant 'consistency-corrected'" },
@@ -16,6 +16,7 @@ export default {
     { version: "0.3.2", date: "2026-11-14", by: "Claude", change: "Annulus SEEs from Table 2 (BSA 0.070, height 0.113) instead of the text, per Dan's review; legacy-code tests now compare the annulus ULN too" },
     { version: "0.3.3", date: "2026-11-14", by: "Claude", change: "Annulus 'consistency-corrected' SD option (0.18 cm); published Table 2 values stay the default" },
     { version: "0.4.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 4 of 4 models, all tests passing; agrees with notes and values" },
+    { version: "0.4.1", date: "2026-11-16", by: "Claude", change: "Notes only: added 'nonobese' (cohort described as nonobese / normal-weight with no BMI cutoff, so no BMI range is checked). No values changed." },
   ],
 
   citation: {
@@ -157,6 +158,12 @@ export default {
   },
 
   notes: [
+    {
+      id: "nonobese",
+      appliesTo: "all",
+      severity: "info",
+      text: "The cohort was 'nonobese' (Methods) and 'normal-weight' (abstract), with no BMI cutoff given, so no BMI range is checked here. Body weights ran up to 110 kg. Adding BMI did not improve the models, but only within that non-obese range; the authors raised the question of whether BSA under-recognizes aortic dilatation in obese subjects without being able to test it.",
+    },
     {
       id: "see-height",
       appliesTo: ["sov-height"],

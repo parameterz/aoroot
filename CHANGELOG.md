@@ -35,6 +35,21 @@ Each reference also keeps its own history in its registry file
   with ✕, Esc, Back, a swipe down, or by tapping the row again. The selection
   is kept in the link (`sel=`).
 - Print: collapsed curve cards print open; the sheet doesn't print.
+- BSA (DuBois) and BMI shown on the input form as you type, with the BMI
+  category; a BMI below 13 or above 60 asks for a units check. BMI joins BSA
+  in the results summary.
+- Body-build banner on the results page when BMI is 30 or more: BSA-based
+  references run low in obesity, which rows come from cohorts that excluded
+  it, and a button to show only references using height. Display only; no
+  numbers change.
+
+### References
+
+- Mirea 2013 0.3.2 and Muraru 2014 0.3.1: BMI ≤ 30 validity range on every
+  model (both excluded obesity), so obese patients get the "outside study"
+  flag and a BMI? chip. No values changed.
+- Devereux 2012 0.4.1: note that the cohort was "nonobese" with no BMI
+  cutoff stated, so no BMI range is checked. No values changed.
 
 ## [1.0.0] - 2026-11-15
 
