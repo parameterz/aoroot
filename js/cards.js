@@ -65,7 +65,7 @@ function drawChips(svg, parent, x, cy, comps, extrap = [], draw = true) {
       const g = el("g", { class: c.cls + (c.key && extrap.includes(c.key) ? " warn" : "") });
       if (!tag) g.appendChild(el("rect", { x: cx, y: cy - 8, width: w, height: 16, rx: 4 }));
       g.appendChild(el("text", { x: cx + (tag ? 1 : 5), y: cy + 4, class: "chiptxt" }, c.text));
-      if (c.key && extrap.includes(c.key)) g.appendChild(el("title", {}, `This patient is outside the study's ${c.key === "ht" ? "height" : c.key === "wt" ? "weight" : c.key === "bsa" ? "BSA" : "age"} range`));
+      if (c.key && extrap.includes(c.key)) g.appendChild(el("title", {}, `This patient is outside the study's ${c.key === "ht" ? "height" : c.key === "wt" ? "weight" : c.key === "bsa" ? "BSA" : c.key === "bmi" ? "BMI" : "age"} range`));
       parent.appendChild(g);
     }
     cx += w + 4;

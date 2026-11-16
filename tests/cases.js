@@ -9,6 +9,7 @@ import { modelsForSite, applyChoices } from "../lib/conventions.js";
 import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight, cmrThreshold } from "../lib/thresholds.js";
 import { scalingOf, adjustsFor, reportLine, shortLabel, indexedReportLine, componentsOf, passesFilter, ageBandText } from "../lib/describe.js";
 import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor } from "../lib/state.js";
+import { bmiNote } from "../lib/body.js";
 
 const TOL = { pred: 0.001, z: 0.01, pctPred: 0.1, uln: 0.01, lln: 0.01, covariates: 0.001 };
 
@@ -213,5 +214,23 @@ export function runAll() {
   check("input: 3.8 cm is fine", checkMeasurement("sov", 3.8, "cm").level === "ok");
   check("input: 85 mm SoV unusual", checkMeasurement("sov", 85, "mm").level === "unusual");
   check("input: 36 mm SoV ok", checkMeasurement("sov", 36, "mm").level === "ok");
+
+  // Body build: BMI categories, the obese banner cutoff, and BMI validity flags.
+  check("bmi: 24.9 normal, no banner", bmiNote(24.9).label === "normal" && !bmiNote(24.9).obese);
+  check("bmi: 30 obese, banner", bmiNote(30).label === "obese" && bmiNote(30).obese);
+  check("bmi: 18.4 underweight, banner; 18.5 none", bmiNote(18.4).underweight && !bmiNote(18.5).underweight && !bmiNote(18.4).obese);
+  check("bmi: 75 (231 lb entered as kg) asks for a units check", bmiNote(75.4).implausible && !bmiNote(34).implausible);
+  {
+    const obese = { sex: "male", age: 50, height_cm: 175, weight_kg: 105 };   // BMI 34.3
+    const lean = { sex: "male", age: 50, height_cm: 175, weight_kg: 70 };     // BMI 22.9
+    const flags = (id, p) => { const ref = registry.find((r) => r.id === id);
+      return ref.models.filter((m) => m.status !== "suppressed").every((m) => score(ref, m, p, 35).extrapolated.includes("bmi")); };
+    const none = (id, p) => { const ref = registry.find((r) => r.id === id);
+      return ref.models.every((m) => !(score(ref, m, p, 35).extrapolated ?? []).includes("bmi")); };
+    for (const id of ["mirea2013", "muraru2014", "yao2026"]) {
+      check(`bmi: ${id} flags BMI 34`, flags(id, obese));
+      check(`bmi: ${id} no flag at BMI 23`, none(id, lean));
+    }
+  }
   return results;
 }

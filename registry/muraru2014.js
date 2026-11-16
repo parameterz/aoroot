@@ -22,11 +22,12 @@ export default {
   schema: 1,
   id: "muraru2014",
   label: "Muraru 2014",
-  entryVersion: "0.3.0",
+  entryVersion: "0.3.1",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Tables 2 and 4)" },
     { version: "0.2.0", date: "2026-11-14", by: "Claude", change: "Removed the 6 Table 4 regressions: no published SD (site rule 7, no range, no model). Added the normality check and 95th-percentile paper tests. Table 2 models unchanged." },
     { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 12 of 12 models, all tests passing; agrees with values and notes" },
+    { version: "0.3.1", date: "2026-11-16", by: "Claude", change: "Validity: BMI up to 30 on every model (Methods exclude BMI > 30), so obese patients get the 'outside study' flag. No values changed." },
   ],
 
   citation: {
@@ -61,21 +62,21 @@ export default {
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis", viewNote: "Aortic root at the sinuses of Valsalva" },
       mean: { type: "linear", terms: [{ var: "height_m", coef: { male: 19, female: 18 } }], source: "Table 2 (aortic root/height, leading edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "height_m", coef: { male: 24, female: 21 } }] }, source: "Table 2 (aortic root/height, leading edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
     {
       id: "stj-ll-ed-ht", label: "Muraru 2014 STJ L–L end-diastole, height-indexed", status: "caution",
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "height_m", coef: { male: 17, female: 17 } }], source: "Table 2 (sinotubular junction/height, leading edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "height_m", coef: { male: 21, female: 19 } }] }, source: "Table 2 (sinotubular junction/height, leading edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
     {
       id: "aao-ll-ed-ht", label: "Muraru 2014 tubular aorta L–L end-diastole, height-indexed", status: "caution",
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis", viewNote: "Proximal tubular ascending aorta, 1 cm from the STJ" },
       mean: { type: "linear", terms: [{ var: "height_m", coef: { male: 17, female: 17 } }], source: "Table 2 (tubular/height, leading edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "height_m", coef: { male: 22, female: 20 } }] }, source: "Table 2 (tubular/height, leading edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
 
     // ── Table 2, leading edge, end-diastole: ratio to BSA (mm/m²) ──
@@ -84,21 +85,21 @@ export default {
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis", viewNote: "Aortic root at the sinuses of Valsalva" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 18, female: 18 } }], source: "Table 2 (aortic root/BSA, leading edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 21, female: 22 } }] }, source: "Table 2 (aortic root/BSA, leading edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
     {
       id: "stj-ll-ed-bsa", label: "Muraru 2014 STJ L–L end-diastole, BSA-indexed", status: "caution",
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 16, female: 17 } }], source: "Table 2 (sinotubular junction/BSA, leading edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 19, female: 20 } }] }, source: "Table 2 (sinotubular junction/BSA, leading edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
     {
       id: "aao-ll-ed-bsa", label: "Muraru 2014 tubular aorta L–L end-diastole, BSA-indexed", status: "caution",
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis", viewNote: "Proximal tubular ascending aorta, 1 cm from the STJ" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 16, female: 17 } }], source: "Table 2 (tubular/BSA, leading edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 19, female: 20 } }] }, source: "Table 2 (tubular/BSA, leading edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
 
     // ── Table 2, inner edge, end-diastole: ratio to height (mm/m) ──
@@ -107,21 +108,21 @@ export default {
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", viewNote: "Aortic root at the sinuses of Valsalva" },
       mean: { type: "linear", terms: [{ var: "height_m", coef: { male: 18, female: 17 } }], source: "Table 2 (aortic root/height, inner edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "height_m", coef: { male: 22, female: 20 } }] }, source: "Table 2 (aortic root/height, inner edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
     {
       id: "stj-ii-ed-ht", label: "Muraru 2014 STJ I–I end-diastole, height-indexed", status: "caution",
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "height_m", coef: { male: 16, female: 15 } }], source: "Table 2 (sinotubular junction/height, inner edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "height_m", coef: { male: 20, female: 18 } }] }, source: "Table 2 (sinotubular junction/height, inner edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
     {
       id: "aao-ii-ed-ht", label: "Muraru 2014 tubular aorta I–I end-diastole, height-indexed", status: "caution",
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", viewNote: "Proximal tubular ascending aorta, 1 cm from the STJ" },
       mean: { type: "linear", terms: [{ var: "height_m", coef: { male: 16, female: 16 } }], source: "Table 2 (tubular/height, inner edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "height_m", coef: { male: 20, female: 19 } }] }, source: "Table 2 (tubular/height, inner edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
 
     // ── Table 2, inner edge, end-diastole: ratio to BSA (mm/m²) ──
@@ -130,7 +131,7 @@ export default {
       measurement: { site: "sov", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", viewNote: "Aortic root at the sinuses of Valsalva" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 16, female: 17 } }], source: "Table 2 (aortic root/BSA, inner edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 19, female: 20 } }] }, source: "Table 2 (aortic root/BSA, inner edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
     {
       // Suppressed: the printed upper limit (28 mm/m² for both sexes) is 13–14 above the
@@ -139,14 +140,14 @@ export default {
       measurement: { site: "stj", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 14, female: 15 } }], source: "Table 2 (sinotubular junction/BSA, inner edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 28, female: 28 } }] }, source: "Table 2 (sinotubular junction/BSA, inner edge, upper limit = 95th percentile; as printed)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
     {
       id: "aao-ii-ed-bsa", label: "Muraru 2014 tubular aorta I–I end-diastole, BSA-indexed", status: "caution",
       measurement: { site: "aao", units: "mm", modality: "echo", edge: "inner", phase: "end-diastole", view: "parasternal long axis", viewNote: "Proximal tubular ascending aorta, 1 cm from the STJ" },
       mean: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 15, female: 16 } }], source: "Table 2 (tubular/BSA, inner edge, median)" },
       sd:   { type: "fromLimits", z: 1.645, uln: { type: "linear", terms: [{ var: "bsa_dubois", coef: { male: 18, female: 19 } }] }, source: "Table 2 (tubular/BSA, inner edge, upper limit = 95th percentile)" },
-      dist: "normal", validity: { age: [18, 80] },
+      dist: "normal", validity: { age: [18, 80], bmi: [null, 30] },
     },
 
   ],

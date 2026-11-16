@@ -3,6 +3,8 @@
 
 import { SITES } from "../lib/conventions.js";
 import { SITE_NAMES } from "../lib/describe.js";
+import { covariates } from "../lib/covariates.js";
+import { bmiNote } from "../lib/body.js";
 import {
   decodeHash, encodeHash, defaultState, isComplete, checkMeasurement,
   CONV_CODES, DEFAULT_CONV, IN_TO_CM, LB_TO_KG, toMm, fromMm,
@@ -73,6 +75,7 @@ function read() {
 }
 
 function render() {
+  renderBody();
   for (const site of SITES) {
     const v = num($(`y_${site}`));
     const box = document.getElementById(`msg_${site}`);
@@ -87,6 +90,19 @@ function render() {
     }
   }
   go.disabled = !isComplete(state);
+}
+
+// BSA and BMI as the user types: confirms the entry (an lb value with kg selected shows
+// up as an impossible BMI) and shows body build before the results.
+function renderBody() {
+  const p = state.patient, box = document.getElementById("body");
+  box.className = "small muted";
+  if (!(p.height_cm > 0)) { box.textContent = "Without weight, references based on BSA or weight are skipped."; return; }
+  if (!(p.weight_kg > 0)) { box.textContent = "No weight: references based on BSA or weight are skipped."; return; }
+  const c = covariates(p);
+  const note = bmiNote(c.bmi);
+  box.textContent = `BSA ${c.bsa_dubois.toFixed(2)} m² (DuBois) · BMI ${c.bmi.toFixed(1)}${note.label ? ` (${note.label})` : ""}`;
+  if (note.implausible) { box.className = "small warn"; box.textContent += ". Unusual: check the height and weight units."; }
 }
 
 form.addEventListener("input", (e) => {

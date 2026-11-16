@@ -379,6 +379,22 @@ details on demand.**
   references disagree).
 - Conditional pearls only when relevant, e.g. BMI outside the normal range
   **and** BSA vs height z-scores differ by about 1 SD or more.
+- Body build (built Nov 2026): the form shows BSA (DuBois) and BMI live; the
+  results summary shows both. At BMI ≥ 30 one banner sits above the sites
+  (BSA-based references run low; rows marked BMI? come from cohorts that
+  excluded obesity; button = the `ht` filter). Triggered by BMI alone, not by
+  BSA-vs-height divergence, so it is predictable. The per-reference part is
+  data: `validity.bmi` in the registry (Yao, Mirea, Muraru). Devereux's
+  cohort was "nonobese" with no cutoff, so it gets a note, not a range.
+  The same banner, reversed, at BMI < 18.5: BSA-based z-scores run high and
+  can overcall dilation (no cohort sets a lower BMI limit, so no chip line).
+  Rarer than obesity, but the cost is a false "dilated".
+- Ideal-weight BSA: decided against (Nov 2026). At a fixed BMI, ideal weight
+  depends only on height, so ideal BSA is a height power (DuBois: about
+  height^1.575) and a BSA model fed it becomes a height model with an exponent
+  nobody fitted. Its only use would be as a fallback where no height-based
+  range exists, and every site and convention here has at least one
+  height-only reference (NORRE covers all of them).
 - Candidate pearls:
   - Muraru 2014: leading vs inner edge differ by about 2 mm in the same people
     (the aortic wall); end-systole about 1 mm larger than end-diastole.
