@@ -207,10 +207,10 @@ they are transcribed, suppressed, and used as `paper` tests.
   also live in the hash, so a shared link reproduces what was on screen.
 - No identifiers in the form. One-line note: "links contain the values you
   entered."
-- **The per-site comparison table is the primary result.** No headline card
-  and no default reference: every reference is shown as an equal, with
-  alternatives and SD variants as menus, "Why?" notes, and Copy for report by
-  ticking rows.
+- **The per-site comparison table is the full record** (the charts lead; see
+  "Results layout (planned)" below). No headline card and no default
+  reference: every reference is shown as an equal, with alternatives and SD
+  variants as menus, "Why?" notes, and Copy for report by ticking rows.
 - **Not wanted:** a per-site summary line ("6 references: z from … to …") —
   the cards already tell that story; and no pooled or meta-analytic estimate,
   because between-reference differences (population, measurement, model form)
@@ -260,7 +260,8 @@ carried by the sketch alone. **Fonts self-hosted:** 9 latin woff2 files
 
 **Wish list:**
 
-- Collapse cards per site (table always visible).
+- Collapse cards per site (table always visible). The curve card collapses
+  by default under the planned results layout.
 - Implied exponent as a line under each model, next to the exponents AHI (1.0)
   and CSAH (0.5) assume.
 - What-if exploration (below), lighter version as buttons on the curve card.
@@ -270,6 +271,68 @@ carried by the sketch alone. **Fonts self-hosted:** 9 latin woff2 files
   not models (Yao's three populations count once), excluding suppressed
   models. Options with 0 sources shown disabled.
 - Serial studies (parked, below).
+
+### Results layout (planned, Nov 2026)
+
+In use, the charts get read far more than the numbers, and on a phone the %
+predicted chart sits a long scroll down. Principle: **overview first, then
+details on demand.**
+
+**Order within each site:**
+
+1. **% predicted** first: the across-reference overview, and the place to
+   choose a reference.
+2. **Patient on the curve**, **collapsed by default** ("Compare curves").
+   Keeps its legend chips and the height / age axis switch; opening it is an
+   opt-in to the overlay.
+3. **Risk thresholds**, with the chart moved to the top of the card.
+4. **Comparison table** last: still the full record, with the equations and
+   the "Why?" notes.
+
+**Compact sticky input summary.** One line (e.g. `39 mm · 52 F · 165 cm ·
+70 kg`) stays at the top while scrolling; tapping it goes to Edit.
+
+**Bottom sheet for one reference** (side panel on wide screens):
+
+- Tapping a % predicted row (the whole row band, label and bar, ≥ 44 px
+  tall) opens a half-height sheet: reference name, normalization, cohort
+  (n, ages), predicted value, % predicted, z, limits, **that reference's curve
+  with the patient's dot**, a "has notes" marker when a "Why?" note exists,
+  and a **Full details** link.
+- Putting the curve in the sheet solves discoverability: a tap never drives a
+  chart that is off screen, and only one curve shows at a time (no
+  spaghetti).
+- **Non-modal:** the chart stays visible and tappable above the sheet;
+  tapping another row swaps the contents, so references can be flipped
+  through quickly. The selected row stays highlighted.
+- **Dismiss:** swipe down on the handle, ✕, tap the selected row again, Esc,
+  or the phone's Back button. The page underneath never scrolls, so closing
+  leaves the user exactly where they were.
+- **Full details** closes the sheet, scrolls to that reference in the table
+  and flashes a highlight: the one jump that is welcome, because the user
+  asked for it.
+- Selection lives in the hash (e.g. `ref=yao2026`), alongside the existing
+  state: Back closes the sheet for free and links can open with a reference
+  selected.
+
+**Implementation notes (still vanilla; no framework needed):**
+
+- New state: selected reference (or none), sheet open, curve card collapsed.
+  Same state object + `render()` pattern.
+- rough.js: keep fixed seeds so redraws don't jitter; do the row highlight
+  with a plain background / CSS class, not a rough redraw.
+- When the sheet opens, keep the selected row visible above it (lower rows
+  could otherwise end up under the sheet).
+- Phones: size with `dvh`; pad the sheet with `env(safe-area-inset-bottom)`.
+  Keep the sticky summary to one line.
+- Accessibility: rows act as buttons (keyboard focusable, `aria-expanded` /
+  `aria-controls`); focus moves into the sheet on open and back to the row on
+  close.
+- If a filter chip hides the selected reference, close the sheet.
+- Print stylesheet: expand the curve card, hide the sheet.
+- `prefers-reduced-motion`: no slide animation.
+- Test swipe-to-close on a real phone early; if it feels fiddly, ✕, Back and
+  tapping the row again are enough.
 
 ### What-if exploration (planned)
 
