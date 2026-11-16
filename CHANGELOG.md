@@ -38,10 +38,11 @@ Each reference also keeps its own history in its registry file
 - BSA (DuBois) and BMI shown on the input form as you type, with the BMI
   category; a BMI below 13 or above 60 asks for a units check. BMI joins BSA
   in the results summary.
-- Body-build banner on the results page when BMI is 30 or more: BSA-based
-  references run low in obesity, which rows come from cohorts that excluded
-  it, and a button to show only references using height. Display only; no
-  numbers change.
+- Body-build banner on the results page when BMI is 30 or more (BSA-based
+  references run low; rows marked BMI? come from cohorts that excluded
+  obesity) or below 18.5 (BSA-based references run high and can overcall
+  dilation), with a button to show only references using height. Display
+  only; no numbers change.
 
 ### References
 

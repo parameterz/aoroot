@@ -218,6 +218,7 @@ export function runAll() {
   // Body build: BMI categories, the obese banner cutoff, and BMI validity flags.
   check("bmi: 24.9 normal, no banner", bmiNote(24.9).label === "normal" && !bmiNote(24.9).obese);
   check("bmi: 30 obese, banner", bmiNote(30).label === "obese" && bmiNote(30).obese);
+  check("bmi: 18.4 underweight, banner; 18.5 none", bmiNote(18.4).underweight && !bmiNote(18.5).underweight && !bmiNote(18.4).obese);
   check("bmi: 75 (231 lb entered as kg) asks for a units check", bmiNote(75.4).implausible && !bmiNote(34).implausible);
   {
     const obese = { sex: "male", age: 50, height_cm: 175, weight_kg: 105 };   // BMI 34.3

@@ -386,8 +386,9 @@ details on demand.**
   BSA-vs-height divergence, so it is predictable. The per-reference part is
   data: `validity.bmi` in the registry (Yao, Mirea, Muraru). Devereux's
   cohort was "nonobese" with no cutoff, so it gets a note, not a range.
-  Underweight (BMI < 18.5, where BSA-based z-scores run high) has no banner
-  yet.
+  The same banner, reversed, at BMI < 18.5: BSA-based z-scores run high and
+  can overcall dilation (no cohort sets a lower BMI limit, so no chip line).
+  Rarer than obesity, but the cost is a false "dilated".
 - Ideal-weight BSA: decided against (Nov 2026). At a fixed BMI, ideal weight
   depends only on height, so ideal BSA is a height power (DuBois: about
   height^1.575) and a BSA model fed it becomes a height model with an exponent

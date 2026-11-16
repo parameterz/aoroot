@@ -241,19 +241,25 @@ function render() {
 }
 
 /**
- * Body-build banner, once above the sites, when BMI is in the obese range. Generic on
+ * Body-build banner, once above the sites, when BMI is obese or underweight. Generic on
  * purpose: the per-reference part is the "outside study" flag (BMI? chip) that each
- * registry entry with a BMI validity range raises on its own rows.
+ * registry entry with a BMI validity range raises on its own rows. No cohort here sets
+ * a lower BMI limit, so the underweight text has no chip line.
  */
 function renderBodyNote(cov, view) {
   const box = document.getElementById("bodynote");
   const note = bmiNote(cov.bmi);
-  if (!note.obese || !SITES.some((s) => state.y[s] != null)) { box.innerHTML = ""; return; }
+  if (!(note.obese || note.underweight) || !SITES.some((s) => state.y[s] != null)) { box.innerHTML = ""; return; }
   const on = view.filter.includes("ht");
-  box.innerHTML = `<aside class="bodynote" aria-label="Body build">
-    <p><b>BMI ${cov.bmi.toFixed(1)}: obese.</b> BSA keeps rising with weight; aortic size doesn't. References that use BSA
+  const text = note.obese
+    ? `BSA keeps rising with weight; aortic size doesn't. References that use BSA
     predict a larger aorta for this patient, so their z-scores and percent of predicted run <em>low</em>.
-    Rows marked <span class="chipkey warn">BMI?</span> come from cohorts that excluded obesity.
+    Rows marked <span class="chipkey warn">BMI?</span> come from cohorts that excluded obesity.`
+    : `BSA falls with weight faster than aortic size does. References that use BSA
+    predict a smaller aorta for this patient, so their z-scores and percent of predicted run <em>high</em>
+    and can overcall dilation.`;
+  box.innerHTML = `<aside class="bodynote" aria-label="Body build">
+    <p><b>BMI ${cov.bmi.toFixed(1)}: ${note.label}.</b> ${text}
     Height-indexed references and the AHI and CSAH thresholds don't use weight.</p>
     <button type="button" class="secondary" id="bodyfilter" aria-pressed="${on}">${on ? "Show all references" : "Show only references using height"}</button>
   </aside>`;
