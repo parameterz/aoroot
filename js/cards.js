@@ -75,8 +75,10 @@ function drawChips(svg, parent, x, cy, comps, extrap = [], draw = true) {
 
 /**
  * Percent-of-predicted card: one row per model, shared axis, grouped by reference.
- * rows: [{ ref, groupStart, comps, extrap, title, pct, lo, hi, outside, extrapolated, dim }]
- *   ref: reference name, shown on the group's first row only; comps: componentsOf(model);
+ * rows: [{ ref, refId, groupStart, comps, extrap, title, aria, pct, lo, hi, outside, extrapolated, dim }]
+ *   ref: reference name, shown on the group's first row only; refId: registry id (rows are
+ *   buttons that open that reference's details sheet; aria: their accessible name);
+ *   comps: componentsOf(model);
  *   lo/hi: normal range as % of predicted (null = no published range); dim: filtered out.
  */
 export function drawPctCard(svg, rows) {
@@ -128,17 +130,24 @@ export function drawPctCard(svg, rows) {
     const cy = y + (narrow ? 30 : rowH / 2);
     y += rowH;
     const seed = 17 + i * 13;
-    const g = el("g", { class: "prow" + (r.dim ? " dim" : "") });
+    const g = el("g", { class: "prow" + (r.dim ? " dim" : ""), "data-ref": r.refId ?? "" });
+    if (r.refId && !r.dim) {
+      g.setAttribute("role", "button");
+      g.setAttribute("tabindex", "0");
+      g.setAttribute("aria-expanded", "false");
+      if (r.aria) g.setAttribute("aria-label", r.aria);
+    }
     svg.appendChild(g);
     if (r.title) g.appendChild(el("title", {}, r.title));
     // The reference name sits outside the row's group so it follows the whole group, not this row.
     const refLabel = (x, ty) => {
-      const rg = el("g", { class: "prow" + (groupDim[i] ? " dim" : "") });
+      const rg = el("g", { class: "prow plabel" + (groupDim[i] ? " dim" : ""), "data-ref": r.refId ?? "" });
       rg.appendChild(el("text", { x, y: ty, class: "lbl ref" }, r.ref));
       svg.appendChild(rg);
     };
-    // Invisible hit area so the whole row shows the tooltip.
-    g.appendChild(el("rect", { x: 0, y: cy - rowH / 2, width: W, height: rowH, class: "hit" }));
+    // Invisible hit area: the whole row band (label, chips and line) takes the tap and
+    // shows the tooltip; filled when the row is selected.
+    g.appendChild(el("rect", { x: 0, y: cy - rowH / 2, width: W - padR + 8, height: rowH, rx: 6, class: "hit" }));
 
     if (narrow) {
       let x = labelW;
@@ -220,12 +229,12 @@ function runs(pts, key) {
 /**
  * Patient-on-the-curve card.
  * series: [{ label, colorIndex, hidden, pts: [{ x, pred, uln, extrap } | null] }]
- * patient: { x, y }   (y in mm)   xLabel: axis title
+ * patient: { x, y }   (y in mm)   xLabel: axis title   opts: { height } (px; default by width)
  */
-export function drawCurveCard(svg, series, patient, xLabel, fmtY = (v) => `${v}`) {
-  const W = Math.max(320, Math.round(svg.getBoundingClientRect().width) || 760);
+export function drawCurveCard(svg, series, patient, xLabel, fmtY = (v) => `${v}`, opts = {}) {
+  const W = Math.max(280, Math.round(svg.getBoundingClientRect().width) || 760);
   const narrow = W < 600;
-  const H = narrow ? 300 : 380;
+  const H = opts.height ?? (narrow ? 300 : 380);
   const m = { l: narrow ? 40 : 56, r: 16, t: 14, b: 46 };
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.replaceChildren();

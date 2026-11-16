@@ -96,10 +96,16 @@ button.primary:hover, button.secondary:hover { filter: brightness(1.08); }
 button:disabled { opacity: .45; cursor: not-allowed; }
 
 /* Results */
-.summary { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; padding: 12px 18px;
-  background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); }
+/* Sticky one-line summary: measurements and patient; tapping it goes to Edit */
+.summary { position: sticky; top: 0; z-index: 5; display: flex; gap: 8px 16px; align-items: center; padding: 8px 14px;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 0 0 var(--radius) var(--radius); border-top: 0;
+  font-size: 14px; margin: 0 -2px; }
 .summary b { font-weight: 600; }
-.summary .seg { margin-left: auto; }
+.summary .sum-info { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); text-decoration: none; }
+.summary .sum-info:hover { text-decoration: underline; text-decoration-color: var(--rule); }
+.summary .sum-edit { flex: none; }
+.summary .seg { flex: none; margin-left: auto; }
+@media (max-width: 600px) { .summary { padding: 6px 10px; gap: 10px; font-size: 13px; } .summary .sum-bsa { display: none; } }
 .tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); }
 table { border-collapse: collapse; width: 100%; font-size: 14px; }
 th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
@@ -315,3 +321,78 @@ main.prose .card ul { padding-left: 20px; }
 main.prose .card li { margin: 6px 0; }
 pre.cite-block { font: 13px/1.5 var(--f-mono); background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px;
   white-space: pre-wrap; overflow-wrap: anywhere; margin: 8px 0; max-width: 75ch; }
+
+/* Results layout: charts first, the comparison table last */
+h3.tablehead { font-size: 18px; margin: 20px 0 8px; display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; }
+h3.tablehead .small { font-family: var(--f-body); }
+table.cmp tr.flash td { animation: flash 1.8s ease-out; }
+@keyframes flash { 0%, 30% { background: var(--accent-soft); } 100% { background: transparent; } }
+.legend .tap-hint { font-family: var(--f-hand); font-size: 17px; font-weight: 600; color: var(--accent); }
+
+/* Percent-of-predicted rows are buttons: hover, focus and selected states */
+svg.pct .prow[role=button], svg.pct .plabel:not(.dim) { cursor: pointer; }
+@media (hover: hover) { svg.pct .prow[role=button]:hover .hit { fill: color-mix(in srgb, var(--accent-soft) 45%, transparent); } }
+svg.pct .prow.sel .hit { fill: var(--accent-soft); }
+svg.pct .prow[role=button]:focus { outline: none; }
+svg.pct .prow[role=button]:focus-visible .hit { stroke: var(--accent); stroke-width: 2; }
+
+/* Curve card: collapsed by default */
+details.curvecard > summary { cursor: pointer; list-style: none; }
+details.curvecard > summary::-webkit-details-marker { display: none; }
+details.curvecard > summary h3::before { content: "▸ "; color: var(--accent); font-size: 15px; }
+details.curvecard[open] > summary h3::before { content: "▾ "; }
+details.curvecard .sum-hint { margin-left: auto; }
+details.curvecard:not([open]) { padding-bottom: 14px; }
+.curve-ctl { display: flex; justify-content: flex-end; margin-top: 8px; }
+
+/* Details sheet: half height, non-modal, slides up from the bottom */
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; margin: 0 auto; max-width: 760px;
+  max-height: min(46dvh, 520px); display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--rule); border-bottom: 0; border-radius: 14px 14px 0 0;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, .14); padding-bottom: env(safe-area-inset-bottom, 0px);
+  transform: translateY(100%); transition: transform .22s ease-out; }
+.sheet.open { transform: none; }
+.sheet.dragging { transition: none; }
+.sheet-grab { flex: none; height: 18px; display: flex; justify-content: center; align-items: center; cursor: grab; touch-action: none; }
+.sheet-grab::before { content: ""; width: 40px; height: 4px; border-radius: 2px; background: var(--rule); }
+.sheet-head { flex: none; display: flex; gap: 12px; align-items: flex-start; padding: 0 14px 8px 18px; touch-action: none;
+  border-bottom: 1px solid var(--rule); }
+.sheet-title { flex: 1; min-width: 0; }
+.sheet-head h2 { font-size: 20px; margin: 0 0 2px; }
+.sheet-head h2:focus { outline: none; }
+.sheet-x { flex: none; font: inherit; font-size: 18px; line-height: 1; width: 44px; height: 44px; margin: -6px -6px 0 0; border: 0;
+  border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; }
+.sheet-x:hover { background: var(--bg); color: var(--ink); }
+.sheet-body { overflow-y: auto; overscroll-behavior: contain; padding: 4px 18px 14px; }
+.sm-row { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.sm-name { font-size: 14px; }
+.sm-name b { font-weight: 600; }
+.sm-nums { display: grid; grid-template-columns: repeat(4, auto); justify-content: space-between; gap: 4px 12px; margin: 6px 0 0; }
+.sm-nums dt { font-size: 10.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.sm-nums dd { margin: 0; font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: 14px; }
+.sm-nums dd.hi { color: var(--crit); font-weight: 500; }
+.sm-curve-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; margin-top: 12px; }
+svg.sm-curve { margin-top: 4px; }
+.sm-links { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; padding-top: 10px; margin-top: 8px; border-top: 1px solid var(--rule); font-size: 14px; }
+button.linkbtn { font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 6px 0; cursor: pointer; }
+button.linkbtn:hover { text-decoration: underline; }
+@media (max-width: 600px) {
+  .sheet { max-height: 56dvh; }
+  .sheet-head { padding: 0 8px 6px 14px; }
+  .sheet-body { padding: 2px 14px 12px; }
+  .sm-nums { gap: 2px 8px; }
+  .sm-nums dt { font-size: 10px; letter-spacing: .05em; }
+  .sm-nums dd { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet { transition: none; }
+  table.cmp tr.flash td { animation-duration: .01s; }
+  svg .prow { transition: none; }
+}
+
+@media print {
+  .sheet, .pfilter, .summary .seg, .sum-edit { display: none !important; }
+  .summary { position: static; }
+  body { padding-bottom: 0 !important; }
+  details.curvecard .sum-hint { display: none; }
+}

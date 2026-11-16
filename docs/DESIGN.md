@@ -272,7 +272,7 @@ carried by the sketch alone. **Fonts self-hosted:** 9 latin woff2 files
   models. Options with 0 sources shown disabled.
 - Serial studies (parked, below).
 
-### Results layout (planned, Nov 2026)
+### Results layout (built Nov 2026, branch `results-layout`)
 
 In use, the charts get read far more than the numbers, and on a phone the %
 predicted chart sits a long scroll down. Principle: **overview first, then
@@ -292,7 +292,7 @@ details on demand.**
 **Compact sticky input summary.** One line (e.g. `39 mm · 52 F · 165 cm ·
 70 kg`) stays at the top while scrolling; tapping it goes to Edit.
 
-**Bottom sheet for one reference** (side panel on wide screens):
+**Bottom sheet for one reference** (`js/sheet.js`; same sheet on wide screens, centred, max 760 px wide and a little shorter):
 
 - Tapping a % predicted row (the whole row band, label and bar, ≥ 44 px
   tall) opens a half-height sheet: reference name, normalization, cohort
@@ -311,9 +311,12 @@ details on demand.**
 - **Full details** closes the sheet, scrolls to that reference in the table
   and flashes a highlight: the one jump that is welcome, because the user
   asked for it.
-- Selection lives in the hash (e.g. `ref=yao2026`), alongside the existing
-  state: Back closes the sheet for free and links can open with a reference
-  selected.
+- Selection lives in the hash (`sel=<site>.<refId>`, e.g. `sel=sov.yao2026`),
+  alongside the existing state: opening pushes one history entry (swapping
+  replaces it), so Back closes the sheet, and links can open with a reference
+  selected (the page scrolls to its row). Leaving that entry carries over
+  anything changed while the sheet was open (units, filters), since the older
+  entry's hash predates it (`beforeNav()` in `js/sheet.js`).
 
 **Implementation notes (still vanilla; no framework needed):**
 

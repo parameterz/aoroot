@@ -17,6 +17,25 @@ clinical calculator:
 Each reference also keeps its own history in its registry file
 (`registry/*.js`); entries here name the reference version a release includes.
 
+## [Unreleased]
+
+### Changed
+
+- Results page leads with the charts: percent of predicted, then patient on the
+  curve (now collapsed by default), then risk thresholds (chart at the top of
+  the card), then the comparison table. No numbers change.
+- One-line input summary (measurements, sex, age, height, weight) stays at the
+  top while scrolling; tapping it goes to Edit.
+
+### Added
+
+- Tap a percent-of-predicted row to open that reference in a bottom sheet:
+  its predicted value, normal range, z and percent of predicted, its curve
+  with the patient, and a link to its full table entry and "Why?" notes. Close
+  with ✕, Esc, Back, a swipe down, or by tapping the row again. The selection
+  is kept in the link (`sel=`).
+- Print: collapsed curve cards print open; the sheet doesn't print.
+
 ## [1.0.0] - 2026-11-15
 
 First release of the rebuilt site: adults only, static, on GitHub Pages at
