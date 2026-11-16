@@ -38,6 +38,10 @@ function setHash(mutate) {
 }
 
 function render() {
+  // Rebuilding #sites makes the page briefly short (the sketches measure their width
+  // mid-rebuild, forcing a layout), and the browser clamps the scroll position to fit.
+  // Put it back at the end so toggles and ticks don't move the page (issue #3).
+  const scrollX0 = window.scrollX, scrollY0 = window.scrollY;
   const decoded = decodeHash(location.hash);
   state = decoded.state;
   const { patient: p, view } = state;
@@ -238,6 +242,7 @@ function render() {
     c.onchange = () => { c.checked ? checked.add(c.dataset.report) : checked.delete(c.dataset.report); updateReport(reportRows); };
   updateReport(reportRows);
   renderSheet();
+  if (window.scrollY !== scrollY0 || window.scrollX !== scrollX0) window.scrollTo({ left: scrollX0, top: scrollY0, behavior: "instant" });
 }
 
 /**
