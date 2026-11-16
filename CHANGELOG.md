@@ -23,6 +23,9 @@ Each reference also keeps its own history in its registry file
 
 - Results page site headings keep the measurement and its unit on one line
   on narrow phones (was "Sinus of Valsalva 41" with "mm" wrapped below).
+- Results page no longer jumps toward the top when you tick an SD option,
+  use a filter, open "Patient on the curve" or toggle a curve series while
+  scrolled down the page (#3).
 
 ## [1.2.0] - 2026-11-16
 
