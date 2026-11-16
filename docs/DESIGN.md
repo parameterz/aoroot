@@ -367,7 +367,8 @@ details on demand.**
   CSAH 9).* Guideline thresholds appended only when met.
 - Numbers only by default; an optional toggle adds threshold wording
   ("dilated"), naming the threshold.
-- Version tag at the end (e.g. "aoroot.parameterz.com v1.2").
+- Version tag at the end (e.g. "aoroot.parameterz.com v1.0.0"), from
+  `lib/version.js`; see CHANGELOG.md for what each version contains.
 
 ## Teaching notes
 

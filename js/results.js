@@ -34,7 +34,7 @@ function render() {
   state = decoded.state;
   const { patient: p, view } = state;
   const units = view.units;
-  document.getElementById("version").textContent = VERSION;
+  document.getElementById("version").textContent = `v${VERSION}`;
 
   // Summary bar
   const cov = p.sex && p.height_cm ? covariates(p) : {};
@@ -297,7 +297,7 @@ function updateReport(rows) {
     .map((r, i) => ({ ...r, i, s: SITES.indexOf(r.key.split("|")[0]) }))
     .sort((a, b) => a.s - b.s || a.i - b.i).map((r) => r.line);
   document.getElementById("report").hidden = rows.length === 0;
-  document.getElementById("reportText").value = lines.length ? [...lines, `aoroot.parameterz.com ${VERSION}`].join("\n") : "";
+  document.getElementById("reportText").value = lines.length ? [...lines, `aoroot.parameterz.com v${VERSION}`].join("\n") : "";
   document.getElementById("copy").disabled = !lines.length;
 }
 
