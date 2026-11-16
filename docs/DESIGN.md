@@ -210,7 +210,8 @@ they are transcribed, suppressed, and used as `paper` tests.
 - **The per-site comparison table is the full record** (the charts lead; see
   "Results layout (planned)" below). No headline card and no default
   reference: every reference is shown as an equal, with alternatives and SD
-  variants as menus, "Why?" notes, and Copy for report by ticking rows.
+  variants as menus, "Why?" notes, and Copy for report by ticking rows
+  (detail chips in the report card).
 - **Not wanted:** a per-site summary line ("6 references: z from … to …") —
   the cards already tell that story; and no pooled or meta-analytic estimate,
   because between-reference differences (population, measurement, model form)
@@ -361,15 +362,32 @@ details on demand.**
 ## Copy for report
 
 - **Plain text** on the clipboard (no tables or special symbols; "mm", "m",
-  "z = +2.8"). One line per site, the reference named every time. Units follow
-  the mm/cm switch.
-- Example: *Sinus of Valsalva 41 mm (z = +2.8; 118% of predicted for age, sex
-  and height; Devereux 2012 height model).*
-- **Indexed line** (tick in a risk-thresholds card): *Ascending aorta 44 mm:
-  AHI 2.78 cm/m, CSAH 9.6 cm2/m; above Desai 2026 risk thresholds (AHI 2.5,
-  CSAH 9).* Guideline thresholds appended only when met.
-- Numbers only by default; an optional toggle adds threshold wording
-  ("dilated"), naming the threshold.
+  "z = +2.8"). Units follow the mm/cm switch.
+- **Ticks choose the sources; chips choose the pieces.** Ticking table rows
+  (and "add AHI and CSAH" in a risk-thresholds card) picks what goes in. One
+  row of chips in the report card turns pieces of every sentence on or off:
+  verdict, z-score, % predicted, normal limit, reference, risk thresholds.
+  Defaults: z-score, % predicted, reference and risk thresholds on. Chip
+  choices are remembered in the browser (`localStorage`, display settings
+  only; nothing the visitor enters is stored). Borrowed from dilated-af.
+- **One line per site, the site and measurement named once** (issue #5). Each
+  ticked reference adds a clause, then the AHI/CSAH clause: *Sinus of Valsalva
+  38 mm: z = +1.53; 109% of predicted for age, sex and height (Devereux 2012). AHI 2.30 cm/m, CSAH 6.9 cm2/m; below Desai 2026 risk
+  thresholds (AHI 2.5, CSAH 9).*
+- References are named by first author and year ("Saura 2017"); the site
+  heading already says what was measured. Two models from the same reference
+  in one line also carry their model label.
+- A site with more than one reference ticked always names them; the reference
+  chip is locked on, since unnamed clauses would be ambiguous.
+- **Verdict** ("dilated", "small", "within normal limits") is off by default
+  and is judged against that reference's own normal range; the **normal
+  limit** chip adds the limit in mm (upper limit when dilated, lower when
+  small, the range when normal).
+- Guideline indexed thresholds are appended only when met.
+- **Editable:** the text can be changed by hand before copying. An "edited"
+  marker warns that a tick or chip rewrites it; Reset restores the generated
+  text. Re-renders that leave the text unchanged keep the edit.
+- The text is built by `buildReport` in `lib/describe.js` (no DOM, tested).
 - Version tag at the end (e.g. "aoroot.parameterz.com v1.0.0"), from
   `lib/version.js`; see CHANGELOG.md for what each version contains.
 

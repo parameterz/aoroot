@@ -36,13 +36,15 @@
 
 <section class="report" id="report" hidden>
   <h2>Copy for report</h2>
-  <p class="small muted">Tick the rows you want in the report column of the tables above, and "add AHI and CSAH" in a risk-thresholds card. Plain text; the reference is named on every line.</p>
-  <textarea id="reportText" readonly aria-label="Report text"></textarea>
+  <p class="small muted">Tick the rows you want in the report column of the tables above, and "add AHI and CSAH" in a risk-thresholds card. Each site is named once; the chips turn pieces of the sentences on or off and are remembered in this browser.</p>
+  <div class="rchips" id="chips" aria-label="Report contents"></div>
+  <textarea id="reportText" aria-label="Report text (editable)"></textarea>
+  <p class="small muted" id="edited" hidden><span class="flag">edited</span> Changing a tick or a chip rewrites the text. <button type="button" class="linkbtn" id="resetText">Reset</button></p>
   <div class="actions"><button type="button" class="primary" id="copy">Copy</button><span id="copied" class="small muted"></span></div>
 </section>
 
 <footer>
-  <span>Links contain the values you entered. All calculation runs in your browser; nothing is stored or sent. Educational tool, not a substitute for clinical judgment; check results against the original publications.</span>
+  <span>Links contain the values you entered. All calculation runs in your browser; nothing you enter is stored or sent. Educational tool, not a substitute for clinical judgment; check results against the original publications.</span>
   <span>Visual style after <a href="https://intro2echo.com">The Heart by Ultrasound</a>. Sketched figures drawn with rough.js (MIT). <a href="references.html">References</a> · <a href="about.html">About and how to cite</a>.</span>
   <span><strong>Created by:</strong> <a href="https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/">Dan Dyar, MA, ACS, RDCS, FASE</a></span>
   <span>aoroot.parameterz.com <span id="version"></span></span>

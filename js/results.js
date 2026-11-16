@@ -13,7 +13,7 @@ import { drawPctCard, drawLegend, drawCurveCard, drawThresholdCard } from "./car
 import { THRESHOLDS, CMR_NORMAL, cmrThreshold, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
 import { curveSeries, SWEEP } from "./curve.js";
 import { initSheet, renderSheet, beforeNav } from "./sheet.js";
-import { SITE_NAMES, scalingOf, adjustsFor, componentsOf, passesFilter, CHIP_OF, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, reportLine, indexedReportLine } from "../lib/describe.js";
+import { SITE_NAMES, scalingOf, adjustsFor, componentsOf, passesFilter, CHIP_OF, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, buildReport, REPORT_CHIPS, defaultReportChips } from "../lib/describe.js";
 
 import { bmiNote } from "../lib/body.js";
 import { VERSION } from "../lib/version.js";
@@ -137,8 +137,7 @@ function render() {
           dim: !passesFilter(comps, view.filter),
         });
         const key = `${site}|${ref.id}|${model.id}`;
-        const line = reportLine(site, y, r, ref, model, units);
-        reportRows.push({ key, line });
+        reportRows.push({ key, site, y, kind: "ref", result: r, ref, model });
         const zHi = r.outside ? " hi" : "";
         rows += `<tr class="${first.trim()}"${i === 0 ? ` id="t_${site}_${esc(ref.id)}"` : ""}>
           <td>${refCell}</td>
@@ -239,8 +238,8 @@ function render() {
   for (const c of main.querySelectorAll("input[data-sd]"))
     c.onchange = () => setHash((st) => { if (c.checked) st.view.sd[c.dataset.sd] = c.value; else delete st.view.sd[c.dataset.sd]; });
   for (const c of main.querySelectorAll("input[data-report]"))
-    c.onchange = () => { c.checked ? checked.add(c.dataset.report) : checked.delete(c.dataset.report); updateReport(reportRows); };
-  updateReport(reportRows);
+    c.onchange = () => { c.checked ? checked.add(c.dataset.report) : checked.delete(c.dataset.report); updateReport(reportRows, units); };
+  updateReport(reportRows, units);
   renderSheet();
   if (window.scrollY !== scrollY0 || window.scrollX !== scrollX0) window.scrollTo({ left: scrollX0, top: scrollY0, behavior: "instant" });
 }
@@ -276,7 +275,7 @@ function renderBodyNote(cov, view) {
 /** Card 3: risk thresholds (AHI / CSAH / diameter) for the SoV and ascending aorta. */
 function renderThresholds(main, site, y, units, p, reportRows) {
   const key = `${site}|indexed`;
-  reportRows.push({ key, line: indexedReportLine(site, y, p, units) });
+  reportRows.push({ key, site, y, kind: "indexed", patient: p });
   const h = p.height_cm;
   const ahi = indexValue("AHI", y, h), csah = indexValue("CSAH", y, h);
   const cmr = CMR_NORMAL.sites.includes(site) ? cmrThreshold(p) : null;
@@ -357,15 +356,56 @@ function renderThresholds(main, site, y, units, p, reportRows) {
   drawLegend(svg.parentElement);
 }
 
-function updateReport(rows) {
-  // Report order: by site, then as the rows appear (indexed line after that site's references).
-  const lines = rows.filter((r) => checked.has(r.key))
-    .map((r, i) => ({ ...r, i, s: SITES.indexOf(r.key.split("|")[0]), ix: r.key.endsWith("|indexed") ? 1 : 0 }))
-    .sort((a, b) => a.s - b.s || a.ix - b.ix || a.i - b.i).map((r) => r.line);
+// ── Copy for report ──────────────────────────────────────────────────────────
+// Ticks choose the sources (references, AHI/CSAH); chips choose the pieces of each
+// sentence. Chip choices are display settings, remembered in this browser only.
+const chipStore = {
+  get(k) { try { return localStorage.getItem("aoroot.report." + k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem("aoroot.report." + k, v); } catch { /* private mode: lasts for this visit */ } },
+};
+const chipOn = defaultReportChips();
+for (const c of REPORT_CHIPS) { const v = chipStore.get(c.key); if (v !== null) chipOn[c.key] = v === "1"; }
+const report = { rows: [], units: "mm", generated: "", edited: false };
+
+function updateReport(rows = report.rows, units = report.units) {
+  report.rows = rows; report.units = units;
+  // Report order: by site, then as the rows appear (AHI/CSAH after that site's references).
+  const sites = SITES.map((site) => {
+    const mine = rows.filter((r) => r.site === site && checked.has(r.key));
+    return { site, y_mm: mine[0]?.y, refs: mine.filter((r) => r.kind === "ref"), indexed: mine.find((r) => r.kind === "indexed")?.patient ?? null };
+  }).filter((s) => s.refs.length || s.indexed);
+  const lines = buildReport(sites, units, chipOn);
+  const text = lines.length ? [...lines, `aoroot.parameterz.com v${VERSION}`].join("\n") : "";
+  const box = document.getElementById("reportText");
+  // A hand edit survives re-renders that don't change the generated text (a filter, a curve toggle).
+  if (text !== report.generated || !report.edited) { box.value = text; report.edited = false; }
+  report.generated = text;
   document.getElementById("report").hidden = rows.length === 0;
-  document.getElementById("reportText").value = lines.length ? [...lines, `aoroot.parameterz.com v${VERSION}`].join("\n") : "";
-  document.getElementById("copy").disabled = !lines.length;
+  document.getElementById("edited").hidden = !report.edited;
+  const forced = sites.some((s) => s.refs.length > 1);
+  document.getElementById("chips").innerHTML = REPORT_CHIPS.map((c) => {
+    const lock = c.key === "ref" && forced;
+    return `<button type="button" class="rchip" data-chip="${c.key}" aria-pressed="${lock || chipOn[c.key]}"${lock ? ' disabled title="Always named when a site has more than one reference"' : ""}>${c.label}</button>`;
+  }).join("");
+  box.readOnly = !lines.length;
+  document.getElementById("copy").disabled = !box.value.trim();
 }
+
+document.getElementById("chips").onclick = (e) => {
+  const b = e.target.closest("button[data-chip]");
+  if (!b || b.disabled) return;
+  const k = b.dataset.chip;
+  chipOn[k] = !chipOn[k];
+  chipStore.set(k, chipOn[k] ? "1" : "0");
+  report.edited = false; // a chip rewrites the sentence, as the marker warns
+  updateReport();
+};
+document.getElementById("reportText").oninput = () => {
+  report.edited = document.getElementById("reportText").value !== report.generated;
+  document.getElementById("edited").hidden = !report.edited;
+  document.getElementById("copy").disabled = !document.getElementById("reportText").value.trim();
+};
+document.getElementById("resetText").onclick = () => { report.edited = false; updateReport(); };
 
 document.getElementById("copy").onclick = async () => {
   const text = document.getElementById("reportText").value;
