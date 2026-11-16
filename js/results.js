@@ -152,7 +152,7 @@ function render() {
     const convNote = convCode === DEFAULT_CONV[site] ? "" : ` <span class="flag">non-default</span>`;
     const hasExtrap = pctRows.some((r) => r.extrap.length);
     main.insertAdjacentHTML("beforeend", `
-      <h2 id="site_${site}">${SITE_NAMES[site]} ${fmtObserved(y, units)} <span class="muted small">(${CONV_LABEL[convCode]})</span>${convNote}</h2>
+      <h2 id="site_${site}">${SITE_NAMES[site]} <span class="nowrap">${fmtObserved(y, units)}</span> <span class="muted small">(${CONV_LABEL[convCode]})</span>${convNote}</h2>
       <section class="card" aria-label="${SITE_NAMES[site]}: percent of predicted">
         <div class="card-head"><h3>Percent of predicted</h3>
           <span class="handnote">same ${fmtObserved(y, units)}, as a share of what each reference expects</span></div>

@@ -17,6 +17,13 @@ clinical calculator:
 Each reference also keeps its own history in its registry file
 (`registry/*.js`); entries here name the reference version a release includes.
 
+## [Unreleased]
+
+### Fixed
+
+- Results page site headings keep the measurement and its unit on one line
+  on narrow phones (was "Sinus of Valsalva 41" with "mm" wrapped below).
+
 ## [1.2.0] - 2026-11-16
 
 ### Added

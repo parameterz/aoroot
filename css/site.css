@@ -403,3 +403,6 @@ button.linkbtn:hover { text-decoration: underline; }
   body { padding-bottom: 0 !important; }
   details.curvecard .sum-hint { display: none; }
 }
+
+/* keep a value and its unit on one line (e.g. "41 mm" in the site headings) */
+.nowrap { white-space: nowrap; }
