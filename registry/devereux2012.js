@@ -1,4 +1,6 @@
 // @ts-check
+// Copyright © 2026 Dan Dyar. Licensed under CC BY-NC-SA 4.0 (see LICENSE-DATA and LICENSING.md).
+// Published equations and values belong to the cited paper; this entry's curation, notes and checks are covered here.
 // Devereux 2012: sinus of Valsalva and annulus, BSA and height models.
 // Transcribed as published. Suspected corrections live in sd.variants + notes.
 

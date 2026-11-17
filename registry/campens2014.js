@@ -1,4 +1,6 @@
 // @ts-check
+// Copyright © 2026 Dan Dyar. Licensed under CC BY-NC-SA 4.0 (see LICENSE-DATA and LICENSING.md).
+// Published equations and values belong to the cited paper; this entry's curation, notes and checks are covered here.
 // Campens 2014: sinuses of Valsalva and ascending aorta, ages 1–85, Ghent.
 // Transcribed as published from Table 2 (8 equations: 2 levels × 2 sexes × 2 BSA formulas).
 //

@@ -1,3 +1,4 @@
+// Copyright © 2026 Dan Dyar. Licensed under CC BY-NC-SA 4.0 (see LICENSE-DATA and LICENSING.md).
 // Every registry entry, in display order. Browsers can't list a folder,
 // so a new reference needs one import line here.
 import devereux2012 from "./devereux2012.js";

@@ -1,4 +1,6 @@
 // @ts-check
+// Copyright © 2026 Dan Dyar. Licensed under CC BY-NC-SA 4.0 (see LICENSE-DATA and LICENSING.md).
+// Published equations and values belong to the cited paper; this entry's curation, notes and checks are covered here.
 // WASE (Patel 2022): aortic annulus, SoV and STJ in 1,585 healthy adults from 15 countries.
 // Transcribed as published from Table 3 and the equations printed under Figures 2 and 3.
 // Table 3 height-indexed SoV and STJ values checked against parameterz/dilated-af data.js.

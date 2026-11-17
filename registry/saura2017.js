@@ -1,4 +1,6 @@
 // @ts-check
+// Copyright © 2026 Dan Dyar. Licensed under CC BY-NC-SA 4.0 (see LICENSE-DATA and LICENSING.md).
+// Published equations and values belong to the cited paper; this entry's curation, notes and checks are covered here.
 // NORRE (Saura 2017): proximal aorta, healthy European adults.
 // Transcribed as published from Tables 3 and 5. Table 3 values were checked
 // against parameterz/dilated-af scripts/data.js (height ratios: all 19 match).

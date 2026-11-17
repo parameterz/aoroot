@@ -1,4 +1,6 @@
 // @ts-check
+// Copyright © 2026 Dan Dyar. Licensed under CC BY-NC-SA 4.0 (see LICENSE-DATA and LICENSING.md).
+// Published equations and values belong to the cited paper; this entry's curation, notes and checks are covered here.
 // Yao 2026 (CITED I): optimized multivariate allometric model (OMAM) for the aortic
 // annulus, sinus and proximal ascending aorta in healthy Chinese and Italian adults.
 // Transcribed as published (Sections 2.6–2.8, Tables 4 and 5); equations checked
