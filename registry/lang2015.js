@@ -1,4 +1,6 @@
 // @ts-check
+// Copyright © 2026 Dan Dyar. Licensed under CC BY-NC-SA 4.0 (see LICENSE-DATA and LICENSING.md).
+// Published equations and values belong to the cited paper; this entry's curation, notes and checks are covered here.
 // Lang 2015 (ASE/EACVI chamber quantification guideline), Table 14: "Aortic root
 // dimensions in normal adults", mean ± SD by sex, absolute (cm) and indexed to BSA
 // (cm/m²; used here), for the annulus, sinuses of Valsalva, STJ and proximal ascending aorta.

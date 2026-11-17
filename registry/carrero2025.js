@@ -1,4 +1,6 @@
 // @ts-check
+// Copyright © 2026 Dan Dyar. Licensed under CC BY-NC-SA 4.0 (see LICENSE-DATA and LICENSING.md).
+// Published equations and values belong to the cited paper; this entry's curation, notes and checks are covered here.
 // MATEAR (Carrero 2025): 1,000 healthy Argentine adults, 53 echo laboratories, offline
 // confirmation by two readers. Transcribed as published from Table 2: mean ± SD and
 // 97.5th percentile by sex, as absolute diameter (cm) and indexed to BSA (cm/m²,

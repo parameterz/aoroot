@@ -1,1 +1,1 @@
-{ "type": "module", "private": true, "scripts": { "test": "node tests/run.js" } }
+{"type": "module", "private": true, "scripts": {"test": "node tests/run.js"}, "license": "(AGPL-3.0-or-later AND CC-BY-NC-SA-4.0)"}

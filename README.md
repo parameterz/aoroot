@@ -56,3 +56,7 @@ Static site, plain HTML + ES modules, no build step, served by GitHub Pages.
 
 Run locally with `python3 -m http.server` and open <http://localhost:8000>.
 Tests: `node tests/run.js`, or open `tests.html` from the local server.
+
+## License
+
+© 2026 Dan Dyar. The code is licensed under the [GNU AGPL v3.0 or later](LICENSE); the curated reference registry (`registry/`), notes and page text under [CC BY-NC-SA 4.0](LICENSE-DATA). Non-commercial use, sharing and adaptation are welcome with attribution. **Commercial use**, including integration into reporting, PACS or EHR systems, needs a separate license: please [get in touch](https://www.linkedin.com/in/dan-dyar-ma-acs-rdcs-ae-pe-fe-fase/). Details in [LICENSING.md](LICENSING.md).

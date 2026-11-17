@@ -1,4 +1,6 @@
 // @ts-check
+// Copyright © 2026 Dan Dyar. Licensed under CC BY-NC-SA 4.0 (see LICENSE-DATA and LICENSING.md).
+// Published equations and values belong to the cited paper; this entry's curation, notes and checks are covered here.
 // Muraru 2014: ascending aorta (root, STJ, tubular) by leading-edge AND inner-edge
 // conventions in 218 healthy Caucasian volunteers (Padua).
 // Transcribed as published from Table 2.

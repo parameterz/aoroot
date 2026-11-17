@@ -17,6 +17,20 @@ clinical calculator:
 Each reference also keeps its own history in its registry file
 (`registry/*.js`); entries here name the reference version a release includes.
 
+## [1.3.1] - 2026-11-16
+
+### Added
+
+- Licensing. Code under the GNU AGPL v3.0 or later (`LICENSE`); the reference
+  registry, notes and page text under CC BY-NC-SA 4.0 (`LICENSE-DATA`);
+  `LICENSING.md` explains what each covers. Commercial use, including
+  reporting, PACS or EHR integration, needs a separate license: contact the
+  author.
+- About page: a License and reuse section. Every page footer carries a
+  one-line license notice; every registry file carries a license header.
+
+No numbers change.
+
 ## [1.3.0] - 2026-11-16
 
 ### Added

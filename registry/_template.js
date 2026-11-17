@@ -1,4 +1,6 @@
 // @ts-check
+// Copyright © 2026 Dan Dyar. Licensed under CC BY-NC-SA 4.0 (see LICENSE-DATA and LICENSING.md).
+// Published equations and values belong to the cited paper; this entry's curation, notes and checks are covered here.
 // ─────────────────────────────────────────────────────────────────────────────
 // REGISTRY ENTRY TEMPLATE  (schema 1)
 // Copy to registry/<id>.js, fill in, add one line to registry/index.js.
