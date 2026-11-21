@@ -23,7 +23,7 @@ Each reference also keeps its own history in its registry file
 
 - Absolute (sex-only) values, shown as the unadjusted comparison beside the
   references that account for body size: ASE/EACVI 2015 Table 14 (4 models,
-  entry 0.4.1, reviewed), WASE (9, entry 0.4.1, reviewed) and MATEAR (4, entry 0.3.1,
+  entry 0.4.2), WASE (9, entry 0.4.1, reviewed) and MATEAR (4, entry 0.3.1,
   reviewed). All marked
   caution with a "no body size" note. Results for every existing model are
   unchanged.
@@ -34,8 +34,10 @@ Each reference also keeps its own history in its registry file
   upper limit in 12 of 15 size-adjusted models").
 - Patient on the curve: a flat, dotted line per unadjusted reference, with its
   own legend key (also in that reference's sheet).
-- ASE/EACVI 2015 note: the guideline never says what its ± values are; read as
-  mean ± SD, and the upper limit is mean + 1.96 SD, not mean + 1 SD.
+- ASE/EACVI 2015 notes: the guideline never says what its ± values are; its
+  source (Roman 1989, Table III) gives them as mean ± 1 SD, so the upper limit is
+  mean + 1.96 SD, not mean + 1 SD. Roman's own upper limits agree to about 0.1 cm;
+  Roman gave none for the proximal ascending aorta, because of its age dependence.
 - No z-score for the sex-only rows (table, sheet and report text): one SD for
   everyone, whatever their size, implies a precision the method can't deliver.
 

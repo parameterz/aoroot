@@ -4,8 +4,8 @@
 // Lang 2015 (ASE/EACVI chamber quantification guideline), Table 14: "Aortic root
 // dimensions in normal adults", by sex, absolute (cm) and indexed to BSA (cm/m²), for
 // the annulus, sinuses of Valsalva, STJ and proximal ascending aorta. Transcribed as
-// published. The guideline never says what the ± values are; read as mean ± SD (note
-// plus-minus).
+// published. The guideline never says what the ± values are; its source, Roman 1989
+// (Am J Cardiol 64:507-512) Table III, gives the same numbers as mean ± 1 SD (note plus-minus).
 //
 // Secondary data: the table is "adapted from Roman et al. (ref. 195) and Hiratzka et al.
 // (ref. 204)". No population, n, age range or BSA formula is given; DuBois is assumed
@@ -27,13 +27,14 @@ export default {
   schema: 1,
   id: "lang2015",
   label: "ASE/EACVI 2015",
-  entryVersion: "0.4.1",
+  entryVersion: "0.4.2",
   changelog: [
     { version: "0.1.0", date: "2026-11-15", by: "Claude", change: "Initial draft from PDF (Table 14)" },
     { version: "0.2.0", date: "2026-11-15", by: "Claude", change: "Removed the 4 absolute (sex-only) models at Dan's request: the site moves beyond absolute values. BSA-indexed models unchanged." },
     { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 4 of 4 models, all tests passing; agrees with values and notes" },
     { version: "0.4.0", date: "2026-11-20", by: "Claude", change: "Added the 4 absolute (sex-only) Table 14 models as caution, at Dan's request: the unadjusted comparison. New notes no-body-size and plus-minus; rounding note extended; bsa-ratio now applies to the BSA models only. BSA-indexed models unchanged." },
     { version: "0.4.1", date: "2026-11-21", by: "Dan Dyar", change: "Reviewed against the paper: 8 of 8 models (the 4 absolute models in this review, the 4 BSA-indexed already cleared), 7/7 tests passing; unadjusted values correct as reviewed" },
+    { version: "0.4.2", date: "2026-11-21", by: "Claude", change: "Checked Table 14 against its source, Roman 1989 (Dan's copy): Table 14 is Roman's Table III, and Roman's Methods give mean ± 1 SD. Note plus-minus now says so; new notes roman-limits and roman-aao. No values changed." },
   ],
 
   citation: {
@@ -159,7 +160,19 @@ export default {
       id: "plus-minus",
       appliesTo: "all",
       severity: "important",
-      text: "The guideline never says what the ± values are: not in the table, its caption or the text. They are read here as mean ± SD. The upper limit of normal is then mean + 1.96 SD (about 4.0 cm for men's sinuses of Valsalva), not mean + 1 SD: \"3.4 ± 0.3 cm\" is not a normal range of 3.1 to 3.7 cm.",
+      text: "The guideline never says what the ± values are: not in the table, its caption or the text. Its source does: Table 14 is Table III of Roman et al. (Am J Cardiol 1989), whose Methods give means ± 1 SD (the guideline renames Roman's supraaortic ridge the sinotubular junction). The upper limit of normal is then mean + 1.96 SD (about 4.0 cm for men's sinuses of Valsalva), not mean + 1 SD: \"3.4 ± 0.3 cm\" is not a normal range of 3.1 to 3.7 cm.",
+    },
+    {
+      id: "roman-limits",
+      appliesTo: { match: "^(annulus|sov|stj)-abs$" },
+      severity: "info",
+      text: "Roman 1989 gives its own sex-specific upper limits (Table IV; absolute: annulus 3.1 cm men, 2.6 women; sinuses 4.0, 3.6; supraaortic ridge 3.6, 3.2), chosen for 96–100% specificity rather than as mean + 1.96 SD. They agree with this site's mean + 1.96 SD limits to about 0.1 cm (the sinuses to 0.01 cm). The same paper found the sex difference disappears once diameters are indexed to BSA (Table III), and that body size and age, not sex, are the main determinants of aortic size.",
+    },
+    {
+      id: "roman-aao",
+      appliesTo: { match: "^aao-" },
+      severity: "important",
+      text: "Roman 1989 gave no upper limit for the proximal ascending aorta, because of its striking dependence on age. The guideline table carries the mean ± SD anyway, with no age term.",
     },
     {
       id: "bsa-ratio",
@@ -239,6 +252,6 @@ export default {
     reviewedBy: "Dan Dyar",
     date: "2026-11-21",
     against: "J Am Soc Echocardiogr 2015;28:1-39.e14: Table 14; Figure 10; section IV (aortic root)",
-    summary: "8 of 8 models checked against the paper (4 BSA-indexed on 2026-11-15, 4 absolute on 2026-11-21); 7/7 tests passing (3 paper, 4 arithmetic). Agrees with values and notes.",
+    summary: "8 of 8 models checked against the paper (4 BSA-indexed on 2026-11-15, 4 absolute on 2026-11-21); 7/7 tests passing (3 paper, 4 arithmetic). Agrees with values and notes. Table 14 checked against its source, Roman 1989 Table III (mean ± 1 SD), on 2026-11-21 (notes in 0.4.2 await review).",
   },
 };
