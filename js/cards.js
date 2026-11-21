@@ -50,6 +50,7 @@ function textWidth(svg, str, cls) {
 function drawChips(svg, parent, x, cy, comps, extrap = [], draw = true) {
   const chips = [];
   for (const k of comps.size) chips.push({ text: (comps.ratio ? "÷" : "") + CHIP_TEXT[k], cls: "chip", key: k });
+  if (!comps.size.length) chips.push({ text: "no body size", cls: "chip none" });
   if (comps.age) chips.push(comps.age.kind === "eq"
     ? { text: "age", cls: "chip age", key: "age" }
     : { text: `age ${comps.age.text}`, cls: "chip band", key: "age" });
@@ -79,7 +80,8 @@ function drawChips(svg, parent, x, cy, comps, extrap = [], draw = true) {
  *   ref: reference name, shown on the group's first row only; refId: registry id (rows are
  *   buttons that open that reference's details sheet; aria: their accessible name);
  *   comps: componentsOf(model);
- *   lo/hi: normal range as % of predicted (null = no published range); dim: filtered out.
+ *   lo/hi: normal range as % of predicted (null = no published range); dim: filtered out;
+ *   unadj: no body-size term (range drawn as an open outline, not hatched).
  */
 export function drawPctCard(svg, rows) {
   // Draw at the element's real width so text stays a fixed size; narrow screens put
@@ -158,10 +160,11 @@ export function drawPctCard(svg, rows) {
       drawChips(svg, g, chipX, cy, r.comps, r.extrap);
     }
 
-    // Normal range: hatched band.
+    // Normal range: hatched band (an open dashed outline for unadjusted, sex-only ranges).
     if (r.lo != null && r.hi != null) {
-      put(g, "g-band", R.rectangle(X(r.lo), cy - 8, X(r.hi) - X(r.lo), 16,
-        { stroke: "none", fill: "currentColor", fillStyle: "hachure", hachureGap: 3.5, fillWeight: 1.1, hachureAngle: -41, roughness: 1.3, seed }));
+      put(g, "g-band", R.rectangle(X(r.lo), cy - 8, X(r.hi) - X(r.lo), 16, r.unadj
+        ? { stroke: "currentColor", strokeWidth: 1, strokeLineDash: [4, 3], roughness: 1, seed }
+        : { stroke: "none", fill: "currentColor", fillStyle: "hachure", hachureGap: 3.5, fillWeight: 1.1, hachureAngle: -41, roughness: 1.3, seed }));
       for (const v of [r.lo, r.hi])
         put(g, "g-rule", R.line(X(v), cy - 9, X(v), cy + 9, { stroke: "currentColor", strokeWidth: 1.1, roughness: 0.6, seed: seed + 2 }));
     } else {
@@ -228,7 +231,8 @@ function runs(pts, key) {
 
 /**
  * Patient-on-the-curve card.
- * series: [{ label, colorIndex, hidden, pts: [{ x, pred, uln, extrap } | null] }]
+ * series: [{ label, colorIndex, hidden, unadj, pts: [{ x, pred, uln, extrap } | null] }]
+ *   unadj: no body-size term (predicted drawn dotted; flat against height)
  * patient: { x, y }   (y in mm)   xLabel: axis title   opts: { height } (px; default by width)
  */
 export function drawCurveCard(svg, series, patient, xLabel, fmtY = (v) => `${v}`, opts = {}) {
@@ -272,11 +276,13 @@ export function drawCurveCard(svg, series, patient, xLabel, fmtY = (v) => `${v}`
     for (const key of ["pred", "uln"]) {
       for (const run of runs(s.pts, key)) {
         if (run.pts.length < 2) continue;
-        const cls = `g-c${s.colorIndex}` + (run.extrap ? " extrap" : "");
+        const cls = `g-c${s.colorIndex}` + (run.extrap ? " extrap" : "") + (s.unadj ? " unadj" : "");
         const pts = run.pts.map((p) => [X(p.x), Y(p[key])]);
         let g;
         if (key === "pred") {
-          g = put(svg, cls, R.linearPath(pts, { stroke: "currentColor", strokeWidth: 2, roughness: 0.55, bowing: 0.6, seed }));
+          g = put(svg, cls, R.linearPath(pts, s.unadj
+            ? { stroke: "currentColor", strokeWidth: 2, roughness: 0.4, bowing: 0.3, strokeLineDash: [2, 5], seed: seed + 7 }
+            : { stroke: "currentColor", strokeWidth: 2, roughness: 0.55, bowing: 0.6, seed }));
         } else {
           // Upper limit: one continuous dashed path (rough.js restarts dashes on every segment).
           g = el("g", { class: cls });

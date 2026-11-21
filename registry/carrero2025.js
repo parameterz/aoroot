@@ -12,9 +12,9 @@
 // proximal tubular ascending aorta (1 cm above the STJ) leading edge end-diastole. These
 // are the site's default conventions.
 //
-// Model IDs: <site>-<abs|bsa|ht>. The absolute (abs) models are suppressed (the site moves
-// beyond absolute values, Dan 2026-11-15); they are transcribed because they carry the
-// paper's only printed z-scores, which serve as `paper` tests.
+// Model IDs: <site>-<abs|bsa|ht>. The absolute (abs) models were suppressed until 0.3.0
+// and are shown since then, marked caution, as the unadjusted comparison (Dan,
+// 2026-11-20). They also carry the paper's only printed z-scores (the `paper` tests).
 // Not used: aortic arch and descending aorta rows (not sites on this site).
 
 /** @type {any} */
@@ -22,10 +22,12 @@ export default {
   schema: 1,
   id: "carrero2025",
   label: "MATEAR (Carrero 2025)",
-  entryVersion: "0.2.0",
+  entryVersion: "0.3.1",
   changelog: [
     { version: "0.1.0", date: "2026-11-15", by: "Claude", change: "Initial draft from PDF (Table 2; Methods; Results)" },
     { version: "0.2.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 12 of 12 models, all tests passing; agrees with values and notes" },
+    { version: "0.3.0", date: "2026-11-20", by: "Claude", change: "Absolute (cm) Table 2 models shown as caution, at Dan's request: the unadjusted comparison beside the size-adjusted references. Values unchanged; note abs-suppressed replaced by no-body-size." },
+    { version: "0.3.1", date: "2026-11-21", by: "Dan Dyar", change: "Reviewed the 4 absolute models (now shown as the unadjusted comparison) against the paper: values confirmed" },
   ],
 
   citation: {
@@ -61,7 +63,7 @@ export default {
 
     // ── Annulus: inner edge, mid-systole ──
     {
-      id: "annulus-abs", label: "MATEAR annulus, absolute", status: "suppressed",
+      id: "annulus-abs", label: "MATEAR annulus, absolute", status: "caution",
       measurement: { site: "annulus", units: "cm", modality: "echo", edge: "inner", phase: "mid-systole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 2.12, female: 1.93 }, source: "Table 2 (annulus, cm)" },
       sd:   { type: "constant", value: { male: 0.20, female: 0.18 }, source: "Table 2 (annulus, cm)" },
@@ -84,7 +86,7 @@ export default {
 
     // ── Sinuses of Valsalva: leading edge, end-diastole ──
     {
-      id: "sov-abs", label: "MATEAR SoV, absolute", status: "suppressed",
+      id: "sov-abs", label: "MATEAR SoV, absolute", status: "caution",
       measurement: { site: "sov", units: "cm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 3.11, female: 2.77 }, source: "Table 2 (sinus, cm)" },
       sd:   { type: "constant", value: { male: 0.38, female: 0.34 }, source: "Table 2 (sinus, cm)" },
@@ -107,7 +109,7 @@ export default {
 
     // ── Sinotubular junction: leading edge, end-diastole ──
     {
-      id: "stj-abs", label: "MATEAR STJ, absolute", status: "suppressed",
+      id: "stj-abs", label: "MATEAR STJ, absolute", status: "caution",
       measurement: { site: "stj", units: "cm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis" },
       mean: { type: "constant", value: { male: 2.74, female: 2.45 }, source: "Table 2 (STJ, cm)" },
       sd:   { type: "constant", value: { male: 0.37, female: 0.31 }, source: "Table 2 (STJ, cm)" },
@@ -130,7 +132,7 @@ export default {
 
     // ── Proximal tubular ascending aorta (1 cm above the STJ): leading edge, end-diastole ──
     {
-      id: "aao-abs", label: "MATEAR ascending aorta, absolute", status: "suppressed",
+      id: "aao-abs", label: "MATEAR ascending aorta, absolute", status: "caution",
       measurement: { site: "aao", units: "cm", modality: "echo", edge: "leading", phase: "end-diastole", view: "parasternal long axis", viewNote: "Proximal tubular ascending aorta, 1 cm above the STJ" },
       mean: { type: "constant", value: { male: 2.88, female: 2.65 }, source: "Table 2 (ascending, cm)" },
       sd:   { type: "constant", value: { male: 0.36, female: 0.35 }, source: "Table 2 (ascending, cm)" },
@@ -161,10 +163,10 @@ export default {
 
   notes: [
     {
-      id: "abs-suppressed",
+      id: "no-body-size",
       appliesTo: { match: "-abs$" },
-      severity: "info",
-      text: "Hidden. Table 2 also gives absolute diameters by sex with no body-size or age term. They are transcribed (they carry the paper's own z-score examples) but not shown: the site uses only references that account for body size.",
+      severity: "important",
+      text: "No body-size or age term: one normal range for every man or woman, whatever their size. It overcalls dilation in large patients and misses it in small ones. Shown as the unadjusted comparison (it also carries the paper's own z-score examples), so you can see where a sex-only limit and the size-adjusted references disagree.",
     },
     {
       id: "no-age",
@@ -268,8 +270,8 @@ export default {
   verification: {
     status: "reviewed",
     reviewedBy: "Dan Dyar",
-    date: "2026-11-15",
+    date: "2026-11-21",
     against: "Arch Cardiol Mex 2025;95(2):171-177: Table 2; Table 1; Materials and methods; Statistical analysis; Results",
-    summary: "12 of 12 models checked against the paper; 5/5 tests passing (3 paper, 2 arithmetic). Agrees with values and notes.",
+    summary: "12 of 12 models checked against the paper (all on 2026-11-15; the 4 absolute models again on 2026-11-21, after they were shown); 5/5 tests passing (3 paper, 2 arithmetic). Agrees with values and notes.",
   },
 };

@@ -10,7 +10,7 @@
 import { drawCurveCard } from "./cards.js";
 import { SWEEP } from "./curve.js";
 import { encodeHash } from "../lib/state.js";
-import { SITE_NAMES, scalingOf, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved } from "../lib/describe.js";
+import { SITE_NAMES, scalingOf, shortLabel, showZ, NO_Z_TITLE, fmtZ, fmtPct, fmtLen, fmtObserved } from "../lib/describe.js";
 import { notesFor } from "../lib/evaluator.js";
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -28,7 +28,7 @@ const withSel = (st, sel) => ({ ...st, view: { ...st.view, sel } });
 
 /**
  * ctx: { getState, setHashFromSheet(state, push), data, curveView, rerender }
- *   data[site][refId] = { ref, site, y, models: [{ model, r, flags }], curve, dim }  (built by render())
+ *   data[site][refId] = { ref, site, y, models: [{ model, r, flags }], curve, curveUnadj, dim }  (built by render())
  */
 export function initSheet(c) {
   ctx = c;
@@ -149,7 +149,7 @@ function headHtml(d, units) {
   const pop = ref.population ?? {};
   const ages = pop.age?.range;
   const cohort = [
-    pop.n ? `n = ${pop.n.toLocaleString("en-US")}` : null,
+    pop.n ? `n = ${pop.n.toLocaleString("en-US")}${pop.via ? ` (${pop.via})` : ""}` : null,
     ages && ages[0] != null ? `ages ${ages[0]}${ages[1] != null ? `–${ages[1]}` : "+"}` : null,
   ].filter(Boolean).join(" · ");
   const cit = ref.citation ? `${ref.citation.authors.split(",")[0]} et al. ${ref.citation.journal} ${ref.citation.year}` : "";
@@ -173,13 +173,13 @@ function bodyHtml(d, st) {
         <dl class="sm-nums">
           <div><dt>Predicted</dt><dd>${fmtLen(r.pred, units)}</dd></div>
           <div><dt>Normal</dt><dd>${range}</dd></div>
-          <div><dt>z</dt><dd class="z${hi}">${fmtZ(r.z)}</dd></div>
+          <div><dt>z</dt><dd class="z${showZ(model) ? hi : ""}"${showZ(model) ? "" : ` title="${NO_Z_TITLE}"`}>${showZ(model) ? fmtZ(r.z) : "—"}</dd></div>
           <div><dt>% pred</dt><dd class="${hi.trim()}">${fmtPct(r.pctPred)}</dd></div>
         </dl></div>`;
   }).join("");
   const xv = ctx.curveView.xVar;
   const curveHtml = curve && curve.pts.some(Boolean)
-    ? `<div class="sm-curve-head"><span class="small muted">${esc(curve.sub)} model · solid: predicted · dashed: upper limit</span>
+    ? `<div class="sm-curve-head"><span class="small muted">${esc(curve.sub)} model · solid: predicted · dashed: upper limit${d.curveUnadj ? " · dotted: no body size" : ""}</span>
         <span class="seg small-seg"><label><input type="radio" name="sheet_x" value="height_cm" ${xv === "height_cm" ? "checked" : ""}> vs height</label>
         <label><input type="radio" name="sheet_x" value="age" ${xv === "age" ? "checked" : ""}> vs age</label></span></div>
        <svg class="curve sm-curve" id="sheetCurve" role="img" aria-label="${esc(ref.label)}: predicted diameter and upper limit of normal against ${xv === "age" ? "age" : "height"}, with this patient"></svg>`
@@ -198,7 +198,7 @@ function drawSheetCurve(d, st) {
   const p = st.patient, xv = ctx.curveView.xVar, units = st.view.units;
   const px = xv === "age" ? p.age : p.height_cm;
   const narrow = window.innerWidth < 600;
-  drawCurveCard(svg, [{ ...d.curve, hidden: false }],
+  drawCurveCard(svg, [d.curve, d.curveUnadj].filter(Boolean).map((s) => ({ ...s, hidden: false })),
     { x: Math.min(Math.max(px, SWEEP[xv].min), SWEEP[xv].max), y: d.y, label: fmtObserved(d.y, units) },
     SWEEP[xv].label, (v) => (units === "cm" ? (v / 10).toFixed(1) : `${v}`), { height: narrow ? 190 : 230 });
 }

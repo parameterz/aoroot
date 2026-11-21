@@ -175,9 +175,42 @@ reproducible model with a spread (rule 7), and the covariate range. Small but
 clean papers (Muraru, n = 218) are worth including; between-reference
 differences outweigh sampling error.
 
-**No absolute values.** Sex-only absolute models (no body size, no age) are not
-shown. Where a paper's only printed z-scores are on absolute models (MATEAR),
-they are transcribed, suppressed, and used as `paper` tests.
+**Absolute values: shown as the unadjusted comparison, not as peers** (Nov 2026;
+until then suppressed). A cardiologist's point: making it obvious *when* absolute
+values fail is worth doing. Sex-only models (no body-size term; WASE's also pick an
+age group) from ASE/EACVI 2015, WASE and MATEAR are shown, `caution`, with a
+`no-body-size` note. No schema field marks them: "unadjusted" is derived (the mean
+uses no body-size variable; `isUnadjusted` in `lib/describe.js`), so a new entry
+labels itself. They are set apart everywhere they appear:
+
+- **% predicted:** a dotted `no body size` chip and an open dashed outline in
+  place of the hatched band. Filter chip `no body size` (hash `f=none`) shows only
+  them; it is one of the kinds (with `÷ ratios` and `fitted equations`, which now
+  excludes them) and can't combine with a ht / wt / BSA chip (`toggleFilter`).
+- **Disagreement call-out** (`unadjustedDisagreement`): above the chart when the
+  unadjusted rows and the size-adjusted rows reach different verdicts, e.g.
+  "Within the unadjusted (sex-only) limits, but above the upper limit in 12 of 15
+  size-adjusted models." Counts models (rows with a range), not references, and
+  ignores the filter. Majority rule for the size-adjusted side; silent when the
+  sides agree or one is missing.
+- **Patient on the curve:** each such reference gets a second series, flat
+  against height, drawn dotted with its own legend key. Left out of the risk
+  thresholds' ULN band.
+- **Report:** nothing is ticked by default, so a sex-only verdict never reaches
+  the report text unless chosen; its clause then reads "…% of predicted for sex".
+- **No z-score** (table, sheet, report text): one SD for every man or woman,
+  whatever their size, implies a precision the method can't deliver (`showZ`).
+  The engine still computes it; the verdict, % predicted and range still show.
+
+**Row order: a predictable hierarchy.** Across references, chronological
+(registry order). Within a reference, least to most adjustment
+(`adjustmentOrder` / `byAdjustment` in `lib/describe.js`): unadjusted → simple
+ratio → fitted equation; then by how many patient inputs the prediction uses
+(height 1, weight 1, BSA 2 since it is height and weight, age group or age term
+1); ties keep registry order. So WASE reads absolute, ÷ht, ÷BSA, height
+nomogram, BSA nomogram, and height models come before BSA models of the same
+kind. Applies to the % predicted rows, the table, the sheet and the report; the
+curve legend puts a reference's unadjusted line first too.
 
 ## Pages
 
@@ -249,7 +282,8 @@ carried by the sketch alone. **Fonts self-hosted:** 9 latin woff2 files
    bands that narrow as predicted size grows; constant-CV references give a
    fixed band. Rows chronological and grouped by reference; labels show
    author/year plus normalization components (age / height / weight / BSA,
-   ratio vs equation).
+   ratio vs equation); within a reference, least to most adjustment (see Row
+   order).
 2. **Patient on the curve** (`js/curve.js`, `drawCurveCard`): predicted vs
    height (140–205 cm) or age (18–85 y), everything else held fixed; one model
    per reference, height-based where available; dashed ULN; faded outside
@@ -608,10 +642,20 @@ Lang RM et al. J Am Soc Echocardiogr 2015;28:1–39.e14. The guideline table
 many labs still report against, included so it sits beside references that
 model age and body size.
 
-- **Models (4), all `caution`:** BSA-indexed mean ± SD by sex (DuBois
-  assumed). Absolute columns not used.
+- **Models (8), all `caution`:** BSA-indexed and absolute mean ± SD by sex
+  (DuBois assumed). Absolute models added back in 0.4.0 as the unadjusted
+  comparison. The guideline never says what the ± is (note `plus-minus`,
+  which also warns against reading mean ± 1 SD as the normal range).
 - Conventions not stated in the table; mapped to the guideline's own
   recommendations, so it appears at the default conventions only.
+- **Source traced (Nov 2026):** Table 14 is Roman 1989 Table III (mean ± 1 SD),
+  via Hiratzka 2010 Table 4 (same numbers with p-values; supraaortic ridge →
+  STJ). Cohort filled from Roman's Methods as `population.via` (n 135, ages
+  20–74, one center); the reference stays the guideline. Roman measured every
+  level, the annulus included, leading edge at end-diastole. **Decision (Dan):**
+  keep the guideline's own conventions (annulus inner edge, peak systole), since
+  that is how labs following the guideline measure; the `secondary-source` note
+  states the mismatch with the source.
 - **Notes:** a guideline table that recommends against its own use (section IV
   says SoV should be compared with age- and BSA-related nomograms or
   allometric equations); secondary source (adapted from Roman 1989; no n, ages,
@@ -645,7 +689,8 @@ adults, 15 countries, core-lab reading; annulus I–I mid-systole, SoV and STJ
 L–L end-diastole; DuBois BSA.
 
 - **Table 3 models:** BSA- and height-indexed mean ± SD by sex and age group
-  (`[18, 41)`, `[41, 66)`, `[66, ∞)`). The 9 absolute models are suppressed.
+  (`[18, 41)`, `[41, 66)`, `[66, ∞)`). The 9 absolute models are shown
+  (since 0.4.0) as the unadjusted comparison.
 - **Figure 2/3 nomograms (6):** SoV vs BSA and height per age group, sexes
   pooled. SD = (printed ULN − fit) / 1.96 via `fromLimits`. Height nomograms
   are `caution` (coefficients printed to 2–3 decimals).
@@ -668,8 +713,8 @@ excluded (mean BMI 26.4). DuBois BSA.
 - Annulus I–I mid-systole; SoV, STJ, proximal AAo L–L ED (the defaults).
 - **Models (8 shown), Table 2:** height- and BSA-indexed mean ± SD by sex;
   height-indexed is the default row.
-- **Absolute models (4)** transcribed but suppressed; they carry the paper's
-  only printed z-scores, used as `paper` tests.
+- **Absolute models (4)** shown (since 0.3.0) as the unadjusted comparison;
+  they also carry the paper's only printed z-scores, used as `paper` tests.
 - **Normality check:** mean + 1.96 SD within 0.07 cm of the printed P97.5 in
   every row (slightly long upper tail).
 - **Notes:** no age term (young cohort, so z runs high in older adults); BSA

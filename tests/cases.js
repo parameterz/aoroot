@@ -7,8 +7,9 @@ import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
 import { modelsForSite, applyChoices } from "../lib/conventions.js";
 import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight, cmrThreshold } from "../lib/thresholds.js";
-import { scalingOf, adjustsFor, refClause, buildReport, authorYear, defaultReportChips, shortLabel, indexedReportLine, componentsOf, passesFilter, ageBandText } from "../lib/describe.js";
-import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor } from "../lib/state.js";
+import { scalingOf, adjustsFor, refClause, buildReport, authorYear, defaultReportChips, shortLabel, indexedReportLine, componentsOf, passesFilter, ageBandText, isUnadjusted, unadjustedDisagreement, disagreementText, byAdjustment, showZ } from "../lib/describe.js";
+import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor, toggleFilter } from "../lib/state.js";
+import { curveSeries } from "../js/curve.js";
 import { bmiNote } from "../lib/body.js";
 
 const TOL = { pred: 0.001, z: 0.01, pctPred: 0.1, uln: 0.01, lln: 0.01, covariates: 0.001 };
@@ -71,13 +72,13 @@ export function runAll() {
     ["muraru2014", "sov", undefined, ["sov-ll-ed-ht", "sov-ll-ed-bsa"]],
     ["muraru2014", "stj", II_ED, ["stj-ii-ed-ht"]],  // stj-ii-ed-bsa suppressed
     ["muraru2014", "annulus", undefined, []],
-    ["lang2015", "sov", undefined, ["sov-bsa"]],
-    ["lang2015", "annulus", undefined, ["annulus-bsa"]],
+    ["lang2015", "sov", undefined, ["sov-bsa", "sov-abs"]],
+    ["lang2015", "annulus", undefined, ["annulus-bsa", "annulus-abs"]],
     ["lang2015", "sov", II_ED, []],
     ["mirea2013", "sov", undefined, []],
     ["mirea2013", "aao", II_ED, ["aao-bsa-40to49"]],
     ["mirea2013", "annulus", II_ED, ["annulus-bsa-40to49"]],
-    ["patel2022", "sov", undefined, ["sov-bsa-18to40", "sov-ht-18to40", "sov-fig-bsa-18to40", "sov-fig-ht-18to40"]],
+    ["patel2022", "sov", undefined, ["sov-abs-18to40", "sov-bsa-18to40", "sov-ht-18to40", "sov-fig-bsa-18to40", "sov-fig-ht-18to40"]],
   ];
   for (const [refId, site, conv, want] of expectations) {
     const ref = registry.find((r) => r.id === refId);
@@ -151,6 +152,62 @@ export function runAll() {
     const fh = decodeHash("#sex=m&f=age,ratio,eq,zz");
     check("hash: filter decoded, one kind only, bad token reported", JSON.stringify(fh.state.view.filter) === '["age","ratio"]' && fh.errors.length === 1, JSON.stringify(fh));
     check("hash: filter encoded", encodeHash(fh.state).endsWith("&f=age,ratio"), encodeHash(fh.state));
+
+    // Unadjusted (no body size) models: the "none" filter token and the disagreement call-out.
+    const aseAbs = componentsOf(get("lang2015", "sov-abs")[1]), waseAbs = componentsOf(get("patel2022", "sov-abs-41to65")[1]);
+    check("unadjusted: ASE and WASE absolute have no body size; ASE BSA does",
+      isUnadjusted(aseAbs) && isUnadjusted(waseAbs) && !isUnadjusted(componentsOf(get("lang2015", "sov-bsa")[1])));
+    check("filter: none keeps absolute only; eq and ratio drop it",
+      passesFilter(aseAbs, ["none"]) && passesFilter(waseAbs, ["age", "none"]) && !passesFilter(dev, ["none"]) && !passesFilter(aseAbs, ["eq"]) && !passesFilter(aseAbs, ["ratio"]));
+    check("filter: none and a body-size component replace each other",
+      JSON.stringify(toggleFilter(["age", "bsa", "eq"], "none")) === '["age","none"]' && JSON.stringify(toggleFilter(["age", "none"], "ht")) === '["age","ht"]'
+      && JSON.stringify(toggleFilter(["none"], "none")) === "[]");
+    const fn = decodeHash("#sex=m&f=bsa,none");
+    check("hash: none after a size component is dropped", JSON.stringify(fn.state.view.filter) === '["bsa"]', JSON.stringify(fn.state.view.filter));
+    const row = (c, outside) => ({ comps: c, outside, hasRange: true });
+    const missed = unadjustedDisagreement([row(aseAbs, null), row(waseAbs, null), row(dev, "above"), row(wase, "above"), row(dev, null)]);
+    check("disagreement: missed by the sex-only limits", missed?.kind === "missed" && missed.adj.above === 2 && missed.adj.n === 3,
+      JSON.stringify(missed));
+    check("disagreement: text", disagreementText(missed) === "Within the unadjusted (sex-only) limits, but above the upper limit in 2 of 3 size-adjusted models.", disagreementText(missed));
+    const over = unadjustedDisagreement([row(aseAbs, "above"), row(dev, null), row(wase, null), row(dev, "above")]);
+    check("disagreement: overcalled", over?.kind === "overcalled" && disagreementText(over) === "Above the unadjusted (sex-only) limit, but within normal limits in 2 of 3 size-adjusted models.", disagreementText(over));
+    const split = unadjustedDisagreement([row(aseAbs, "above"), row(waseAbs, null), row(dev, null), row(wase, null)]);
+    check("disagreement: split", split?.kind === "split" && disagreementText(split) === "Above the upper limit in 1 of 2 unadjusted (sex-only) models, but in none of 2 size-adjusted models.", disagreementText(split));
+    check("disagreement: none when they agree, or a group is missing",
+      unadjustedDisagreement([row(aseAbs, "above"), row(dev, "above")]) === null && unadjustedDisagreement([row(dev, "above")]) === null
+      && unadjustedDisagreement([row(aseAbs, null), row(dev, "above"), row(wase, null)]) === null);
+
+    // Display order within a reference: unadjusted → ratio → equation, then fewest inputs (BSA counts 2).
+    const ids = (r, site, input = { sex: "male", age: 50, height_cm: 175, weight_kg: 75 }) =>
+      byAdjustment(applyChoices(modelsForSite(registry.find((x) => x.id === r), input, site), {})).map((m) => m.id).join(",");
+    check("order: WASE abs, ÷ht, ÷BSA, ht nomogram, BSA nomogram",
+      ids("patel2022", "sov") === "sov-abs-41to65,sov-ht-41to65,sov-bsa-41to65,sov-fig-ht-41to65,sov-fig-bsa-41to65", ids("patel2022", "sov"));
+    check("order: ASE abs before BSA", ids("lang2015", "sov") === "sov-abs,sov-bsa", ids("lang2015", "sov"));
+    check("order: MATEAR abs, ÷ht, ÷BSA", ids("carrero2025", "sov") === "sov-abs,sov-ht,sov-bsa", ids("carrero2025", "sov"));
+    check("order: Devereux height model before BSA", ids("devereux2012", "sov") === "sov-height,sov-bsa", ids("devereux2012", "sov"));
+    {
+      const lang = registry.find((x) => x.id === "lang2015"), abs = get("lang2015", "sov-abs")[1], bsa = get("lang2015", "sov-bsa")[1];
+      const res = { z: 1.33, pctPred: 112, uln: 39.9, lln: 28.1, outside: null };
+      const chipsAll = { ...defaultReportChips(), z: true };
+      check("no z for unadjusted: display and report", !showZ(abs) && showZ(bsa)
+        && !/z = /.test(refClause(res, lang, abs, "mm", chipsAll)) && /z = \+1\.33/.test(refClause(res, lang, bsa, "mm", chipsAll)),
+        refClause(res, lang, abs, "mm", chipsAll));
+    }
+
+    // Curve: the unadjusted series is its own, flat against height.
+    {
+      const st = defaultState();
+      Object.assign(st.patient, { sex: "male", age: 50, height_cm: 175, weight_kg: 75 });
+      st.y.sov = 38;
+      const ser = curveSeries(registry, st, "sov", "height_cm");
+      const ase = ser.filter((x) => x.ref.id === "lang2015");
+      const flat = ase.find((x) => x.unadj);
+      const ys = flat?.pts.filter(Boolean).map((q) => q.pred) ?? [];
+      check("curve: ASE has a BSA series and a flat unadjusted one",
+        ase.length === 2 && ase[0].unadj && ase[1].model.id === "sov-bsa" && flat?.key === "lang2015~unadj" && ys.length > 10 && ys.every((v) => Math.abs(v - 34) < 1e-9),
+        ase.map((x) => x.key).join(","));
+      check("curve: WASE size-adjusted series stays height-based", ser.find((x) => x.ref.id === "patel2022" && !x.unadj)?.model.id === "sov-ht-41to65");
+    }
     const sh = decodeHash("#sex=m&sel=sov.muraru2014");
     check("hash: selected reference round trip", sh.state.view.sel === "sov.muraru2014" && encodeHash(sh.state) === "#sex=m&sel=sov.muraru2014", encodeHash(sh.state));
     const sb = decodeHash("#sex=m&sel=root.x%20y");

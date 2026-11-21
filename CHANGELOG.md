@@ -17,6 +17,46 @@ clinical calculator:
 Each reference also keeps its own history in its registry file
 (`registry/*.js`); entries here name the reference version a release includes.
 
+## [1.4.0] - 2026-11-20
+
+### Added
+
+- Absolute (sex-only) values, shown as the unadjusted comparison beside the
+  references that account for body size: ASE/EACVI 2015 Table 14 (4 models,
+  entry 0.4.2), WASE (9, entry 0.4.1, reviewed) and MATEAR (4, entry 0.3.1,
+  reviewed). All marked
+  caution with a "no body size" note. Results for every existing model are
+  unchanged.
+- Percent of predicted: a dotted `no body size` chip and an open outline for
+  these rows, and a `no body size` filter chip.
+- A call-out above the chart when the sex-only limits and the size-adjusted
+  references disagree ("Within the unadjusted (sex-only) limits, but above the
+  upper limit in 12 of 15 size-adjusted models").
+- Patient on the curve: a flat, dotted line per unadjusted reference, with its
+  own legend key (also in that reference's sheet).
+- ASE/EACVI 2015 notes: the guideline never says what its ± values are; its
+  source (Roman 1989, Table III) gives them as mean ± 1 SD, so the upper limit is
+  mean + 1.96 SD, not mean + 1 SD. Roman's own upper limits agree to about 0.1 cm;
+  Roman gave none for the proximal ascending aorta, because of its age dependence.
+  A lineage note traces Table 14 through Hiratzka 2010 Table 4, which kept
+  Roman's p-values (indexing removes the sex difference); Table 14 dropped them.
+- ASE/EACVI 2015 cohort details filled in from its source, labelled "via Roman
+  1989": 135 adults (68 men, 67 women), ages 20–74, one center, 1980s. Shown on
+  the references page and in the reference's sheet. New optional registry field
+  `population.via` for secondary data.
+- No z-score for the sex-only rows (table, sheet and report text): one SD for
+  everyone, whatever their size, implies a precision the method can't deliver.
+
+### Changed
+
+- The `fitted equations` filter no longer matches sex-only constants.
+- Rows within a reference follow a fixed order, least to most adjustment:
+  unadjusted, then simple ratios, then fitted equations; within each, fewer
+  patient inputs first (so height-based before BSA-based). Some references'
+  rows swap places (e.g. Devereux, WASE, Muraru and NORRE lead with height).
+- The risk thresholds' band of upper limits spans the size-adjusted
+  references only.
+
 ## [1.3.1] - 2026-11-16
 
 ### Added

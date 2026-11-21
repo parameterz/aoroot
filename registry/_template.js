@@ -47,6 +47,8 @@ export default {
 
   // ── Documentation only ────────────────────────────────────────────────────
   population: {
+    // via: "Roman 1989",          // only for secondary data: the paper the cohort details come
+    //                             // from, when the reference itself gives none (ASE/EACVI 2015)
     n: 0,
     female: null,                  // fraction, e.g. 0.54
     age: { range: [null, null], mean: null, sd: null },        // years

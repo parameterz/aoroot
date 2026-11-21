@@ -8,12 +8,12 @@ import registry from "../registry/index.js";
 import { score, notesFor } from "../lib/evaluator.js";
 import { covariates } from "../lib/covariates.js";
 import { SITES, modelsForSite, applyChoices } from "../lib/conventions.js";
-import { decodeHash, encodeHash, convFromCode, picksFor, sdVariantFor, DEFAULT_CONV, FILTER_KINDS } from "../lib/state.js";
+import { decodeHash, encodeHash, convFromCode, picksFor, sdVariantFor, DEFAULT_CONV, toggleFilter } from "../lib/state.js";
 import { drawPctCard, drawLegend, drawCurveCard, drawThresholdCard } from "./cards.js";
 import { THRESHOLDS, CMR_NORMAL, cmrThreshold, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
 import { curveSeries, SWEEP } from "./curve.js";
 import { initSheet, renderSheet, beforeNav } from "./sheet.js";
-import { SITE_NAMES, scalingOf, adjustsFor, componentsOf, passesFilter, CHIP_OF, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, buildReport, REPORT_CHIPS, defaultReportChips } from "../lib/describe.js";
+import { SITE_NAMES, scalingOf, adjustsFor, componentsOf, passesFilter, isUnadjusted, byAdjustment, showZ, NO_Z_TITLE, unadjustedDisagreement, disagreementText, CHIP_OF, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, buildReport, REPORT_CHIPS, defaultReportChips } from "../lib/describe.js";
 
 import { bmiNote } from "../lib/body.js";
 import { VERSION } from "../lib/version.js";
@@ -85,7 +85,7 @@ function render() {
     for (const ref of registry) {
       if (!ref.models.some((m) => m.measurement.site === site && !m.measurement.sinus)) continue; // reference doesn't cover this site
       const candidates = modelsForSite(ref, p, site, conv);
-      const models = applyChoices(candidates, picksFor(state, ref.id));
+      const models = byAdjustment(applyChoices(candidates, picksFor(state, ref.id)));
       if (!models.length) {
         const anyConv = ref.models.some((m) => m.measurement.site === site && m.measurement.edge === conv.edge && m.measurement.phase === conv.phase);
         rows += `<tr class="na ref-start"><td><span class="ref">${esc(ref.label)}</span></td><td colspan="6">` +
@@ -134,18 +134,19 @@ function render() {
           title: `${ref.label} · ${shortLabel(ref, model)}\n${scalingOf(model)}; adjusts for ${adjustsFor(model)}` +
             (r.pctPred == null ? "" : `\n${fmtPct(r.pctPred)} of predicted` + (r.llnPct == null ? "" : ` (normal ${fmtPct(r.llnPct)}–${fmtPct(r.ulnPct)})`)),
           pct: r.pctPred, lo: r.llnPct, hi: r.ulnPct, outside: !!r.outside,
+          verdict: r.outside ?? null, hasRange: r.uln != null, unadj: isUnadjusted(comps),
           dim: !passesFilter(comps, view.filter),
         });
         const key = `${site}|${ref.id}|${model.id}`;
         reportRows.push({ key, site, y, kind: "ref", result: r, ref, model });
-        const zHi = r.outside ? " hi" : "";
+        const zHi = r.outside && showZ(model) ? " hi" : "";
         rows += `<tr class="${first.trim()}"${i === 0 ? ` id="t_${site}_${esc(ref.id)}"` : ""}>
           <td>${refCell}</td>
           <td><div>${esc(shortLabel(ref, model))}</div>
               <div class="model">${esc(scalingOf(model))}</div>${choice}${variant}${flags ? "<div>" + flags + "</div>" : ""}${notesHtml}</td>
           <td class="num" data-label="Predicted">${fmtLen(r.pred, units)}</td>
           <td class="num" data-label="Normal range">${r.lln == null ? "—" : `${fmtLen(r.lln, units).replace(/ (mm|cm)$/, "")}–${fmtLen(r.uln, units)}`}</td>
-          <td class="num z${zHi}" data-label="z">${fmtZ(r.z)}</td>
+          <td class="num z${zHi}" data-label="z"${showZ(model) ? "" : ` title="${NO_Z_TITLE}"`}>${showZ(model) ? fmtZ(r.z) : "—"}</td>
           <td class="num" data-label="% pred">${fmtPct(r.pctPred)}</td>
           <td class="rep" data-label="Report"><input type="checkbox" data-report="${esc(key)}" aria-label="Include in report" ${checked.has(key) ? "checked" : ""}></td>
         </tr>`;
@@ -154,22 +155,28 @@ function render() {
 
     const convNote = convCode === DEFAULT_CONV[site] ? "" : ` <span class="flag">non-default</span>`;
     const hasExtrap = pctRows.some((r) => r.extrap.length);
+    const hasUnadj = pctRows.some((r) => r.unadj);
+    // Unadjusted (sex-only) limits vs the size-adjusted references: say so when they disagree.
+    const dis = disagreementText(unadjustedDisagreement(pctRows.map((r) => ({ comps: r.comps, outside: r.verdict, hasRange: r.hasRange }))));
+    const disHtml = dis ? `<p class="disagree"><b>Body size changes the answer.</b> ${esc(dis)}
+      <button type="button" class="linkbtn" data-pf-only="none">${view.filter.includes("none") ? "show all" : "show only the unadjusted"}</button></p>` : "";
     main.insertAdjacentHTML("beforeend", `
       <h2 id="site_${site}">${SITE_NAMES[site]} <span class="nowrap">${fmtObserved(y, units)}</span> <span class="muted small">(${CONV_LABEL[convCode]})</span>${convNote}</h2>
       <section class="card" aria-label="${SITE_NAMES[site]}: percent of predicted">
         <div class="card-head"><h3>Percent of predicted</h3>
           <span class="handnote">same ${fmtObserved(y, units)}, as a share of what each reference expects</span></div>
+        ${disHtml}
         <svg class="pct" id="pct_${site}" role="group" aria-label="Percent of predicted for each reference. Each row opens that reference's details; all values are also in the table below."></svg>
         <div class="legend"><span class="tap-hint">tap a row for details</span><span><span data-lg="band"></span> normal range</span><span><span data-lg="dot"></span> this patient</span>
           <span><span data-lg="out"></span> outside the normal range</span>${hasExtrap ? `<span><span data-lg="hollow"></span> outside the study's range</span>` : ""}
           <span class="muted">dashed line: 100% of predicted</span></div>
         <div class="legend chips-key"><span><span class="chipkey">BSA</span> in the equation</span><span><span class="chipkey">÷BSA</span> simple ratio</span>
           <span><span class="chipkey age">age</span> age in the equation</span><span><span class="chipkey band">age 41–65</span> age group used</span>
-          ${hasExtrap ? `<span><span class="chipkey warn">ht</span> patient outside the study's range</span>` : ""}<span class="muted">no age chip: age ignored · sex not shown (nearly all are sex-specific)</span></div>
+          ${hasExtrap ? `<span><span class="chipkey warn">ht</span> patient outside the study's range</span>` : ""}${hasUnadj ? `<span><span class="chipkey none">no body size</span> unadjusted: one range for every man or woman</span>` : ""}<span class="muted">no age chip: age ignored · sex not shown (nearly all are sex-specific)</span></div>
         <div class="pfilter"><span>Show only references using</span>
           ${[["age", "age"], ["ht", "ht"], ["wt", "wt"], ["bsa", "BSA"]].map(([k, t]) => `<button type="button" class="pf" data-pf="${k}" aria-pressed="${view.filter.includes(k)}">${t}</button>`).join("")}
           <span class="sep"></span>
-          ${[["ratio", "÷ ratios"], ["eq", "fitted equations"]].map(([k, t]) => `<button type="button" class="pf" data-pf="${k}" aria-pressed="${view.filter.includes(k)}">${t}</button>`).join("")}
+          ${[["ratio", "÷ ratios"], ["eq", "fitted equations"], ...(hasUnadj ? [["none", "no body size"]] : [])].map(([k, t]) => `<button type="button" class="pf" data-pf="${k}" aria-pressed="${view.filter.includes(k)}">${t}</button>`).join("")}
           <span class="count">${view.filter.length ? `showing ${pctRows.filter((r) => !r.dim).length} of ${pctRows.length}` : ""}</span></div>
       </section>`);
     const svg = document.getElementById(`pct_${site}`);
@@ -183,9 +190,9 @@ function render() {
     // <details> has no width to draw at.
     const xv = curveView.xVar;
     const series = curveSeries(registry, state, site, xv).map((s) => ({
-      ...s, colorIndex: registry.indexOf(s.ref), hidden: curveView.hidden.has(s.ref.id),
+      ...s, colorIndex: registry.indexOf(s.ref), hidden: curveView.hidden.has(s.key),
     }));
-    for (const s of series) if (refsHere[s.ref.id]) refsHere[s.ref.id].curve = s;
+    for (const s of series) if (refsHere[s.ref.id]) refsHere[s.ref.id][s.unadj ? "curveUnadj" : "curve"] = s;
     if (series.some((s) => s.pts.some(Boolean))) {
       const open = curveView.open || curveView.printing;
       main.insertAdjacentHTML("beforeend", `
@@ -197,8 +204,8 @@ function render() {
               <label><input type="radio" name="cx_${site}" value="height_cm" ${xv === "height_cm" ? "checked" : ""}> vs height</label>
               <label><input type="radio" name="cx_${site}" value="age" ${xv === "age" ? "checked" : ""}> vs age</label></span></div>
           <svg class="curve" id="curve_${site}" role="img" aria-label="Predicted diameter and upper limit of normal for each reference against ${xv === "age" ? "age" : "height"}; values for this patient are in the table below"></svg>
-          <div class="legend keys">${series.map((s) => `<button type="button" class="key c${s.colorIndex}" data-ref="${esc(s.ref.id)}" aria-pressed="${!s.hidden}" title="${esc(s.sub)}">${esc(s.label)}</button>`).join("")}
-            <span class="muted">solid: predicted · dashed: upper limit of normal · faded: outside the study's range · ${xv === "age" ? "height and weight" : "age, sex and weight"} held at this patient's values</span></div>
+          <div class="legend keys">${series.map((s) => `<button type="button" class="key c${s.colorIndex}${s.unadj ? " unadj" : ""}" data-ref="${esc(s.key)}" aria-pressed="${!s.hidden}" title="${esc(s.sub)}">${esc(s.label)}</button>`).join("")}
+            <span class="muted">solid: predicted · dashed: upper limit of normal${series.some((s) => s.unadj) ? " · dotted: no body size (flat against height)" : ""} · faded: outside the study's range · ${xv === "age" ? "height and weight" : "age, sex and weight"} held at this patient's values</span></div>
         </details>`);
       if (open) {
         const csvg = document.getElementById(`curve_${site}`);
@@ -220,11 +227,9 @@ function render() {
         <tbody>${rows}</tbody></table></div>`);
   }
   for (const b of main.querySelectorAll("button[data-pf]"))
-    b.onclick = () => setHash((st) => {
-      const k = b.dataset.pf, f = st.view.filter;
-      if (f.includes(k)) st.view.filter = f.filter((x) => x !== k);
-      else st.view.filter = [...f.filter((x) => !(FILTER_KINDS.includes(k) && FILTER_KINDS.includes(x))), k];
-    });
+    b.onclick = () => setHash((st) => { st.view.filter = toggleFilter(st.view.filter, b.dataset.pf); });
+  for (const b of main.querySelectorAll("button[data-pf-only]"))
+    b.onclick = () => setHash((st) => { st.view.filter = st.view.filter.includes("none") ? [] : ["none"]; });
   for (const r of main.querySelectorAll("input[name^=cx_]"))
     r.onchange = () => { curveView.xVar = r.value; render(); };
   for (const d of main.querySelectorAll("details.curvecard"))
@@ -311,7 +316,8 @@ function renderThresholds(main, site, y, units, p, reportRows) {
     for (let x = xRange[0]; x <= xRange[1]; x += 1) pts.push({ x, y: diameterAt(cmr, x) });
     allLines.push({ id: cmr.id, kind: "normal", label: `CMR normal, ${Math.round(p.age)} y`, short: "CMR normal", pts, faded: cmr.extrapolated });
   }
-  const series = curveSeries(registry, state, site, "height_cm");
+  // The band spans the size-adjusted references' limits; the unadjusted (flat) ones are left out.
+  const series = curveSeries(registry, state, site, "height_cm").filter((s) => !s.unadj);
   const envelope = [];
   for (let i = 0; i <= xRange[1] - xRange[0]; i++) {
     const ulns = series.map((s) => s.pts[i]?.uln).filter((v) => v != null);

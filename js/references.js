@@ -49,7 +49,7 @@ function renderSummary() {
     const sites = [...new Set(ref.models.map((m) => m.measurement.site))].map((s) => SITE_NAMES[s].replace("Sinus of Valsalva", "SoV").replace("Sinotubular junction", "STJ").replace("Ascending aorta", "AAo").replace("Aortic annulus", "annulus")).join(", ");
     const done = rv(ref.id).checked.filter((id) => ref.models.some((m) => m.id === id)).length;
     const st = ref.verification?.status ?? "draft";
-    return `<tr><td class="lead"><a class="ref" href="#${ref.id}">${esc(ref.label)}</a></td><td class="num" data-label="n">${ref.population.n != null ? ref.population.n.toLocaleString() : "—"}</td>
+    return `<tr><td class="lead"><a class="ref" href="#${ref.id}">${esc(ref.label)}</a></td><td class="num" data-label="n">${ref.population.n != null ? ref.population.n.toLocaleString() : "—"}${ref.population.via ? `<div class="model">via ${esc(ref.population.via)}</div>` : ""}</td>
       <td data-label="Sites">${esc(sites)}</td><td class="num" data-label="Models">${ref.models.length}</td>
       <td data-label="Tests"><span class="${pass === tr.length ? "ok" : "bad"}">${pass}/${tr.length} passing</span><div class="model">${kinds.map(([k, n]) => `${n} ${k}`).join(" · ")}</div></td>
       <td data-label="Status"><span class="flag ${st === "draft" ? "draft" : "ok"}">${esc(st)}</span></td>
@@ -98,7 +98,7 @@ function renderRefs() {
       <p class="cite">${citation(ref.citation)}</p>
       <div class="card">
         <dl class="facts">
-          <dt>Population</dt><dd>n = ${p.n != null ? p.n.toLocaleString() : "not stated"}${p.female != null ? ` · ${Math.round(p.female * 100)}% women` : ""} · age ${esc(range(p.age?.range))}${p.age?.mean != null ? ` (mean ${p.age.mean}${p.age.sd != null ? ` ± ${p.age.sd}` : ""})` : ""} · height ${p.height?.range?.some((x) => x != null) ? `${esc(range(p.height.range))} cm` : "not reported"} · BSA formula: ${esc(p.bsa?.formula ?? "not stated")}</dd>
+          <dt>Population</dt><dd>${p.via ? `From ${esc(p.via)} (the source of this table): ` : ""}n = ${p.n != null ? p.n.toLocaleString() : "not stated"}${p.female != null ? ` · ${Math.round(p.female * 100)}% women` : ""} · age ${esc(range(p.age?.range))}${p.age?.mean != null ? ` (mean ${p.age.mean}${p.age.sd != null ? ` ± ${p.age.sd}` : ""})` : ""} · height ${p.height?.range?.some((x) => x != null) ? `${esc(range(p.height.range))} cm` : "not reported"} · BSA formula: ${esc(p.bsa?.formula ?? "not stated")}</dd>
           <dt>Composition</dt><dd>${(p.composition ?? []).map((c) => `${esc(c.group)}${c.n != null ? ` (${c.n})` : ""}`).join("; ") || "—"}</dd>
           <dt>Region</dt><dd>${esc(p.region)}</dd>
           <dt>Inclusion</dt><dd>${esc(p.inclusion)}</dd>
