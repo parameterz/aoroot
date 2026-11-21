@@ -27,12 +27,13 @@ export default {
   schema: 1,
   id: "lang2015",
   label: "ASE/EACVI 2015",
-  entryVersion: "0.4.0",
+  entryVersion: "0.4.1",
   changelog: [
     { version: "0.1.0", date: "2026-11-15", by: "Claude", change: "Initial draft from PDF (Table 14)" },
     { version: "0.2.0", date: "2026-11-15", by: "Claude", change: "Removed the 4 absolute (sex-only) models at Dan's request: the site moves beyond absolute values. BSA-indexed models unchanged." },
     { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 4 of 4 models, all tests passing; agrees with values and notes" },
     { version: "0.4.0", date: "2026-11-20", by: "Claude", change: "Added the 4 absolute (sex-only) Table 14 models as caution, at Dan's request: the unadjusted comparison. New notes no-body-size and plus-minus; rounding note extended; bsa-ratio now applies to the BSA models only. BSA-indexed models unchanged." },
+    { version: "0.4.1", date: "2026-11-21", by: "Dan Dyar", change: "Reviewed against the paper: 8 of 8 models (the 4 absolute models in this review, the 4 BSA-indexed already cleared), 7/7 tests passing; unadjusted values correct as reviewed" },
   ],
 
   citation: {
@@ -236,8 +237,8 @@ export default {
   verification: {
     status: "reviewed",
     reviewedBy: "Dan Dyar",
-    date: "2026-11-15",
+    date: "2026-11-21",
     against: "J Am Soc Echocardiogr 2015;28:1-39.e14: Table 14; Figure 10; section IV (aortic root)",
-    summary: "4 of 4 BSA-indexed models checked against the paper; 4/4 tests passing (2 paper, 2 arithmetic). Agrees with values and notes. The 4 absolute models added in 0.4.0 (2026-11-20) await review.",
+    summary: "8 of 8 models checked against the paper (4 BSA-indexed on 2026-11-15, 4 absolute on 2026-11-21); 7/7 tests passing (3 paper, 4 arithmetic). Agrees with values and notes.",
   },
 };
