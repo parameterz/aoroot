@@ -23,12 +23,13 @@ export default {
   schema: 1,
   id: "patel2022",
   label: "WASE (Patel 2022)",
-  entryVersion: "0.4.0",
+  entryVersion: "0.4.1",
   changelog: [
     { version: "0.1.0", date: "2026-11-14", by: "Claude", change: "Initial draft from PDF (Table 3; Figures 2 and 3)" },
     { version: "0.2.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 33 of 33 models, all tests passing; agrees with values and notes" },
     { version: "0.3.0", date: "2026-11-15", by: "Claude", change: "Suppressed the 9 absolute (mm) Table 3 models at Dan's request: the site moves beyond absolute values. BSA- and height-indexed models and the nomograms unchanged; coefficients kept as transcribed." },
     { version: "0.4.0", date: "2026-11-20", by: "Claude", change: "Absolute (mm) Table 3 models shown again as caution, at Dan's request: the unadjusted comparison beside the size-adjusted references. Values unchanged; note abs-suppressed replaced by no-body-size." },
+    { version: "0.4.1", date: "2026-11-21", by: "Dan Dyar", change: "Reviewed the 9 absolute models (now shown as the unadjusted comparison) against the paper: values confirmed" },
   ],
 
   citation: {
@@ -441,8 +442,8 @@ export default {
   verification: {
     status: "reviewed",
     reviewedBy: "Dan Dyar",
-    date: "2026-11-15",
+    date: "2026-11-21",
     against: "J Am Soc Echocardiogr 2022;35:267-274: Table 3; Figures 2 and 3 (equations read from the rendered page)",
-    summary: "33 of 33 models checked against the paper; 5/5 tests passing (2 paper, 2 independent, 1 arithmetic). Agrees with values and notes.",
+    summary: "33 of 33 models checked against the paper (all on 2026-11-15; the 9 absolute models again on 2026-11-21, after they were shown); 5/5 tests passing (2 paper, 2 independent, 1 arithmetic). Agrees with values and notes.",
   },
 };

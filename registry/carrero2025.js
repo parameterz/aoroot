@@ -22,11 +22,12 @@ export default {
   schema: 1,
   id: "carrero2025",
   label: "MATEAR (Carrero 2025)",
-  entryVersion: "0.3.0",
+  entryVersion: "0.3.1",
   changelog: [
     { version: "0.1.0", date: "2026-11-15", by: "Claude", change: "Initial draft from PDF (Table 2; Methods; Results)" },
     { version: "0.2.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 12 of 12 models, all tests passing; agrees with values and notes" },
     { version: "0.3.0", date: "2026-11-20", by: "Claude", change: "Absolute (cm) Table 2 models shown as caution, at Dan's request: the unadjusted comparison beside the size-adjusted references. Values unchanged; note abs-suppressed replaced by no-body-size." },
+    { version: "0.3.1", date: "2026-11-21", by: "Dan Dyar", change: "Reviewed the 4 absolute models (now shown as the unadjusted comparison) against the paper: values confirmed" },
   ],
 
   citation: {
@@ -269,8 +270,8 @@ export default {
   verification: {
     status: "reviewed",
     reviewedBy: "Dan Dyar",
-    date: "2026-11-15",
+    date: "2026-11-21",
     against: "Arch Cardiol Mex 2025;95(2):171-177: Table 2; Table 1; Materials and methods; Statistical analysis; Results",
-    summary: "12 of 12 models checked against the paper; 5/5 tests passing (3 paper, 2 arithmetic). Agrees with values and notes.",
+    summary: "12 of 12 models checked against the paper (all on 2026-11-15; the 4 absolute models again on 2026-11-21, after they were shown); 5/5 tests passing (3 paper, 2 arithmetic). Agrees with values and notes.",
   },
 };
