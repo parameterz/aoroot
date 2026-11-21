@@ -10,8 +10,9 @@
 // Table 14 (p-values dropped) (note lineage).
 //
 // Secondary data: the table is "adapted from Roman et al. (ref. 195) and Hiratzka et al.
-// (ref. 204)". No population, n, age range or BSA formula is given; DuBois is assumed
-// (Roman 1989 used it). The table does not state a convention, so each level is mapped
+// (ref. 204)". The guideline gives no population, n, age range or BSA formula; the
+// population block is filled from Roman 1989's Methods (population.via). Neither paper
+// names the BSA formula; DuBois is assumed. The table does not state a convention, so each level is mapped
 // to the guideline's own recommendation (Figure 10, section IV): annulus inner edge
 // (hinge points) at peak systole; SoV, STJ and proximal ascending aorta leading edge at
 // end-diastole.
@@ -36,7 +37,7 @@ export default {
     { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 4 of 4 models, all tests passing; agrees with values and notes" },
     { version: "0.4.0", date: "2026-11-20", by: "Claude", change: "Added the 4 absolute (sex-only) Table 14 models as caution, at Dan's request: the unadjusted comparison. New notes no-body-size and plus-minus; rounding note extended; bsa-ratio now applies to the BSA models only. BSA-indexed models unchanged." },
     { version: "0.4.1", date: "2026-11-21", by: "Dan Dyar", change: "Reviewed against the paper: 8 of 8 models (the 4 absolute models in this review, the 4 BSA-indexed already cleared), 7/7 tests passing; unadjusted values correct as reviewed" },
-    { version: "0.4.2", date: "2026-11-21", by: "Claude", change: "Checked Table 14 against its source, Roman 1989 (Dan's copy): Table 14 is Roman's Table III, and Roman's Methods give mean ± 1 SD. Hiratzka 2010 Table 4 is the same table with p-values (the STJ rename is Hiratzka's). Note plus-minus now cites Roman; new notes lineage, roman-limits and roman-aao. No values changed." },
+    { version: "0.4.2", date: "2026-11-21", by: "Claude", change: "Checked Table 14 against its source, Roman 1989 (Dan's copy): Table 14 is Roman's Table III, and Roman's Methods give mean ± 1 SD. Hiratzka 2010 Table 4 is the same table with p-values (the STJ rename is Hiratzka's). Note plus-minus now cites Roman; new notes lineage, roman-limits and roman-aao. Population filled from Roman's Methods (n 135, ages 20–74; population.via); secondary-source note rewritten (annulus convention differs from the source). No values changed." },
   ],
 
   citation: {
@@ -50,17 +51,19 @@ export default {
     pmid: 25559473,
   },
 
+  // The guideline gives none of this; it is Roman 1989's adult cohort (the source of Table 14).
   population: {
-    n: null, // not given: Table 14 is adapted from earlier sources
-    female: null,
-    age: { range: [null, null], mean: null, sd: null },
+    via: "Roman 1989", // shown wherever the cohort is: the reference stays the guideline
+    n: 135, // 68 men, 67 women (Roman's 52 children are not in Table 14)
+    female: 0.496, // 67 of 135
+    age: { range: [20, 74], mean: 43, sd: 15 },
     height: { range: [null, null] },
-    bsa: { range: [null, null], formula: "dubois" }, // assumed; the guideline does not say
+    bsa: { range: [1.29, 2.40], formula: "dubois" }, // formula assumed: neither paper names it
     composition: [],
-    region: "Not stated (secondary data)",
-    inclusion: "\"Normal adults\" (Table 14 title). Adapted from Roman et al. (ref. 195) and Hiratzka et al. (ref. 204); no other details given.",
+    region: "Single center: New York Hospital–Cornell Medical Center (USA), 1980s",
+    inclusion: "Roman 1989: normal adults from a healthy employed population, plus unaffected relatives and spouses from family studies of mitral prolapse and Marfan syndrome. The guideline says only \"normal adults\" (Table 14 title).",
     exclusion: "Not stated.",
-    source: "Table 14 and footnote",
+    source: "Roman 1989, Methods (Table 14's source); the guideline gives no population details",
   },
 
   models: [
@@ -144,7 +147,7 @@ export default {
       id: "secondary-source",
       appliesTo: "all",
       severity: "important",
-      text: "Secondary data: Table 14 is \"adapted from\" Roman et al. (ref. 195, the 1989 data behind the Figure 13 nomograms) and Hiratzka et al. (ref. 204). The guideline gives no sample size, age range, BSA formula or measurement convention for the table. Conventions here follow the guideline's own recommendations (annulus inner edge at peak systole; other levels leading edge at end-diastole), and DuBois BSA is assumed.",
+      text: "Secondary data: Table 14 is \"adapted from\" Roman et al. (ref. 195, the 1989 data behind the Figure 13 nomograms) and Hiratzka et al. (ref. 204). The guideline gives no sample size, age range, BSA formula or measurement convention; Roman's Methods give most of them. The cohort is 135 adults (68 men, 67 women) aged 20 to 74 (mean 43), BSA 1.29 to 2.40 m², from one center in the 1980s, so each sex-specific row rests on about 67 people. Roman measured every level, the annulus included, by the leading edge at end-diastole; this site maps the annulus to the guideline's own recommendation (inner edge, peak systole), which differs from the source. Neither paper names the BSA formula; DuBois is assumed.",
     },
     {
       id: "no-age",

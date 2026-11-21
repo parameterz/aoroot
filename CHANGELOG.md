@@ -40,6 +40,10 @@ Each reference also keeps its own history in its registry file
   Roman gave none for the proximal ascending aorta, because of its age dependence.
   A lineage note traces Table 14 through Hiratzka 2010 Table 4, which kept
   Roman's p-values (indexing removes the sex difference); Table 14 dropped them.
+- ASE/EACVI 2015 cohort details filled in from its source, labelled "via Roman
+  1989": 135 adults (68 men, 67 women), ages 20–74, one center, 1980s. Shown on
+  the references page and in the reference's sheet. New optional registry field
+  `population.via` for secondary data.
 - No z-score for the sex-only rows (table, sheet and report text): one SD for
   everyone, whatever their size, implies a precision the method can't deliver.
 

@@ -149,7 +149,7 @@ function headHtml(d, units) {
   const pop = ref.population ?? {};
   const ages = pop.age?.range;
   const cohort = [
-    pop.n ? `n = ${pop.n.toLocaleString("en-US")}` : null,
+    pop.n ? `n = ${pop.n.toLocaleString("en-US")}${pop.via ? ` (${pop.via})` : ""}` : null,
     ages && ages[0] != null ? `ages ${ages[0]}${ages[1] != null ? `–${ages[1]}` : "+"}` : null,
   ].filter(Boolean).join(" · ");
   const cit = ref.citation ? `${ref.citation.authors.split(",")[0]} et al. ${ref.citation.journal} ${ref.citation.year}` : "";
