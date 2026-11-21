@@ -23,7 +23,7 @@ Each reference also keeps its own history in its registry file
 
 - Absolute (sex-only) values, shown as the unadjusted comparison beside the
   references that account for body size: ASE/EACVI 2015 Table 14 (4 models,
-  entry 0.4.0), WASE (9, entry 0.4.0) and MATEAR (4, entry 0.3.0). All marked
+  entry 0.4.1, reviewed), WASE (9, entry 0.4.0) and MATEAR (4, entry 0.3.0). All marked
   caution with a "no body size" note. Results for every existing model are
   unchanged.
 - Percent of predicted: a dotted `no body size` chip and an open outline for
