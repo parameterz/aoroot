@@ -6,6 +6,8 @@
 // the annulus, sinuses of Valsalva, STJ and proximal ascending aorta. Transcribed as
 // published. The guideline never says what the ± values are; its source, Roman 1989
 // (Am J Cardiol 64:507-512) Table III, gives the same numbers as mean ± 1 SD (note plus-minus).
+// Lineage: Roman 1989 Table III → Hiratzka 2010 Table 4 (p-values kept; ridge → STJ) →
+// Table 14 (p-values dropped) (note lineage).
 //
 // Secondary data: the table is "adapted from Roman et al. (ref. 195) and Hiratzka et al.
 // (ref. 204)". No population, n, age range or BSA formula is given; DuBois is assumed
@@ -34,7 +36,7 @@ export default {
     { version: "0.3.0", date: "2026-11-15", by: "Dan Dyar", change: "Reviewed against the paper: 4 of 4 models, all tests passing; agrees with values and notes" },
     { version: "0.4.0", date: "2026-11-20", by: "Claude", change: "Added the 4 absolute (sex-only) Table 14 models as caution, at Dan's request: the unadjusted comparison. New notes no-body-size and plus-minus; rounding note extended; bsa-ratio now applies to the BSA models only. BSA-indexed models unchanged." },
     { version: "0.4.1", date: "2026-11-21", by: "Dan Dyar", change: "Reviewed against the paper: 8 of 8 models (the 4 absolute models in this review, the 4 BSA-indexed already cleared), 7/7 tests passing; unadjusted values correct as reviewed" },
-    { version: "0.4.2", date: "2026-11-21", by: "Claude", change: "Checked Table 14 against its source, Roman 1989 (Dan's copy): Table 14 is Roman's Table III, and Roman's Methods give mean ± 1 SD. Note plus-minus now says so; new notes roman-limits and roman-aao. No values changed." },
+    { version: "0.4.2", date: "2026-11-21", by: "Claude", change: "Checked Table 14 against its source, Roman 1989 (Dan's copy): Table 14 is Roman's Table III, and Roman's Methods give mean ± 1 SD. Hiratzka 2010 Table 4 is the same table with p-values (the STJ rename is Hiratzka's). Note plus-minus now cites Roman; new notes lineage, roman-limits and roman-aao. No values changed." },
   ],
 
   citation: {
@@ -160,7 +162,13 @@ export default {
       id: "plus-minus",
       appliesTo: "all",
       severity: "important",
-      text: "The guideline never says what the ± values are: not in the table, its caption or the text. Its source does: Table 14 is Table III of Roman et al. (Am J Cardiol 1989), whose Methods give means ± 1 SD (the guideline renames Roman's supraaortic ridge the sinotubular junction). The upper limit of normal is then mean + 1.96 SD (about 4.0 cm for men's sinuses of Valsalva), not mean + 1 SD: \"3.4 ± 0.3 cm\" is not a normal range of 3.1 to 3.7 cm.",
+      text: "The guideline never says what the ± values are: not in the table, its caption or the text. Its source does: Table 14 is Table III of Roman et al. (Am J Cardiol 1989), whose Methods give means ± 1 SD. The upper limit of normal is then mean + 1.96 SD (about 4.0 cm for men's sinuses of Valsalva), not mean + 1 SD: \"3.4 ± 0.3 cm\" is not a normal range of 3.1 to 3.7 cm.",
+    },
+    {
+      id: "lineage",
+      appliesTo: "all",
+      severity: "info",
+      text: "Where Table 14 comes from: Roman 1989 Table III (\"Gender Differences in Aortic Root Dimensions in Adults\"), copied unchanged into Hiratzka 2010 (ACCF/AHA thoracic aortic disease guidelines) Table 4, which renamed Roman's supraaortic ridge the sinotubular junction, then into this table. Roman and Hiratzka both show p-values: men and women differ in absolute size (p < 0.001) but not once indexed to BSA (not significant). Table 14 drops the p-values and is retitled as normal values, so the table's original finding, that indexing removes the sex difference, no longer appears.",
     },
     {
       id: "roman-limits",
@@ -252,6 +260,6 @@ export default {
     reviewedBy: "Dan Dyar",
     date: "2026-11-21",
     against: "J Am Soc Echocardiogr 2015;28:1-39.e14: Table 14; Figure 10; section IV (aortic root)",
-    summary: "8 of 8 models checked against the paper (4 BSA-indexed on 2026-11-15, 4 absolute on 2026-11-21); 7/7 tests passing (3 paper, 4 arithmetic). Agrees with values and notes. Table 14 checked against its source, Roman 1989 Table III (mean ± 1 SD), on 2026-11-21 (notes in 0.4.2 await review).",
+    summary: "8 of 8 models checked against the paper (4 BSA-indexed on 2026-11-15, 4 absolute on 2026-11-21); 7/7 tests passing (3 paper, 4 arithmetic). Agrees with values and notes. Table 14 traced to its source on 2026-11-21: Roman 1989 Table III (mean ± 1 SD), via Hiratzka 2010 Table 4 (notes in 0.4.2 await review).",
   },
 };

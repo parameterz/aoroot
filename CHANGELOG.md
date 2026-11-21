@@ -38,6 +38,8 @@ Each reference also keeps its own history in its registry file
   source (Roman 1989, Table III) gives them as mean ± 1 SD, so the upper limit is
   mean + 1.96 SD, not mean + 1 SD. Roman's own upper limits agree to about 0.1 cm;
   Roman gave none for the proximal ascending aorta, because of its age dependence.
+  A lineage note traces Table 14 through Hiratzka 2010 Table 4, which kept
+  Roman's p-values (indexing removes the sex difference); Table 14 dropped them.
 - No z-score for the sex-only rows (table, sheet and report text): one SD for
   everyone, whatever their size, implies a precision the method can't deliver.
 
