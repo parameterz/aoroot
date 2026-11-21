@@ -17,6 +17,31 @@ clinical calculator:
 Each reference also keeps its own history in its registry file
 (`registry/*.js`); entries here name the reference version a release includes.
 
+## [1.4.0] - unreleased
+
+### Added
+
+- Absolute (sex-only) values, shown as the unadjusted comparison beside the
+  references that account for body size: ASE/EACVI 2015 Table 14 (4 models,
+  entry 0.4.0), WASE (9, entry 0.4.0) and MATEAR (4, entry 0.3.0). All marked
+  caution with a "no body size" note. Results for every existing model are
+  unchanged.
+- Percent of predicted: a dotted `no body size` chip and an open outline for
+  these rows, and a `no body size` filter chip.
+- A call-out above the chart when the sex-only limits and the size-adjusted
+  references disagree ("Within the unadjusted (sex-only) limits, but above the
+  upper limit in 12 of 15 size-adjusted models").
+- Patient on the curve: a flat, dotted line per unadjusted reference, with its
+  own legend key (also in that reference's sheet).
+- ASE/EACVI 2015 note: the guideline never says what its ± values are; read as
+  mean ± SD, and the upper limit is mean + 1.96 SD, not mean + 1 SD.
+
+### Changed
+
+- The `fitted equations` filter no longer matches sex-only constants.
+- The risk thresholds' band of upper limits spans the size-adjusted
+  references only.
+
 ## [1.3.1] - 2026-11-16
 
 ### Added

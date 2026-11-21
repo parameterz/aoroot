@@ -173,6 +173,8 @@ svg .chip.band rect { fill: none; stroke: var(--accent); stroke-width: 1; stroke
 svg .chip.warn rect { fill: var(--warn-soft); stroke: var(--warn); stroke-dasharray: none; }
 svg .chip.warn text { fill: var(--warn); }
 svg .chiptag text { font-style: italic; }
+svg .chip.none rect { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 2; }
+svg .chip.none text { font-style: italic; }
 .g-sep { color: var(--rule); }
 svg .prow .hit { fill: transparent; }
 svg .prow.dim { opacity: .16; }
@@ -181,6 +183,11 @@ svg .prow { transition: opacity .15s; }
 .chipkey.age { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 .chipkey.band { background: none; border: 1px dashed var(--accent); color: var(--accent); }
 .chipkey.warn { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+.chipkey.none { background: none; border: 1px dashed var(--muted); font-style: italic; }
+/* Unadjusted (sex-only) limits and the size-adjusted references disagree */
+.disagree { margin: 10px 0 2px; padding: 8px 12px; font-size: 14px; border-left: 3px solid var(--warn); background: var(--warn-soft); border-radius: 0 6px 6px 0; }
+.disagree b { color: var(--warn); }
+.disagree .linkbtn { font-size: 13px; margin-left: 4px; }
 .pfilter { display: flex; flex-wrap: wrap; gap: 6px 6px; align-items: center; font-size: 12.5px; color: var(--muted); padding-top: 8px; }
 button.pf { font: inherit; font-size: 12.5px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 99px; padding: 2px 10px; cursor: pointer; }
 button.pf[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
@@ -211,6 +218,9 @@ button.key { font: inherit; font-size: 13px; font-weight: 600; display: inline-f
   border: 1px solid var(--rule); border-radius: 99px; background: var(--surface); cursor: pointer; }
 button.key::before { content: ""; width: 18px; border-top: 2.5px solid currentColor; }
 button.key[aria-pressed="false"] { color: var(--muted); opacity: .55; text-decoration: line-through; }
+button.key.unadj { font-weight: 500; font-style: italic; }
+button.key.unadj::before { border-top-style: dotted; border-top-width: 3px; }
+g.unadj path.uln { stroke-width: 1.1; stroke-dasharray: 3 5; }
 
 /* Threshold card */
 .g-risk { color: var(--warn); } .g-surg { color: var(--crit); }
