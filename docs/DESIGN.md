@@ -648,6 +648,14 @@ model age and body size.
   which also warns against reading mean ± 1 SD as the normal range).
 - Conventions not stated in the table; mapped to the guideline's own
   recommendations, so it appears at the default conventions only.
+- **Source traced (Nov 2026):** Table 14 is Roman 1989 Table III (mean ± 1 SD),
+  via Hiratzka 2010 Table 4 (same numbers with p-values; supraaortic ridge →
+  STJ). Cohort filled from Roman's Methods as `population.via` (n 135, ages
+  20–74, one center); the reference stays the guideline. Roman measured every
+  level, the annulus included, leading edge at end-diastole. **Decision (Dan):**
+  keep the guideline's own conventions (annulus inner edge, peak systole), since
+  that is how labs following the guideline measure; the `secondary-source` note
+  states the mismatch with the source.
 - **Notes:** a guideline table that recommends against its own use (section IV
   says SoV should be compared with age- and BSA-related nomograms or
   allometric equations); secondary source (adapted from Roman 1989; no n, ages,
