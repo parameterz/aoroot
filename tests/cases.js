@@ -7,7 +7,7 @@ import { covariates, convert } from "../lib/covariates.js";
 import { validate } from "../lib/validate.js";
 import { modelsForSite, applyChoices } from "../lib/conventions.js";
 import { THRESHOLDS, indexValue, diameterAt, appliesTo, crossoverHeight, cmrThreshold } from "../lib/thresholds.js";
-import { scalingOf, adjustsFor, refClause, buildReport, authorYear, defaultReportChips, shortLabel, indexedReportLine, componentsOf, passesFilter, ageBandText, isUnadjusted, unadjustedDisagreement, disagreementText } from "../lib/describe.js";
+import { scalingOf, adjustsFor, refClause, buildReport, authorYear, defaultReportChips, shortLabel, indexedReportLine, componentsOf, passesFilter, ageBandText, isUnadjusted, unadjustedDisagreement, disagreementText, byAdjustment, showZ } from "../lib/describe.js";
 import { encodeHash, decodeHash, defaultState, checkMeasurement, convFromCode, picksFor, toggleFilter } from "../lib/state.js";
 import { curveSeries } from "../js/curve.js";
 import { bmiNote } from "../lib/body.js";
@@ -177,6 +177,23 @@ export function runAll() {
       unadjustedDisagreement([row(aseAbs, "above"), row(dev, "above")]) === null && unadjustedDisagreement([row(dev, "above")]) === null
       && unadjustedDisagreement([row(aseAbs, null), row(dev, "above"), row(wase, null)]) === null);
 
+    // Display order within a reference: unadjusted → ratio → equation, then fewest inputs (BSA counts 2).
+    const ids = (r, site, input = { sex: "male", age: 50, height_cm: 175, weight_kg: 75 }) =>
+      byAdjustment(applyChoices(modelsForSite(registry.find((x) => x.id === r), input, site), {})).map((m) => m.id).join(",");
+    check("order: WASE abs, ÷ht, ÷BSA, ht nomogram, BSA nomogram",
+      ids("patel2022", "sov") === "sov-abs-41to65,sov-ht-41to65,sov-bsa-41to65,sov-fig-ht-41to65,sov-fig-bsa-41to65", ids("patel2022", "sov"));
+    check("order: ASE abs before BSA", ids("lang2015", "sov") === "sov-abs,sov-bsa", ids("lang2015", "sov"));
+    check("order: MATEAR abs, ÷ht, ÷BSA", ids("carrero2025", "sov") === "sov-abs,sov-ht,sov-bsa", ids("carrero2025", "sov"));
+    check("order: Devereux height model before BSA", ids("devereux2012", "sov") === "sov-height,sov-bsa", ids("devereux2012", "sov"));
+    {
+      const lang = registry.find((x) => x.id === "lang2015"), abs = get("lang2015", "sov-abs")[1], bsa = get("lang2015", "sov-bsa")[1];
+      const res = { z: 1.33, pctPred: 112, uln: 39.9, lln: 28.1, outside: null };
+      const chipsAll = { ...defaultReportChips(), z: true };
+      check("no z for unadjusted: display and report", !showZ(abs) && showZ(bsa)
+        && !/z = /.test(refClause(res, lang, abs, "mm", chipsAll)) && /z = \+1\.33/.test(refClause(res, lang, bsa, "mm", chipsAll)),
+        refClause(res, lang, abs, "mm", chipsAll));
+    }
+
     // Curve: the unadjusted series is its own, flat against height.
     {
       const st = defaultState();
@@ -187,7 +204,7 @@ export function runAll() {
       const flat = ase.find((x) => x.unadj);
       const ys = flat?.pts.filter(Boolean).map((q) => q.pred) ?? [];
       check("curve: ASE has a BSA series and a flat unadjusted one",
-        ase.length === 2 && ase[0].model.id === "sov-bsa" && flat?.key === "lang2015~unadj" && ys.length > 10 && ys.every((v) => Math.abs(v - 34) < 1e-9),
+        ase.length === 2 && ase[0].unadj && ase[1].model.id === "sov-bsa" && flat?.key === "lang2015~unadj" && ys.length > 10 && ys.every((v) => Math.abs(v - 34) < 1e-9),
         ase.map((x) => x.key).join(","));
       check("curve: WASE size-adjusted series stays height-based", ser.find((x) => x.ref.id === "patel2022" && !x.unadj)?.model.id === "sov-ht-41to65");
     }

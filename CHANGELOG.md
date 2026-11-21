@@ -35,10 +35,16 @@ Each reference also keeps its own history in its registry file
   own legend key (also in that reference's sheet).
 - ASE/EACVI 2015 note: the guideline never says what its ± values are; read as
   mean ± SD, and the upper limit is mean + 1.96 SD, not mean + 1 SD.
+- No z-score for the sex-only rows (table, sheet and report text): one SD for
+  everyone, whatever their size, implies a precision the method can't deliver.
 
 ### Changed
 
 - The `fitted equations` filter no longer matches sex-only constants.
+- Rows within a reference follow a fixed order, least to most adjustment:
+  unadjusted, then simple ratios, then fitted equations; within each, fewer
+  patient inputs first (so height-based before BSA-based). Some references'
+  rows swap places (e.g. Devereux, WASE, Muraru and NORRE lead with height).
 - The risk thresholds' band of upper limits spans the size-adjusted
   references only.
 

@@ -13,7 +13,7 @@ import { drawPctCard, drawLegend, drawCurveCard, drawThresholdCard } from "./car
 import { THRESHOLDS, CMR_NORMAL, cmrThreshold, indexValue, diameterAt, appliesTo, crossoverHeight } from "../lib/thresholds.js";
 import { curveSeries, SWEEP } from "./curve.js";
 import { initSheet, renderSheet, beforeNav } from "./sheet.js";
-import { SITE_NAMES, scalingOf, adjustsFor, componentsOf, passesFilter, isUnadjusted, unadjustedDisagreement, disagreementText, CHIP_OF, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, buildReport, REPORT_CHIPS, defaultReportChips } from "../lib/describe.js";
+import { SITE_NAMES, scalingOf, adjustsFor, componentsOf, passesFilter, isUnadjusted, byAdjustment, showZ, NO_Z_TITLE, unadjustedDisagreement, disagreementText, CHIP_OF, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved, buildReport, REPORT_CHIPS, defaultReportChips } from "../lib/describe.js";
 
 import { bmiNote } from "../lib/body.js";
 import { VERSION } from "../lib/version.js";
@@ -85,7 +85,7 @@ function render() {
     for (const ref of registry) {
       if (!ref.models.some((m) => m.measurement.site === site && !m.measurement.sinus)) continue; // reference doesn't cover this site
       const candidates = modelsForSite(ref, p, site, conv);
-      const models = applyChoices(candidates, picksFor(state, ref.id));
+      const models = byAdjustment(applyChoices(candidates, picksFor(state, ref.id)));
       if (!models.length) {
         const anyConv = ref.models.some((m) => m.measurement.site === site && m.measurement.edge === conv.edge && m.measurement.phase === conv.phase);
         rows += `<tr class="na ref-start"><td><span class="ref">${esc(ref.label)}</span></td><td colspan="6">` +
@@ -139,14 +139,14 @@ function render() {
         });
         const key = `${site}|${ref.id}|${model.id}`;
         reportRows.push({ key, site, y, kind: "ref", result: r, ref, model });
-        const zHi = r.outside ? " hi" : "";
+        const zHi = r.outside && showZ(model) ? " hi" : "";
         rows += `<tr class="${first.trim()}"${i === 0 ? ` id="t_${site}_${esc(ref.id)}"` : ""}>
           <td>${refCell}</td>
           <td><div>${esc(shortLabel(ref, model))}</div>
               <div class="model">${esc(scalingOf(model))}</div>${choice}${variant}${flags ? "<div>" + flags + "</div>" : ""}${notesHtml}</td>
           <td class="num" data-label="Predicted">${fmtLen(r.pred, units)}</td>
           <td class="num" data-label="Normal range">${r.lln == null ? "—" : `${fmtLen(r.lln, units).replace(/ (mm|cm)$/, "")}–${fmtLen(r.uln, units)}`}</td>
-          <td class="num z${zHi}" data-label="z">${fmtZ(r.z)}</td>
+          <td class="num z${zHi}" data-label="z"${showZ(model) ? "" : ` title="${NO_Z_TITLE}"`}>${showZ(model) ? fmtZ(r.z) : "—"}</td>
           <td class="num" data-label="% pred">${fmtPct(r.pctPred)}</td>
           <td class="rep" data-label="Report"><input type="checkbox" data-report="${esc(key)}" aria-label="Include in report" ${checked.has(key) ? "checked" : ""}></td>
         </tr>`;

@@ -198,7 +198,19 @@ labels itself. They are set apart everywhere they appear:
   thresholds' ULN band.
 - **Report:** nothing is ticked by default, so a sex-only verdict never reaches
   the report text unless chosen; its clause then reads "…% of predicted for sex".
-- Z-scores are shown like any other row (the SD is published); left as is for now.
+- **No z-score** (table, sheet, report text): one SD for every man or woman,
+  whatever their size, implies a precision the method can't deliver (`showZ`).
+  The engine still computes it; the verdict, % predicted and range still show.
+
+**Row order: a predictable hierarchy.** Across references, chronological
+(registry order). Within a reference, least to most adjustment
+(`adjustmentOrder` / `byAdjustment` in `lib/describe.js`): unadjusted → simple
+ratio → fitted equation; then by how many patient inputs the prediction uses
+(height 1, weight 1, BSA 2 since it is height and weight, age group or age term
+1); ties keep registry order. So WASE reads absolute, ÷ht, ÷BSA, height
+nomogram, BSA nomogram, and height models come before BSA models of the same
+kind. Applies to the % predicted rows, the table, the sheet and the report; the
+curve legend puts a reference's unadjusted line first too.
 
 ## Pages
 
@@ -270,7 +282,8 @@ carried by the sketch alone. **Fonts self-hosted:** 9 latin woff2 files
    bands that narrow as predicted size grows; constant-CV references give a
    fixed band. Rows chronological and grouped by reference; labels show
    author/year plus normalization components (age / height / weight / BSA,
-   ratio vs equation).
+   ratio vs equation); within a reference, least to most adjustment (see Row
+   order).
 2. **Patient on the curve** (`js/curve.js`, `drawCurveCard`): predicted vs
    height (140–205 cm) or age (18–85 y), everything else held fixed; one model
    per reference, height-based where available; dashed ULN; faded outside

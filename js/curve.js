@@ -35,7 +35,7 @@ export function curveSeries(registry, state, site, xVar = "height_cm") {
     const picks = picksFor(state, ref.id);
     const atPatient = applyChoices(modelsForSite(ref, p, site, conv), picks);
     if (!atPatient.length) continue;
-    const kinds = [curveModel(atPatient), atPatient.find(unadjusted)].filter(Boolean);
+    const kinds = [atPatient.find(unadjusted), curveModel(atPatient)].filter(Boolean); // unadjusted first, as in the rows
     for (const kind of kinds) {
       const pts = [];
       for (let x = min; x <= max + 1e-9; x += step) {

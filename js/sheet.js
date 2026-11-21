@@ -10,7 +10,7 @@
 import { drawCurveCard } from "./cards.js";
 import { SWEEP } from "./curve.js";
 import { encodeHash } from "../lib/state.js";
-import { SITE_NAMES, scalingOf, shortLabel, fmtZ, fmtPct, fmtLen, fmtObserved } from "../lib/describe.js";
+import { SITE_NAMES, scalingOf, shortLabel, showZ, NO_Z_TITLE, fmtZ, fmtPct, fmtLen, fmtObserved } from "../lib/describe.js";
 import { notesFor } from "../lib/evaluator.js";
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -173,7 +173,7 @@ function bodyHtml(d, st) {
         <dl class="sm-nums">
           <div><dt>Predicted</dt><dd>${fmtLen(r.pred, units)}</dd></div>
           <div><dt>Normal</dt><dd>${range}</dd></div>
-          <div><dt>z</dt><dd class="z${hi}">${fmtZ(r.z)}</dd></div>
+          <div><dt>z</dt><dd class="z${showZ(model) ? hi : ""}"${showZ(model) ? "" : ` title="${NO_Z_TITLE}"`}>${showZ(model) ? fmtZ(r.z) : "—"}</dd></div>
           <div><dt>% pred</dt><dd class="${hi.trim()}">${fmtPct(r.pctPred)}</dd></div>
         </dl></div>`;
   }).join("");
